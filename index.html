@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ЧАСТОТА — личные волны</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -29,7 +30,6 @@
   .screen{height:100%}
   .av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#17130a;flex:none;position:relative}
 
-  /* ---------- ЭКРАН ВХОДА ---------- */
   #auth{display:flex;align-items:center;justify-content:center;padding:24px;
     background:radial-gradient(1200px 600px at 15% -10%, rgba(230,168,76,.05), transparent 60%),var(--bg)}
   .auth-wrap{display:grid;grid-template-columns:1.15fr .95fr;gap:56px;max-width:980px;width:100%;align-items:center}
@@ -67,7 +67,6 @@
   .name-av{width:48px;height:48px;font-size:19px}
   .name-note{font-size:12px;color:var(--dim)}
 
-  /* ---------- ПРИЛОЖЕНИЕ ---------- */
   #app{display:grid;grid-template-columns:330px 1fr;height:100%}
   aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
   .side-head{padding:16px 18px 12px;display:flex;align-items:center;justify-content:space-between}
@@ -158,13 +157,11 @@
   .msg.mine .msg-head{justify-content:flex-end;color:var(--muted)}
   .msg.mine.cont .bubble{border-radius:16px 4px 4px 4px}
 
-  /* медиа */
   .media-wrap{position:relative;line-height:0}
   .mimg{max-width:min(340px,100%);max-height:420px;border-radius:12px;display:block;cursor:zoom-in;object-fit:cover}
   .media-badge{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.55);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;border-radius:99px;display:flex;align-items:center;gap:5px;pointer-events:none}
   .media-badge svg{width:11px;height:11px}
 
-  /* видео-плейсхолдер */
   .vposter{position:relative;max-width:min(340px,100%);border-radius:12px;overflow:hidden;cursor:pointer;line-height:0}
   .vposter img{display:block;width:100%;max-height:420px;object-fit:cover}
   .vposter .vplay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25)}
@@ -174,7 +171,6 @@
   .vload{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(0,0,0,.4)}
   .vload i{display:block;height:100%;background:var(--amber);width:0%}
   .mvid{max-width:min(340px,100%);max-height:420px;border-radius:12px;display:block;background:#000}
-  .mcap{font-size:13px;line-height:1.45;margin-top:8px;white-space:pre-wrap;word-wrap:break-word}
 
   .voice{display:flex;align-items:center;gap:10px;min-width:210px}
   .playbtn{width:36px;height:36px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18);color:#1d1608;transition:background .15s}
@@ -182,10 +178,9 @@
   .playbtn:hover{background:var(--amber-soft)}
   .playbtn svg{width:15px;height:15px}
   .vwave{flex:1;height:30px;min-width:90px;cursor:pointer;display:block}
-  .vtime{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);flex:none;min-width:38px;text-align:center;cursor:pointer;user-select:none}
+  .vtime{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);flex:none;min-width:52px;text-align:center;cursor:pointer;user-select:none}
   .msg.mine .vtime{color:rgba(29,22,8,.55)}
 
-  /* вложение перед отправкой */
   #attachbar{max-width:760px;margin:0 auto;background:var(--panel2);border:1px solid var(--line2);border-radius:16px;padding:10px;display:flex;align-items:center;gap:12px}
   #attThumb{width:64px;height:64px;border-radius:10px;object-fit:cover;background:var(--panel);flex:none}
   #attInfo{flex:1;min-width:0}
@@ -265,7 +260,6 @@
 </head>
 <body>
 
-<!-- ================= ЭКРАН ВХОДА ================= -->
 <div id="auth" class="screen">
   <div class="auth-wrap">
     <section class="brand">
@@ -322,7 +316,6 @@
   </div>
 </div>
 
-<!-- ================= ПРИЛОЖЕНИЕ ================= -->
 <div id="app" class="screen hidden">
   <aside id="side">
     <div class="side-head">
@@ -428,10 +421,6 @@
 <div id="toasts"></div>
 
 <script>
-/* =====================================================================
-   ★★★ FIREBASE — КЛЮЧИ ВСТАВЛЕНЫ ★★★
-   Медиа (фото/видео) ходят через Firestore — Storage не нужен.
-   ===================================================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyAj6IlIlfZsfYp_uupdG3d0i5yY4Bg7nk8",
   authDomain: "mogmess-1956a.firebaseapp.com",
@@ -445,7 +434,6 @@ const firebaseConfig = {
 const $ = s => document.querySelector(s);
 const icons = () => { try { lucide.createIcons(); } catch(e){} };
 
-/* ---------------- утилиты ---------------- */
 function hashStr(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return Math.abs(h); }
 const AV_COLORS=['#c98a5e','#8fa876','#cdb45e','#a5778a','#7ba3a8','#c96e5e','#94a86e','#b0885e','#7f96b0','#a8926e','#8a9e8a','#b07860','#c98aa8','#86a8a0','#a8a06e'];
 const colorOf = id => AV_COLORS[hashStr(id)%AV_COLORS.length];
@@ -499,7 +487,7 @@ function humErr(e){
   const c=(e&&e.code)||'';
   const m=(e&&e.message)||String(e);
   if(c.includes('permission-denied')||/permission/i.test(m))
-    return 'Firestore отклонил операцию — обновите правила безопасности (блок Rules из инструкции)';
+    return 'Firestore отклонил операцию — обновите правила безопасности';
   if(c.includes('unavailable')||c.includes('network'))
     return 'Нет соединения с Firebase';
   return m;
@@ -520,6 +508,7 @@ let sharedAC=null;
 function blip(){
   try{
     sharedAC = sharedAC || new (window.AudioContext||window.webkitAudioContext)();
+    if(sharedAC.state==='suspended'){ sharedAC.resume().catch(()=>{}); }
     const o=sharedAC.createOscillator(), g=sharedAC.createGain();
     o.frequency.value=740; o.type='sine';
     g.gain.setValueAtTime(.0001,sharedAC.currentTime);
@@ -530,7 +519,6 @@ function blip(){
   }catch(e){}
 }
 
-/* ---------------- обработка медиа ---------------- */
 function blobToDataURL(blob){
   return new Promise((res,rej)=>{
     const rd=new FileReader();
@@ -595,11 +583,18 @@ function videoMeta(file){
     v.src=url;
   });
 }
-/* разбиение base64-данных на куски */
 function splitBase64(b64,chunk){
   const out=[];
   for(let i=0;i<b64.length;i+=chunk) out.push(b64.slice(i,i+chunk));
   return out;
+}
+/* общий AudioContext для проверки записей (не для звука) */
+let decodeAC=null;
+function getDecodeAC(){
+  try{
+    if(!decodeAC||decodeAC.state==='closed') decodeAC=new (window.AudioContext||window.webkitAudioContext)();
+    return decodeAC;
+  }catch(e){ return null; }
 }
 
 /* ---------------- FIREBASE ---------------- */
@@ -743,11 +738,10 @@ class FBStore{
     },{merge:true});
     await batch.commit();
   }
-  /* ---- медиа-части (видео режется на куски и пишется в подколлекцию) ---- */
   async writeParts(chatId,mediaId,arr,onProgress){
     const base=[this.db,'chats',chatId,'media',mediaId,'parts'];
     let done=0;
-    const B=10; /* частей за один batch — каждая ~600КБ base64 */
+    const B=10;
     for(let s=0;s<arr.length;s+=B){
       const batch=this.fs.writeBatch(this.db);
       for(let i=s;i<Math.min(s+B,arr.length);i++){
@@ -768,13 +762,6 @@ class FBStore{
     snap.docs.forEach(d=>out[d.data().i]=d.data().d);
     for(let i=0;i<out.length;i++) if(!out[i]) throw new Error('Часть '+i+' не найдена — видео повреждено');
     return out;
-  }
-  async cleanupParts(chatId,mediaId,count){
-    try{
-      for(let i=0;i<count;i++){
-        await this.fs.deleteDoc(this.fs.doc(this.db,'chats',chatId,'media',mediaId,'parts','p'+i));
-      }
-    }catch(e){}
   }
   watchMessages(chatId,cb){
     const q=this.fs.query(
@@ -818,7 +805,6 @@ class FBStore{
   }
 }
 
-/* ---------------- ЗАГРУЗКА ---------------- */
 let store=null, storeFailed=false;
 
 async function boot(){
@@ -846,7 +832,6 @@ async function boot(){
   icons();
 }
 
-/* ---------------- ЭКРАН ВХОДА ---------------- */
 let waveAmp=.3;
 function setTab(which){
   $('#tabLogin').classList.toggle('active',which==='login');
@@ -930,7 +915,6 @@ document.querySelectorAll('.eye').forEach(b=>{
  $('#regPass').addEventListener('keydown',e=>{ if(e.key==='Enter')$('#regName').focus(); });
  $('#regName').addEventListener('keydown',e=>{ if(e.key==='Enter')$('#btnReg').click(); });
 
-/* волны */
 const authWave=$('#authWave');
 (function(){
   const ctx=authWave.getContext('2d'); let t=0;
@@ -983,7 +967,6 @@ const authWave=$('#authWave');
   draw();
 })();
 
-/* ---------------- ПРИЛОЖЕНИЕ ---------------- */
 let me=null;
 let contacts={};
 let chatsMap={};
@@ -1009,7 +992,6 @@ function enterApp(profile){
   icons();
 }
 
-/* ---------- список ---------- */
 function seenMillis(chat){
   if(!chat||!chat.seen) return 0;
   const v=chat.seen[me.uid];
@@ -1080,7 +1062,6 @@ function renderList(){
   });
 }
 
-/* ---------- добавление ---------- */
 const addInput=$('#addInput');
 addInput.addEventListener('input',()=>{
   const raw=addInput.value;
@@ -1170,7 +1151,6 @@ function renderFound(u){
   box.appendChild(note);
 }
 
-/* ---------- чат ---------- */
 function openChat(c){
   const chatId=store.chatId(me.uid,c.uid);
   if(unsubMsgs){ unsubMsgs(); unsubMsgs=null; }
@@ -1226,7 +1206,6 @@ function updateHeader(){
 }
 setInterval(()=>{ if(active)updateHeader(); },5000);
 
-/* ---------- лента ---------- */
 const msgList=$('#msgList'), msgScroll=$('#msgScroll');
 
 function makeMsgEl(m,cont){
@@ -1273,7 +1252,6 @@ function buildImage(m){
   return wrap;
 }
 
-/* видео: сначала постер с кнопкой, клик — загрузка и плеер */
 function buildVideoPlaceholder(m){
   const wrap=document.createElement('div'); wrap.className='media-wrap';
   const ph=document.createElement('div'); ph.className='vposter';
@@ -1318,12 +1296,11 @@ function buildVideoPlaceholder(m){
       icons();
       toast('Видео не загрузилось: '+humErr(e),'err');
     }
-  },{once:false});
+  });
   wrap.appendChild(ph);
   return wrap;
 }
 
-/* лайтбокс */
 function openLightbox(src){
   $('#lbImg').src=src;
   $('#lightbox').classList.remove('hidden');
@@ -1339,48 +1316,137 @@ function buildVoice(m,mine){
   play.innerHTML='<i data-lucide="play" class="ic-p"></i><i data-lucide="pause" class="ic-q hidden"></i>';
   const cv=document.createElement('canvas');
   cv.className='vwave'; cv.width=180*devicePixelRatio; cv.height=30*devicePixelRatio;
-  const dur=document.createElement('div'); dur.className='vtime'; dur.textContent=fmtDur(m.duration||0);
+  const dur=document.createElement('div'); dur.className='vtime';
+  dur.textContent=fmtDur(m.duration||0);
   wrap.append(play,cv,dur);
+
   const peaks=(m.peaks&&m.peaks.length)?m.peaks:Array(32).fill(.4);
-  const audio=new Audio(m.audio); audio.preload='metadata';
+  let effDur=(typeof m.duration==='number'&&isFinite(m.duration)&&m.duration>0)?m.duration:0;
+
+  if(!m.audio||typeof m.audio!=='string'||m.audio.length<64){
+    play.disabled=true;
+    play.style.opacity=.35;
+    dur.textContent='—:—';
+    play.addEventListener('click',()=>toast('В этом сообщении нет звука (битая запись из старой версии)','err'));
+    return wrap;
+  }
+
+  let src=m.audio;
+  try{
+    if(src.startsWith('data:')){
+      const raw=dataURLToBlob(src);
+      const cleanType=(raw.type||'audio/webm').split(';')[0]||'audio/webm';
+      src=URL.createObjectURL(new Blob([raw],{type:cleanType}));
+    }
+  }catch(e){ console.warn('voice blob:',e); }
+
+  const audio=new Audio();
+  audio.preload='auto';
+  let mediaErrCode=0;
+  audio.addEventListener('error',()=>{
+    mediaErrCode=(audio.error&&audio.error.code)||0;
+    console.warn('voice audio error code:',mediaErrCode);
+  });
+  audio.src=src;
+
+  function playFail(e){
+    const n=(e&&e.name)||'';
+    if(n==='NotAllowedError'){
+      toast('Браузер заблокировал звук — нажмите play ещё раз','err');
+      return;
+    }
+    if(n==='NotSupportedError'||mediaErrCode===4){
+      toast('Этот браузер не может проиграть формат записи (нужен Chrome/Edge/Safari)','err');
+      return;
+    }
+    if(mediaErrCode===2||mediaErrCode===3){
+      toast('Эта запись битая (сделана до исправления) — попросите перезаписать','err');
+      return;
+    }
+    toast('Не удалось воспроизвести'+(n?' ('+n+')':''),'err');
+  }
+
+  let durFixed=false;
+  function fixDuration(){
+    if(durFixed) return;
+    durFixed=true;
+    const d=audio.duration;
+    if(d===Infinity||!isFinite(d)||!(d>0)){
+      const onSeek=()=>{
+        audio.removeEventListener('seeked',onSeek);
+        if(isFinite(audio.duration)&&audio.duration>0) effDur=audio.duration;
+        try{ audio.currentTime=0; }catch(_){}
+      };
+      audio.addEventListener('seeked',onSeek);
+      try{ audio.currentTime=1e7; }catch(_){}
+    }else{
+      effDur=d;
+    }
+  }
+
   let rateIdx=0; const rates=[1,1.5,2];
+
   function draw(prog){
     const c=cv.getContext('2d'), w=cv.width,h=cv.height;
     c.clearRect(0,0,w,h);
     const n=peaks.length, gap=w/n, bw=Math.max(2,gap*.62);
     const onColor=mine?'#1d1608':'#e6a84c', offColor=mine?'rgba(29,22,8,.35)':'#4a453a';
+    const p=(isFinite(prog)&&prog>=0&&prog<=1)?prog:0;
     for(let i=0;i<n;i++){
       const bh=Math.max(3*devicePixelRatio,peaks[i]*h*.92);
-      c.fillStyle=(i/n)<=prog?onColor:offColor;
+      c.fillStyle=(i/n)<=p?onColor:offColor;
       c.fillRect(i*gap+(gap-bw)/2,(h-bh)/2,bw,bh);
     }
   }
   draw(0);
+
+  function totalLabel(){
+    const total=effDur||(typeof m.duration==='number'?m.duration:0);
+    dur.textContent=fmtDur((total||0)/rates[rateIdx]);
+  }
   function setIcon(playing){
     play.querySelector('.ic-p').classList.toggle('hidden',playing);
     play.querySelector('.ic-q').classList.toggle('hidden',!playing);
   }
+
   play.addEventListener('click',()=>{
-    if(!audio.paused){ audio.pause(); setIcon(false); return; }
+    if(!audio.paused){ audio.pause(); setIcon(false); totalLabel(); return; }
     if(window._curAudio&&window._curAudio.audio!==audio){
-      window._curAudio.audio.pause();
-      window._curAudio.setIcon(false);
+      try{ window._curAudio.audio.pause(); }catch(_){}
+      window._curAudio.setIcon&&window._curAudio.setIcon(false);
     }
     window._curAudio={audio,setIcon};
-    audio.play().catch(()=>toast('Не удалось воспроизвести','err'));
+    fixDuration();
+    const pr=audio.play();
+    if(pr&&pr.catch) pr.catch(playFail);
   });
+
   audio.addEventListener('play',()=>setIcon(true));
-  audio.addEventListener('pause',()=>setIcon(false));
-  audio.addEventListener('ended',()=>{ setIcon(false); draw(0); audio.currentTime=0; });
-  audio.addEventListener('timeupdate',()=>draw(audio.duration?audio.currentTime/audio.duration:0));
+  audio.addEventListener('pause',()=>{ setIcon(false); totalLabel(); });
+  audio.addEventListener('ended',()=>{
+    setIcon(false);
+    draw(0);
+    try{ audio.currentTime=0; }catch(_){}
+    totalLabel();
+  });
+  audio.addEventListener('timeupdate',()=>{
+    const d=effDur||((isFinite(audio.duration)&&audio.duration>0)?audio.duration:(m.duration||0));
+    const cur=isFinite(audio.currentTime)?audio.currentTime:0;
+    draw(d?cur/d:0);
+    dur.textContent=fmtDur(cur/rates[rateIdx])+' / '+fmtDur((d||0)/rates[rateIdx]);
+  });
   cv.addEventListener('click',e=>{
     const r=cv.getBoundingClientRect();
-    if(audio.duration) audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;
+    const frac=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));
+    const d=effDur||((isFinite(audio.duration)&&audio.duration>0)?audio.duration:0);
+    if(d>0){
+      try{ audio.currentTime=frac*d; }catch(_){}
+    }
   });
   dur.addEventListener('click',()=>{
     rateIdx=(rateIdx+1)%rates.length;
-    audio.playbackRate=rates[rateIdx];
-    dur.textContent=fmtDur((m.duration||0)/rates[rateIdx]);
+    try{ audio.playbackRate=rates[rateIdx]; }catch(_){}
+    totalLabel();
     toast('Скорость: ×'+rates[rateIdx]);
   });
   return wrap;
@@ -1444,7 +1510,6 @@ msgScroll.addEventListener('scroll',()=>{
 });
  $('#jumpDown').addEventListener('click',()=>{ msgScroll.scrollTop=msgScroll.scrollHeight; unseen=0; hideJump(); });
 
-/* ---------- текст ---------- */
 const txt=$('#txt'), btnSend=$('#btnSend'), btnMic=$('#btnMic');
 txt.addEventListener('input',()=>{
   txt.style.height='auto';
@@ -1469,7 +1534,6 @@ async function sendText(){
 }
 btnSend.addEventListener('click',sendText);
 
-/* ---------- фото/видео ---------- */
 const fileInput=$('#fileInput');
  $('#btnAttach').addEventListener('click',()=>{ if(active&&!pendingFile)fileInput.click(); });
 
@@ -1543,7 +1607,6 @@ async function sendMedia(){
       setAttUI(p.origName,'Готово',1,p.url);
       clearPending();
     }else{
-      /* видео: читаем как base64, режем на части, пишем порциями */
       const mediaId=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
       setAttUI(p.origName,'Читаю файл…',0.02,p.poster);
       const dataURL=await blobToDataURL(p.file);
@@ -1570,7 +1633,7 @@ async function sendMedia(){
   btn.disabled=false;
 }
 
-/* ---------- голосовые ---------- */
+/* ---------- ЗАПИСЬ ГОЛОСОВЫХ (исправлено для телефонов) ---------- */
 let mediaStream=null, recorder=null, audioCtx=null, analyser=null;
 let recTimerInt=null, sampleInt=null, recStart=0, recCancelled=false, livePeaks=[];
 
@@ -1583,10 +1646,20 @@ async function startRecording(){
     mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});
   }catch(e){ toast('Нет доступа к микрофону — разрешите его в браузере','err'); return; }
 
-  const mime=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(m=>MediaRecorder.isTypeSupported(m))||'';
-  recorder=new MediaRecorder(mediaStream,{mimeType:mime||undefined,audioBitsPerSecond:24000});
+  const mime=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac']
+    .find(m=>{ try{ return MediaRecorder.isTypeSupported(m); }catch(_){ return false; } })||'';
+
+  /* Safari капризен к опциям — создаём с fallback */
+  try{
+    recorder=new MediaRecorder(mediaStream,{mimeType:mime||undefined,audioBitsPerSecond:32000});
+  }catch(e){
+    try{ recorder=new MediaRecorder(mediaStream,{mimeType:mime||undefined}); }
+    catch(e2){ recorder=new MediaRecorder(mediaStream); }
+  }
+
   const chunks=[]; recCancelled=false;
-  recorder.ondataavailable=e=>{ if(e.data.size)chunks.push(e.data); };
+  recorder.ondataavailable=e=>{ if(e.data&&e.data.size)chunks.push(e.data); };
+
   recorder.onstop=async()=>{
     mediaStream.getTracks().forEach(t=>t.stop());
     if(audioCtx){ try{audioCtx.close();}catch(e){} audioCtx=null; }
@@ -1594,9 +1667,29 @@ async function startRecording(){
     $('#recbar').classList.add('hidden'); $('#composer').classList.remove('hidden');
     if(me) store.setRec(me.uid,'');
     if(recCancelled||!active) return;
-    const secs=(Date.now()-recStart)/1000;
+    if(!chunks.length){ toast('Запись пустая — попробуйте ещё раз','err'); return; }
+
+    const blob=new Blob(chunks,{type:(mime||'audio/webm').split(';')[0]});
+
+    /* ПРОВЕРКА ПЕРЕД ОТПРАВКОЙ: декодируем; заодно получаем точную длительность */
+    let realDur=0;
+    try{
+      const ac=getDecodeAC();
+      if(ac){
+        const ab=await blob.arrayBuffer();
+        const buf=await ac.decodeAudioData(ab);
+        if(buf&&isFinite(buf.duration)&&buf.duration>0) realDur=buf.duration;
+      }
+    }catch(e){ realDur=0; }
+
+    if(!realDur){
+      toast('Запись не удалась (пустой или битый файл) — запишите ещё раз','err');
+      return; /* битое НЕ отправляем */
+    }
+
+    const secs=realDur;
     if(secs<.6){ toast('Слишком коротко — запись отменена'); return; }
-    const blob=new Blob(chunks,{type:mime||'audio/webm'});
+
     const rd=new FileReader();
     rd.onload=async()=>{
       const peaks=resamplePeaks(livePeaks,56);
@@ -1637,7 +1730,8 @@ async function startRecording(){
   $('#recbar').classList.remove('hidden');
   $('#recTimer').textContent='0:00';
   store.setRec(me.uid,active.chatId);
-  recorder.start(200);
+  /* без нарезки: Safari склеивает фрагменты криво — берём один цельный blob */
+  recorder.start();
 }
 function stopRecording(){ if(recorder&&recorder.state!=='inactive')recorder.stop(); }
  $('#btnRecStop').addEventListener('click',stopRecording);
@@ -1675,7 +1769,6 @@ function resamplePeaks(arr,n){
   return out;
 }
 
-/* ---------- модалки ---------- */
 let modalAction=null;
 function openModal(title,text,okLabel,action){
   $('#modalTitle').textContent=title;
@@ -1714,13 +1807,11 @@ function openModal(title,text,okLabel,action){
     });
 });
 
-/* ---------- мобильный drawer ---------- */
 function closeDrawer(){ document.body.classList.remove('side-open'); }
  $('#sideToggle').addEventListener('click',()=>document.body.classList.add('side-open'));
  $('#sideBackdrop').addEventListener('click',closeDrawer);
  $('#backBtn').addEventListener('click',()=>{ closeChat(); closeDrawer(); });
 
-/* старт */
 icons();
 boot();
 </script>
