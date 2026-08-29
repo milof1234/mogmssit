@@ -526,9 +526,16 @@ function verifyBadge(){
   s.innerHTML='<i data-lucide="badge-check"></i>';
   return s;
 }
-function isVerified(uid){
+function isVerifiedRaw(uid){
   const u=usersMap[uid];
   return !!(u&&u.verified===true);
+}
+/* локальная правда на 8 сек после нажатия — чтобы галочка не мигала, пока команда в пути */
+const verifyOverride={};
+function verifiedNow(uid){
+  const o=verifyOverride[uid];
+  if(o&&Date.now()<o.until) return o.val;
+  return isVerifiedRaw(uid);
 }
 
 const fmtTime = ms => new Date(ms).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
@@ -808,7 +815,7 @@ class FBStore{
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {digits:{['+7'+digits]:this.fs.deleteField()}},{merge:true});
   }
-  /* Команды mutereq/{uid}: ставит админ, применяет ЛЮБОЙ онлайн-клиент */
+  /* команды mutereq/{uid}: любой онлайн-клиент применяет через транзакцию */
   async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
     await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
@@ -825,8 +832,6 @@ class FBStore{
       verify:!!val, by:by||'', at:Date.now()
     });
   }
-  /* Один универсальный обработчик: применяется ЛЮБЫМ клиентом через транзакцию.
-     Кто первый увидел — тот и применил; остальные увидят удалённый документ и пропустят. */
   watchMuteReq(uid,cb){
     return this.fs.onSnapshot(this.fs.doc(this.db,'mutereq',uid),
       snap=>{
@@ -853,7 +858,6 @@ class FBStore{
           this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
           cb&&cb(patch,uid);
         }).catch(e=>{
-          /* профиль не найден или транзакция не удалась — команду убираем, чтобы не висела */
           if(String(e&&e.message).includes('no-profile')){
             this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
           }
@@ -1294,7 +1298,7 @@ function renderAdmin(){
     nm.appendChild(document.createTextNode(u.name));
     const b=badgeForPhone(u.phone);
     if(b) nm.appendChild(b);
-    if(u.verified===true) nm.appendChild(verifyBadge());
+    if(verifiedNow(u.uid)) nm.appendChild(verifyBadge());
     const meta=document.createElement('div'); meta.className='ameta';
     meta.textContent=fmtPhone(u.phone)+(u.uid===me.uid?' · это вы':'');
     const st=document.createElement('div'); st.className='astate';
@@ -1321,7 +1325,6 @@ function renderAdmin(){
           try{
             await store.requestUnmute(u.uid,me.name);
             toast('Мут снят: '+u.name,'ok');
-            renderAdmin();
           }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
         });
         btns.appendChild(b);
@@ -1333,7 +1336,6 @@ function renderAdmin(){
             try{
               await store.requestMute(u.uid,ms,me.name);
               toast((ms?'Мут '+label.toLowerCase():'Мут навсегда')+': '+u.name,'ok');
-              renderAdmin();
             }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
           });
           btns.appendChild(b);
@@ -1341,18 +1343,17 @@ function renderAdmin(){
       }
       if(iAmCreator){
         const vb=document.createElement('button');
-        vb.className='mbtn vf'+(u.verified===true?' un':'');
-        vb.textContent=(u.verified===true)?'Убрать ✔':'✔';
+        vb.className='mbtn vf'+(verifiedNow(u.uid)?' un':'');
+        vb.textContent=verifiedNow(u.uid)?'Убрать ✔':'✔';
         vb.addEventListener('click',async()=>{
           vb.disabled=true;
           try{
-            const willSet=!(u.verified===true);
+            const willSet=!verifiedNow(u.uid);
+            verifyOverride[u.uid]={val:willSet,until:Date.now()+8000};
             await store.requestVerify(u.uid,willSet,me.name);
-            /* локально оптимистично, чтобы галочка появилась сразу */
-            usersMap[u.uid]={...usersMap[u.uid],verified:willSet};
-            renderAdmin(); renderList(); updateHeader();
             toast(willSet?'Галочка выдана: '+u.name:'Галочка снята: '+u.name,'ok');
-          }catch(e){ toast('Не получилось: '+humErr(e),'err'); vb.disabled=false; }
+            renderAdmin(); renderList();
+          }catch(e){ delete verifyOverride[u.uid]; toast('Не получилось: '+humErr(e),'err'); vb.disabled=false; }
         });
         btns.appendChild(vb);
       }
@@ -1437,7 +1438,7 @@ function renderList(){
     nm.appendChild(nmT);
     const bd=badgeForPhone(it.c.phone);
     if(bd) nm.appendChild(bd);
-    if(isVerified(it.c.uid)) nm.appendChild(verifyBadge());
+    if(verifiedNow(it.c.uid)) nm.appendChild(verifyBadge());
     const tm=document.createElement('div'); tm.className='crow-time';
     tm.textContent=it.chat?fmtListTime(it.chat.lastAt):'';
     top.append(nm,tm);
@@ -1528,7 +1529,7 @@ function renderFound(u){
   n.appendChild(nT);
   const fb=badgeForPhone(u.phone);
   if(fb) n.appendChild(fb);
-  if(u.verified===true) n.appendChild(verifyBadge());
+  if(verifiedNow(u.uid)) n.appendChild(verifyBadge());
   const p=document.createElement('div'); p.className='found-phone'; p.textContent=fmtPhone(u.phone);
   info.append(n,p);
   const btn=document.createElement('button'); btn.className='found-add';
@@ -1599,7 +1600,7 @@ function updateHeader(){
   hn.appendChild(hnT);
   const bd=badgeForPhone(c.phone);
   if(bd) hn.appendChild(bd);
-  if(isVerified(c.uid)) hn.appendChild(verifyBadge());
+  if(verifiedNow(c.uid)) hn.appendChild(verifyBadge());
   const sub=$('#hdSub');
   sub.className='hd-sub';
   const recNow=u&&u.recChat===active.chatId&&(Date.now()-(u.recTs||0)<90000);
@@ -1639,7 +1640,7 @@ function makeMsgEl(m,cont){
     n.appendChild(nT);
     const bd=badgeForUid(m.uid);
     if(bd) n.appendChild(bd);
-    if(!mine&&isVerified(m.uid)) n.appendChild(verifyBadge());
+    if(!mine&&verifiedNow(m.uid)) n.appendChild(verifyBadge());
     const t=document.createElement('span'); t.className='t'; t.textContent=fmtTime(m.createdAt);
     head.append(n,t);
     body.appendChild(head);
