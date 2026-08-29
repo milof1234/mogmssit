@@ -92,6 +92,15 @@
   .crow-name .cn-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
   .msg-head .n{display:inline-flex;align-items:center;max-width:100%;flex-wrap:wrap}
 
+  /* статус сообщения */
+  .mstat{display:inline-flex;align-items:center;margin-left:2px}
+  .mstat svg{width:11px;height:11px}
+  .mstat.pend{color:var(--dim)}
+  .mstat.sent{color:var(--green)}
+  .mstat.fail{color:var(--red)}
+  .mstat .retry{cursor:pointer;text-decoration:underline}
+  .msg.pending .bubble{opacity:.75}
+
   #auth{display:flex;align-items:center;justify-content:center;padding:24px;
     background:radial-gradient(1200px 600px at 15% -10%, rgba(230,168,76,.05), transparent 60%),var(--bg)}
   .auth-wrap{display:grid;grid-template-columns:1.15fr .95fr;gap:56px;max-width:980px;width:100%;align-items:center}
@@ -105,6 +114,8 @@
   .mode-hint .dot.red{background:var(--red)}
   .mode-hint .dot.pulse{animation:blink 1s infinite}
   #bootErr{color:var(--red);font-size:11px;letter-spacing:.06em;margin-top:8px;max-width:460px;font-family:'JetBrains Mono',monospace}
+  #offlineBanner{margin-top:10px;display:inline-flex;align-items:center;gap:8px;background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;padding:7px 12px;font-size:12px;color:var(--amber-hi)}
+  #offlineBanner svg{width:14px;height:14px}
 
   .auth-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:30px 28px;box-shadow:0 30px 60px rgba(0,0,0,.4)}
   body[data-theme="light"] .auth-card{box-shadow:0 30px 60px rgba(120,100,60,.15)}
@@ -500,6 +511,7 @@
       <h1>ЧАСТО<br>ТА<em>·APP</em></h1>
       <p class="brand-sub">Мессенджер: личные чаты и группы, текст, голосовые, фото и видео. Каждый чат — своя частота.</p>
       <canvas id="authWave"></canvas>
+      <div id="offlineBanner" class="hidden"><i data-lucide="wifi-off"></i><span>Офлайн — сообщения уйдут автоматически при подключении</span></div>
       <div class="mode-hint mono" id="modeHint"><span class="dot pulse"></span><span>ПОДКЛЮЧЕНИЕ К FIREBASE…</span></div>
       <div id="bootErr" class="hidden"></div>
     </section>
@@ -1188,6 +1200,7 @@ class FBStore{
   async setAvatar(uid,dataURL){
     await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{avatar:dataURL});
   }
+  /* группы */
   async createGroup(name,ownerUid,memberUids){
     const ref=this.fs.doc(this.fs.collection(this.db,'groups'));
     await this.fs.setDoc(ref,{
@@ -1252,76 +1265,7 @@ class FBStore{
   async markGroupSeen(gid,uid){
     this.fs.updateDoc(this.fs.doc(this.db,'groups',gid),{['seen.'+uid]:this.fs.serverTimestamp()}).catch(()=>{});
   }
-  async requestMute(targetUid,ms,by){
-    const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
-    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{until:untilMs,by:by||'',at:Date.now()});
-  }
-  async requestUnmute(targetUid,by){
-    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{until:0,by:by||'',at:Date.now()});
-  }
-  watchMuteReq(uid,cb){
-    return this.fs.onSnapshot(this.fs.doc(this.db,'mutereq',uid),
-      snap=>{
-        if(!snap.exists()) return;
-        const v=snap.data();
-        if(typeof v.until!=='number'){
-          this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
-          return;
-        }
-        this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{
-          mutedUntil:this.fs.Timestamp.fromMillis(v.until),mutedBy:v.by||''
-        }).then(()=>{ this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{}); })
-        .catch(()=>{ this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{}); });
-        cb&&cb(v.until);
-      },
-      err=>snapErr('мут-команда',err)
-    );
-  }
-  async addContact(myProfile,user){
-    if(!myProfile||!myProfile.uid) throw new Error('Профиль не загружен — перезайдите в аккаунт');
-    if(!user||!user.uid) throw new Error('Данные собеседника неполны');
-    const now=this.fs.serverTimestamp();
-    const batch=this.fs.writeBatch(this.db);
-    batch.set(this.fs.doc(this.db,'contacts',myProfile.uid,'items',user.uid),
-      {uid:user.uid,name:user.name||'Без имени',phone:user.phone||'',color:user.color||colorOf(user.uid),addedAt:now});
-    batch.set(this.fs.doc(this.db,'contacts',user.uid,'items',myProfile.uid),
-      {uid:myProfile.uid,name:myProfile.name||'Без имени',phone:myProfile.phone||'',color:myProfile.color||colorOf(myProfile.uid),addedAt:now});
-    await batch.commit();
-  }
-  async removeContact(uid,contactUid){
-    await this.fs.deleteDoc(this.fs.doc(this.db,'contacts',uid,'items',contactUid));
-  }
-  watchContacts(uid,cb){
-    this.fs.onSnapshot(this.fs.collection(this.db,'contacts',uid,'items'),
-      snap=>{
-        const map={};
-        snap.docs.forEach(d=>{
-          const v=d.data();
-          map[d.id]={uid:d.id,name:v.name||'Без имени',phone:v.phone||'',color:v.color};
-        });
-        cb(map);
-      },
-      err=>snapErr('контакты',err)
-    );
-  }
-  chatId(a,b){ return [a,b].sort().join('__'); }
-  watchChats(uid,cb){
-    const q=this.fs.query(
-      this.fs.collection(this.db,'chats'),
-      this.fs.where('participants','array-contains',uid)
-    );
-    this.fs.onSnapshot(q,
-      snap=>{
-        const map={};
-        snap.docs.forEach(d=>{
-          const v=d.data();
-          map[d.id]={lastAt:v.lastAt?.toMillis?.()??0,lastText:v.lastText||'',lastType:v.lastType||'',seen:v.seen||{}};
-        });
-        cb(map);
-      },
-      err=>snapErr('чаты',err)
-    );
-  }
+  /* личные */
   async sendPayload(chatId,participants,payload,preview){
     const batch=this.fs.writeBatch(this.db);
     batch.set(this.fs.doc(this.fs.collection(this.db,'chats',chatId,'messages')),payload);
@@ -1717,6 +1661,7 @@ function enterApp(profile){
   store.watchChats(me.uid,map=>{ chatsMap=map; renderLists(); });
   store.watchGroups(me.uid,map=>{ groupsMap=map; renderLists(); });
   icons();
+  Outbox.start();
 }
 
 function updateMuteUI(){
@@ -2485,6 +2430,8 @@ function makeMsgEl(m,cont){
   const mine=m.uid===me.uid;
   const isGroup=active&&active.kind==='group';
   el.className='msg'+(mine?' mine':'')+(cont&&!isGroup?' cont':'');
+  if(m.localId) el.dataset.local=m.localId;
+  if(m.status) el.dataset.status=m.status;
   if(!mine){
     const av=document.createElement('div');
     av.className='av';
@@ -2508,6 +2455,23 @@ function makeMsgEl(m,cont){
     }
     const t=document.createElement('span'); t.className='t'; t.textContent=fmtTime(m.createdAt);
     head.append(n,t);
+    /* статус только у моих */
+    if(mine){
+      const st=document.createElement('span'); st.className='mstat '+(m.status||'sent');
+      if(m.status==='pending'){
+        st.innerHTML='<i data-lucide="clock"></i>'; st.title='В очереди';
+      }else if(m.status==='sending'){
+        st.innerHTML='<i data-lucide="loader"></i>'; st.title='Отправляется';
+      }else if(m.status==='fail'){
+        st.innerHTML='<i data-lucide="alert-triangle"></i><span class="retry" title="Отправить снова"> повтор</span>';
+        st.querySelector('.retry').addEventListener('click',()=>{
+          Outbox.retry(m.localId);
+        });
+      }else{
+        st.innerHTML='<i data-lucide="check"></i>'; st.title='Доставлено';
+      }
+      head.appendChild(st);
+    }
     body.appendChild(head);
   }
   const bub=document.createElement('div'); bub.className='bubble';
@@ -2738,7 +2702,6 @@ function buildVoice(m,mine){
 }
 
 function appendMsg(m){
-  if(renderedIds.has(m.id)) return;
   const dk=fmtDay(m.createdAt);
   const isGroup=active&&active.kind==='group';
   const cont=!!(lastMeta&&lastMeta.uid===m.uid&&lastMeta.dk===dk&&(m.createdAt-lastMeta.ts)<5*60000&&!isGroup);
@@ -2748,11 +2711,26 @@ function appendMsg(m){
     msgList.appendChild(sep); renderedIds.add('_d'+dk);
   }
   const el=makeMsgEl(m,cont);
-  el.dataset.id=m.id;
-  msgList.appendChild(el); renderedIds.add(m.id);
+  if(m.id) el.dataset.id=m.id;
+  msgList.appendChild(el);
+  if(m.id) renderedIds.add(m.id);
   lastMeta={uid:m.uid,dk,ts:m.createdAt};
   if(!atBottom&&!m._local){ unseen++; showJump(); }
   else msgScroll.scrollTop=msgScroll.scrollHeight;
+  icons();
+}
+
+/* обновить элемент сообщения по localId (статус/замена на серверную копию) */
+function refreshLocalMsg(localId){
+  const el=msgList.querySelector('[data-local="'+localId+'"]');
+  if(!el) return;
+  /* повторный рендер одного сообщения */
+  const m=MsgCache.getByLocal(localId);
+  if(!m) return;
+  const isGroup=active&&active.kind==='group';
+  const cont=!!(lastMeta&&lastMeta.uid===m.uid&&lastMeta.dk===fmtDay(m.createdAt)&&(m.createdAt-lastMeta.ts)<5*60000&&!isGroup);
+  const fresh=makeMsgEl(m,cont);
+  el.replaceWith(fresh);
   icons();
 }
 
@@ -2760,12 +2738,19 @@ function renderMessages(msgs){
   const visibleCount=[...renderedIds].filter(x=>!x.startsWith('_d')).length;
   const fullRebuild=visibleCount===0 || (msgs.length>0&&!renderedIds.has(msgs[0].id));
   if(msgs.length===0){
+    /* есть локальные сообщения в очереди? не показываем пустоту */
+    if(Outbox.countFor(active)>0){
+      Outbox.renderLocal();
+      return;
+    }
     msgList.innerHTML='<div class="empty-state"><div class="big">Тишина в эфире</div><p>Сообщений ещё нет. Текст, голосовое, фото или видео — всё можно первым.</p></div>';
     renderedIds.clear(); lastMeta=null; return;
   }
   if(fullRebuild){
     msgList.innerHTML=''; renderedIds.clear(); lastMeta=null;
     msgs.forEach(m=>appendMsg(m));
+    /* догружаем локальные из очереди поверх */
+    Outbox.renderLocal(true);
     msgScroll.scrollTop=msgScroll.scrollHeight;
     atBottom=true; unseen=0; hideJump();
     return;
@@ -2773,6 +2758,9 @@ function renderMessages(msgs){
   const fresh=msgs.filter(m=>!renderedIds.has(m.id));
   fresh.forEach(m=>{
     m._local=m.uid===me.uid;
+    /* если это подтверждение локального — убираем локальную копию-дубль */
+    const loc=m.localId&&msgList.querySelector('[data-local="'+m.localId+'"]');
+    if(loc) loc.remove();
     appendMsg(m);
     if(m._local){ unseen=0; hideJump(); }
   });
@@ -2810,23 +2798,13 @@ txt.addEventListener('input',()=>{
 txt.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&!e.shiftKey&&!isMobile()){ e.preventDefault(); sendText(); }
 });
-async function sendText(){
+function sendText(){
   if(!active) return;
   if(muteGuard()) return;
   const t=txt.value.trim(); if(!t) return;
   txt.value=''; txt.style.height='auto';
   btnSend.classList.add('hidden'); btnMic.classList.remove('hidden');
-  const base={uid:me.uid,name:me.name,color:me.color,createdAt:store.fs.serverTimestamp()};
-  try{
-    if(active.kind==='group'){
-      await store.sendGroupPayload(active.id,{...base,type:'text',text:t},{type:'text',text:t.slice(0,80)});
-    }else{
-      await store.sendPayload(active.id,[me.uid,active.otherUid],{...base,type:'text',text:t},{type:'text',text:t.slice(0,80)});
-    }
-  }catch(e){
-    toast('Не отправилось: '+humErr(e),'err');
-    txt.value=t;
-  }
+  Outbox.pushText(t);
   msgScroll.scrollTop=msgScroll.scrollHeight;
 }
 btnSend.addEventListener('click',sendText);
@@ -2887,56 +2865,13 @@ function setAttUI(name,meta,prog,thumb){
   $('#attSend').textContent='Отправить';
 }
  $('#attCancel').addEventListener('click',clearPending);
- $('#attSend').addEventListener('click',sendMedia);
-
-async function sendMedia(){
+ $('#attSend').addEventListener('click',()=>{
   if(!active||!pendingFile) return;
-  if(muteGuard()){ return; }
+  if(muteGuard()) return;
   const p=pendingFile;
-  const btn=$('#attSend');
-  btn.disabled=true;
-  const base={uid:me.uid,name:me.name,color:me.color,createdAt:store.fs.serverTimestamp()};
-
-  const writePartsFn = active.kind==='group'
-    ? (mid,arr,pr)=>store.writeGroupParts(active.id,mid,arr,pr)
-    : (mid,arr,pr)=>store.writeParts(active.id,mid,arr,pr);
-  const sendFn = active.kind==='group'
-    ? (payload,prev)=>store.sendGroupPayload(active.id,payload,prev)
-    : (payload,prev)=>store.sendPayload(active.id,[me.uid,active.otherUid],payload,prev);
-
-  try{
-    if(p.kind==='image'){
-      setAttUI(p.origName,'Отправка…',0.05,p.url);
-      const dataURL=await blobToDataURL(p.file);
-      await sendFn({...base,type:'image',data:dataURL,w:p.w,h:p.h},{type:'image',text:'Фото'});
-      setAttUI(p.origName,'Готово',1,p.url);
-      clearPending();
-    }else{
-      const mediaId=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-      setAttUI(p.origName,'Читаю файл…',0.02,p.poster);
-      const dataURL=await blobToDataURL(p.file);
-      const comma=dataURL.indexOf(',');
-      const b64=dataURL.slice(comma+1);
-      const mime=p.file.type||'video/mp4';
-      const chunks=splitBase64(b64,600000);
-      if(chunks.length>140){ toast('Видео слишком тяжёлое — выберите короче или меньше','err'); btn.disabled=false; setAttUI(p.origName,'Отменено',0,p.poster); return; }
-      await writePartsFn(mediaId,chunks,
-        f=>setAttUI(p.origName,'Отправка видео… '+Math.round(f*100)+'%',f,p.poster));
-      setAttUI(p.origName,'Сохраняю…',1,p.poster);
-      await sendFn(
-        {...base,type:'video',mediaId,mime,parts:chunks.length,size:p.file.size,
-         poster:p.poster,duration:p.duration,w:p.w,h:p.h},
-        {type:'video',text:'Видео · '+fmtDur(p.duration)});
-      clearPending();
-    }
-  }catch(e){
-    setAttUI(p.origName,'Ошибка — попробуйте ещё раз',0,p.url||p.poster||null);
-    toast('Не отправилось: '+humErr(e),'err');
-    btn.disabled=false;
-    return;
-  }
-  btn.disabled=false;
-}
+  clearPending();
+  Outbox.pushMedia(p);
+});
 
 let mediaStream=null, recorder=null, audioCtx=null, analyser=null;
 let recTimerInt=null, sampleInt=null, recStart=0, recCancelled=false, livePeaks=[];
@@ -3000,17 +2935,9 @@ async function startRecording(){
     if(secs<.6){ toast('Слишком коротко — запись отменена'); return; }
 
     const rd=new FileReader();
-    rd.onload=async()=>{
+    rd.onload=()=>{
       const peaks=resamplePeaks(livePeaks,56);
-      const base={uid:me.uid,name:me.name,color:me.color,type:'voice',
-        audio:rd.result,peaks,duration:Math.round(secs),createdAt:store.fs.serverTimestamp()};
-      try{
-        if(active.kind==='group'){
-          await store.sendGroupPayload(active.id,base,{type:'voice',text:'Голосовое · '+fmtDur(secs)});
-        }else{
-          await store.sendPayload(active.id,[me.uid,active.otherUid],base,{type:'voice',text:'Голосовое · '+fmtDur(secs)});
-        }
-      }catch(e){ toast('Не отправилось: '+humErr(e),'err'); }
+      Outbox.pushVoice(rd.result,peaks,Math.round(secs));
     };
     rd.readAsDataURL(blob);
   };
@@ -3079,6 +3006,276 @@ function resamplePeaks(arr,n){
   }
   return out;
 }
+
+/* ==================== ИСХОДЯЩАЯ ОЧЕРЕДЬ ====================
+   Сообщения сначала показываются локально (мгновенно),
+   кладутся в очередь (localStorage) и отправляются фоном.
+   Статусы: pending -> sending -> sent | fail(повтор по клику).
+============================================================= */
+const MsgCache={
+  get(){ try{ return JSON.parse(localStorage.getItem('f15_outbox')||'[]'); }catch(e){ return []; } },
+  set(list){ try{ localStorage.setItem('f15_outbox',JSON.stringify(list)); }catch(e){} },
+  getByLocal(lid){ return this.get().find(x=>x.localId===lid); },
+  update(lid,patch){
+    const list=this.get();
+    const i=list.findIndex(x=>x.localId===lid);
+    if(i>-1){ list[i]={...list[i],...patch}; this.set(list); }
+  },
+  remove(lid){
+    const list=this.get().filter(x=>x.localId!==lid);
+    this.set(list);
+  }
+};
+
+const Outbox={
+  queue:MsgCache.get(),
+  sending:false,
+
+  countFor(act){
+    if(!act||!me) return 0;
+    return this.queue.filter(x=>x.targetId===act.id&&x.kind===act.kind).length;
+  },
+
+  nextLocalId(){ return 'L'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); },
+
+  /* базовая вставка локального сообщения в активный чат */
+  renderLocalItem(m,append){
+    const dk=fmtDay(m.createdAt);
+    const isGroup=active&&active.kind==='group';
+    const cont=!!(lastMeta&&lastMeta.uid===m.uid&&lastMeta.dk===dk&&(m.createdAt-lastMeta.ts)<5*60000&&!isGroup);
+    if(!lastMeta||lastMeta.dk!==dk){
+      const sep=document.createElement('div');
+      sep.className='day-sep'; sep.textContent=dk;
+      msgList.appendChild(sep);
+    }
+    const el=makeMsgEl(m,cont);
+    el.dataset.local=m.localId;
+    msgList.appendChild(el);
+    lastMeta={uid:m.uid,dk,ts:m.createdAt};
+    msgScroll.scrollTop=msgScroll.scrollHeight;
+    icons();
+  },
+
+  renderLocal(appendAll){
+    if(!active||!me) return;
+    const mine=this.queue.filter(x=>x.targetId===active.id&&x.kind===active.kind);
+    mine.forEach(m=>{
+      if(m.status==='fail'||m.status==='pending'){
+        this.renderLocalItem(m,true);
+      }
+    });
+  },
+
+  pushText(t){
+    const m={
+      localId:this.nextLocalId(),
+      kind:active.kind, targetId:active.id,
+      participants:active.kind==='dm'?[me.uid,active.otherUid]:null,
+      msg:{uid:me.uid,name:me.name,color:me.color,type:'text',text:t,createdAt:Date.now()},
+      preview:{type:'text',text:t.slice(0,80)},
+      status:'pending', tries:0
+    };
+    this.queue.push(m); MsgCache.set(this.queue);
+    this.renderLocalItem(m);
+    this.pump();
+  },
+
+  pushVoice(audio,peaks,duration){
+    const m={
+      localId:this.nextLocalId(),
+      kind:active.kind, targetId:active.id,
+      participants:active.kind==='dm'?[me.uid,active.otherUid]:null,
+      msg:{uid:me.uid,name:me.name,color:me.color,type:'voice',audio,peaks,duration,createdAt:Date.now()},
+      preview:{type:'voice',text:'Голосовое · '+fmtDur(duration)},
+      status:'pending', tries:0
+    };
+    this.queue.push(m); MsgCache.set(this.queue);
+    this.renderLocalItem(m);
+    this.pump();
+  },
+
+  pushMedia(p){
+    const m={
+      localId:this.nextLocalId(),
+      kind:active.kind, targetId:active.id,
+      participants:active.kind==='dm'?[me.uid,active.otherUid]:null,
+      file:p, /* сам файл и метаданные для загрузки */
+      msg:{uid:me.uid,name:me.name,color:me.color,type:p.kind==='image'?'image':'video',
+           data:p.kind==='image'?null:'',w:p.w,h:p.h,
+           mime:p.kind==='video'?(p.file.type||'video/mp4'):'',
+           poster:p.kind==='video'?p.poster:'',
+           duration:p.kind==='video'?p.duration:0,
+           createdAt:Date.now()},
+      preview:{type:p.kind==='image'?'image':'video',
+               text:p.kind==='image'?'Фото':'Видео'},
+      status:'pending', tries:0
+    };
+    this.queue.push(m); MsgCache.set(this.queue);
+    this.renderLocalItem(m);
+    this.pump();
+  },
+
+  retry(localId){
+    MsgCache.update(localId,{status:'pending',tries:0});
+    const item=this.queue.find(x=>x.localId===localId);
+    if(item){ item.status='pending'; item.tries=0; }
+    if(active) refreshLocalMsg(localId);
+    this.pump();
+  },
+
+  updateStatusInDOM(localId,status){
+    const el=msgList.querySelector('[data-local="'+localId+'"]');
+    if(!el) return;
+    el.dataset.status=status;
+    const st=el.querySelector('.mstat');
+    if(st){
+      st.className='mstat '+status;
+      if(status==='pending'){ st.innerHTML='<i data-lucide="clock"></i>'; }
+      else if(status==='sending'){ st.innerHTML='<i data-lucide="loader"></i>'; }
+      else if(status==='sent'){ st.innerHTML='<i data-lucide="check"></i>'; }
+      else if(status==='fail'){
+        st.innerHTML='<i data-lucide="alert-triangle"></i><span class="retry" title="Отправить снова"> повтор</span>';
+        st.querySelector('.retry').addEventListener('click',()=>this.retry(localId));
+      }
+      icons();
+    }
+  },
+
+  async pump(){
+    if(this.sending) return;
+    this.sending=true;
+    try{
+      while(true){
+        if(!store||storeFailed){ break; }
+        const item=this.queue.find(x=>x.status==='pending'||x.status==='fail');
+        if(!item) break;
+        if(item.tries>=5){
+          /* исчерпали попытки — ждём ручного повтора */
+          const first=this.queue.find(x=>x.status==='pending');
+          if(!first) break;
+        }
+        item.status='sending'; item.tries=(item.tries||0)+1;
+        MsgCache.update(item.localId,{status:'sending'});
+        if(active&&active.kind===item.kind&&active.id===item.targetId){
+          this.updateStatusInDOM(item.localId,'sending');
+        }
+        try{
+          await this.deliver(item);
+          this.queue=this.queue.filter(x=>x.localId!==item.localId);
+          MsgCache.remove(item.localId);
+          if(active&&active.kind===item.kind&&active.id===item.targetId){
+            this.updateStatusInDOM(item.localId,'sent');
+          }
+        }catch(e){
+          item.status='fail';
+          MsgCache.update(item.localId,{status:'fail'});
+          if(active&&active.kind===item.kind&&active.id===item.targetId){
+            this.updateStatusInDOM(item.localId,'fail');
+          }
+          console.warn('outbox:',e);
+          break; /* подождём, попробуем в следующем тике */
+        }
+      }
+    }finally{
+      this.sending=false;
+      /* если остались недоставленные — запланировать повтор через 5 сек */
+      if(this.queue.some(x=>x.status==='pending'||(x.status==='fail'&&x.tries<5))){
+        setTimeout(()=>this.pump(),5000);
+      }
+    }
+  },
+
+  async deliver(item){
+    const createdAt=store.fs.Timestamp.fromMillis(item.msg.createdAt);
+    if(item.kind==='group'){
+      if(item.msg.type==='text'){
+        await store.sendGroupPayload(item.targetId,
+          {...item.msg,createdAt},{type:'text',text:item.msg.text.slice(0,80)});
+      }else if(item.msg.type==='voice'){
+        await store.sendGroupPayload(item.targetId,
+          {...item.msg,createdAt},{type:'voice',text:'Голосовое · '+fmtDur(item.msg.duration)});
+      }else{
+        /* медиа: сначала части */
+        await this.uploadAndSendMedia(item,true);
+      }
+    }else{
+      if(item.msg.type==='text'){
+        await store.sendPayload(item.targetId,item.participants,
+          {...item.msg,createdAt},item.preview);
+      }else if(item.msg.type==='voice'){
+        await store.sendPayload(item.targetId,item.participants,
+          {...item.msg,createdAt},{type:'voice',text:'Голосовое · '+fmtDur(item.msg.duration)});
+      }else{
+        await this.uploadAndSendMedia(item,false);
+      }
+    }
+  },
+
+  async uploadAndSendMedia(item,isGroup){
+    const p=item.file;
+    const mediaId=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+    const dataURL=await blobToDataURL(p.file);
+    const comma=dataURL.indexOf(',');
+    const b64=dataURL.slice(comma+1);
+    const mime=p.kind==='video'?(p.file.type||'video/mp4'):'image/jpeg';
+    const chunks=splitBase64(b64,600000);
+    if(chunks.length>140) throw new Error('Файл слишком большой для очереди');
+    const writeFn=isGroup
+      ? (mid,arr)=>store.writeGroupParts(item.targetId,mid,arr)
+      : (mid,arr)=>store.writeParts(item.targetId,mid,arr);
+    await writeFn(mediaId,chunks);
+    const payload={uid:me.uid,name:me.name,color:me.color,
+      type:p.kind==='image'?'image':'video',
+      createdAt:store.fs.Timestamp.fromMillis(item.msg.createdAt),
+      mediaId,mime,parts:chunks.length,size:p.file.size,w:p.w,h:p.h};
+    if(p.kind==='video'){
+      payload.poster=p.poster; payload.duration=p.duration;
+    }else{
+      payload.data=''; /* данные приходят из parts; для фото в личных кладём сразу, если влезает */
+      if(!isGroup&&b64.length<900000){
+        delete payload.parts;
+        delete payload.mediaId;
+        payload.data=dataURL;
+      }
+    }
+    const preview={type:p.kind==='image'?'image':'video',
+      text:p.kind==='image'?'Фото':'Видео'};
+    if(isGroup){
+      await store.sendGroupPayload(item.targetId,payload,preview);
+    }else{
+      await store.sendPayload(item.targetId,item.participants,payload,preview);
+    }
+  },
+
+  /* активный чат: локальные сообщения показываем при входе */
+  showForActive(){
+    if(!active||!me) return;
+    const mine=this.queue.filter(x=>x.targetId===active.id&&x.kind===active.kind&&(x.status==='pending'||x.status==='fail'));
+    mine.forEach(m=>this.renderLocalItem(m,true));
+  }
+};
+
+/* патчим открытие чатов, чтобы подмешивать очередь */
+const _openDM=openDM;
+openDM=function(c){
+  _openDM(c);
+  Outbox.showForActive();
+};
+const _openGroup=openGroup;
+openGroup=function(gid){
+  _openGroup(gid);
+  Outbox.showForActive();
+};
+
+/* banner оффлайна */
+window.addEventListener('online',()=>{
+  $('#offlineBanner').classList.add('hidden');
+  Outbox.pump();
+});
+window.addEventListener('offline',()=>{
+  $('#offlineBanner').classList.remove('hidden');
+});
+if(!navigator.onLine) $('#offlineBanner').classList.remove('hidden');
 
 let modalAction=null;
 function openModal(title,text,okLabel,action){
