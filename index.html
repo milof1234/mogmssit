@@ -35,6 +35,9 @@
   .adm-crown{background:rgba(242,192,105,.22);color:var(--amber-hi)}
   .adm-hammer{background:var(--amber-soft);color:var(--amber)}
   .msg.mine .adm-badge{background:rgba(29,22,8,.16);color:#1d1608}
+  .vbadge{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--amber);color:#1d1608;margin-left:5px;flex:none}
+  .vbadge svg{width:9px;height:9px}
+  .mbtn.vf{color:var(--amber);border-color:rgba(230,168,76,.5)}
   .hd-name{display:flex;align-items:center;min-width:0}
   .hd-name .hn-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .crow-name{display:flex;align-items:center;min-width:0}
@@ -258,6 +261,7 @@
   .mbtn:hover{color:var(--amber);border-color:var(--amber)}
   .mbtn.un{color:#f0b3a8;border-color:rgba(224,96,74,.5)}
   .mbtn.un:hover{color:#fff;background:var(--red);border-color:var(--red)}
+  .mbtn.vf{color:var(--amber);border-color:rgba(230,168,76,.5)}
   .mbtn:disabled{opacity:.4;cursor:default}
   .meself{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em}
 
@@ -290,7 +294,7 @@
     .msg{max-width:92%}
     .mimg{max-width:100%}
     footer{padding:10px 12px}
-    .mbtns{max-width:170px}
+    .mbtns{max-width:190px}
   }
   #backBtn{display:none}
 </style>
@@ -453,7 +457,7 @@
       <div class="admin-title" id="adminTitle"></div>
       <button class="icbtn" id="adminClose" title="Закрыть"><i data-lucide="x"></i></button>
     </div>
-    <div class="admin-sub">ЛЮДИ · МУТ И АДМИН — КНОПКАМИ В СТРОКЕ</div>
+    <div class="admin-sub">ЛЮДИ · МУТ · АДМИН · ГАЛОЧКА — КНОПКАМИ В СТРОКЕ</div>
     <div id="adminList"></div>
   </div>
 </div>
@@ -514,6 +518,17 @@ function badgeForPhone(p){
 function badgeForUid(uid){
   const u=usersMap[uid];
   return u?badgeForPhone(u.phone):null;
+}
+function verifyBadge(){
+  const s=document.createElement('span');
+  s.className='vbadge';
+  s.title='Подтверждённый';
+  s.innerHTML='<i data-lucide="badge-check"></i>';
+  return s;
+}
+function isVerified(uid){
+  const u=usersMap[uid];
+  return !!(u&&u.verified===true);
 }
 
 const fmtTime = ms => new Date(ms).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
@@ -793,7 +808,7 @@ class FBStore{
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {digits:{['+7'+digits]:this.fs.deleteField()}},{merge:true});
   }
-  /* МУТ: команда mutereq/{uid} — замученный сам применяет её к своему профилю */
+  /* команды через mutereq/{uid}: сам целевой применяет их к своему профилю */
   async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
     await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
@@ -805,23 +820,34 @@ class FBStore{
       until:0, by:by||'', at:Date.now()
     });
   }
+  async requestVerify(targetUid,val,by){
+    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
+      verify:!!val, by:by||'', at:Date.now()
+    });
+  }
   watchMuteReq(uid,cb){
     return this.fs.onSnapshot(this.fs.doc(this.db,'mutereq',uid),
       snap=>{
         if(!snap.exists()) return;
         const v=snap.data();
-        const until=(typeof v.until==='number')?v.until:0;
-        this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{
-          mutedUntil:this.fs.Timestamp.fromMillis(until),
-          mutedBy:v.by||''
-        }).then(()=>{
+        const patch={};
+        if(typeof v.until==='number'){
+          patch.mutedUntil=this.fs.Timestamp.fromMillis(v.until);
+          patch.mutedBy=v.by||'';
+        }
+        if(typeof v.verify==='boolean'){
+          patch.verified=v.verify;
+        }
+        if(!Object.keys(patch).length){
           this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
-        }).catch(()=>{
-          this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
-        });
-        cb&&cb(until);
+          return;
+        }
+        this.fs.updateDoc(this.fs.doc(this.db,'users',uid),patch)
+          .then(()=>{ this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{}); })
+          .catch(()=>{ this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{}); });
+        cb&&cb(patch);
       },
-      err=>snapErr('мут-команда',err)
+      err=>snapErr('команды',err)
     );
   }
   async addContact(myProfile,user){
@@ -1163,12 +1189,18 @@ function enterApp(profile){
   mn.textContent=me.name;
   const myBadge=isCreatorPhone(me.phone)?badgeEl('crown'):badgeForPhone(me.phone);
   if(myBadge) mn.appendChild(myBadge);
+  if(me.verified===true) mn.appendChild(verifyBadge());
   $('#mePhone').textContent=fmtPhone(me.phone||'');
   refreshStaffButtons();
   store.presence(me.uid);
-  store.watchMuteReq(me.uid,(until)=>{
-    if(until>Date.now()) toast('Вас замутили до '+fmtUntil(until),'err');
-    else toast('Мут снят','ok');
+  store.watchMuteReq(me.uid,(patch)=>{
+    if(patch.mutedUntil!==undefined){
+      const ms=patch.mutedUntil.toMillis?patch.mutedUntil.toMillis():0;
+      if(ms>Date.now()) toast('Вас замутили до '+fmtUntil(ms),'err');
+      else toast('Мут снят','ok');
+    }
+    if(patch.verified===true) toast('Вам выдали галочку','ok');
+    if(patch.verified===false) toast('Галочку сняли');
   });
   store.watchAdmins(set=>{
     adminDigits=set;
@@ -1179,7 +1211,8 @@ function enterApp(profile){
   store.watchUsers(map=>{
     usersMap=map;
     renderList(); updateHeader(); updateMuteUI();
-    const sig=Object.keys(map).filter(uid=>isStaffPhone(map[uid].phone)).sort().join(',');
+    const sig=Object.keys(map).filter(uid=>isStaffPhone(map[uid].phone)).sort().join(',')
+      +'|'+Object.keys(map).filter(uid=>map[uid].verified===true).sort().join(',');
     if(sig!==staffSig){
       staffSig=sig;
       if(active&&unsubMsgs){ unsubMsgs(); unsubMsgs=store.watchMessages(active.chatId,renderMessages); }
@@ -1257,6 +1290,7 @@ function renderAdmin(){
     nm.appendChild(document.createTextNode(u.name));
     const b=badgeForPhone(u.phone);
     if(b) nm.appendChild(b);
+    if(u.verified===true) nm.appendChild(verifyBadge());
     const meta=document.createElement('div'); meta.className='ameta';
     meta.textContent=fmtPhone(u.phone)+(u.uid===me.uid?' · это вы':'');
     const st=document.createElement('div'); st.className='astate';
@@ -1276,6 +1310,7 @@ function renderAdmin(){
       const self=document.createElement('span'); self.className='meself'; self.textContent='ЭТО ВЫ';
       btns.appendChild(self);
     }else{
+      /* мут */
       if(info){
         const b=document.createElement('button'); b.className='mbtn un'; b.textContent='Снять мут';
         b.addEventListener('click',async()=>{
@@ -1299,6 +1334,22 @@ function renderAdmin(){
           btns.appendChild(b);
         });
       }
+      /* галочка — только создатель */
+      if(iAmCreator){
+        const vb=document.createElement('button');
+        vb.className='mbtn vf'+(u.verified===true?' un':'');
+        vb.textContent=(u.verified===true)?'Убрать ✔':'✔';
+        vb.addEventListener('click',async()=>{
+          vb.disabled=true;
+          try{
+            const willSet=!(u.verified===true);
+            await store.requestVerify(u.uid,willSet,me.name);
+            toast(willSet?'Галочка выдана: '+u.name:'Галочка снята: '+u.name,'ok');
+          }catch(e){ toast('Не получилось: '+humErr(e),'err'); vb.disabled=false; }
+        });
+        btns.appendChild(vb);
+      }
+      /* админ — только создатель */
       if(iAmCreator){
         const ab=document.createElement('button');
         ab.className='mbtn'+(targetAdmin?' un':'');
@@ -1380,6 +1431,7 @@ function renderList(){
     nm.appendChild(nmT);
     const bd=badgeForPhone(it.c.phone);
     if(bd) nm.appendChild(bd);
+    if(isVerified(it.c.uid)) nm.appendChild(verifyBadge());
     const tm=document.createElement('div'); tm.className='crow-time';
     tm.textContent=it.chat?fmtListTime(it.chat.lastAt):'';
     top.append(nm,tm);
@@ -1470,6 +1522,7 @@ function renderFound(u){
   n.appendChild(nT);
   const fb=badgeForPhone(u.phone);
   if(fb) n.appendChild(fb);
+  if(u.verified===true) n.appendChild(verifyBadge());
   const p=document.createElement('div'); p.className='found-phone'; p.textContent=fmtPhone(u.phone);
   info.append(n,p);
   const btn=document.createElement('button'); btn.className='found-add';
@@ -1540,6 +1593,7 @@ function updateHeader(){
   hn.appendChild(hnT);
   const bd=badgeForPhone(c.phone);
   if(bd) hn.appendChild(bd);
+  if(isVerified(c.uid)) hn.appendChild(verifyBadge());
   const sub=$('#hdSub');
   sub.className='hd-sub';
   const recNow=u&&u.recChat===active.chatId&&(Date.now()-(u.recTs||0)<90000);
@@ -1579,6 +1633,7 @@ function makeMsgEl(m,cont){
     n.appendChild(nT);
     const bd=badgeForUid(m.uid);
     if(bd) n.appendChild(bd);
+    if(!mine&&isVerified(m.uid)) n.appendChild(verifyBadge());
     const t=document.createElement('span'); t.className='t'; t.textContent=fmtTime(m.createdAt);
     head.append(n,t);
     body.appendChild(head);
