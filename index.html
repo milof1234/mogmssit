@@ -92,7 +92,6 @@
   .crow-name .cn-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
   .msg-head .n{display:inline-flex;align-items:center;max-width:100%;flex-wrap:wrap}
 
-  /* статус сообщения */
   .mstat{display:inline-flex;align-items:center;margin-left:2px}
   .mstat svg{width:11px;height:11px}
   .mstat.pend{color:var(--dim)}
@@ -1200,7 +1199,35 @@ class FBStore{
   async setAvatar(uid,dataURL){
     await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{avatar:dataURL});
   }
-  /* группы */
+  /* ===== контакты ===== */
+  async addContact(myProfile,user){
+    if(!myProfile||!myProfile.uid) throw new Error('Профиль не загружен — перезайдите в аккаунт');
+    if(!user||!user.uid) throw new Error('Данные собеседника неполны');
+    const now=this.fs.serverTimestamp();
+    const batch=this.fs.writeBatch(this.db);
+    batch.set(this.fs.doc(this.db,'contacts',myProfile.uid,'items',user.uid),
+      {uid:user.uid,name:user.name||'Без имени',phone:user.phone||'',color:user.color||colorOf(user.uid),addedAt:now});
+    batch.set(this.fs.doc(this.db,'contacts',user.uid,'items',myProfile.uid),
+      {uid:myProfile.uid,name:myProfile.name||'Без имени',phone:myProfile.phone||'',color:myProfile.color||colorOf(myProfile.uid),addedAt:now});
+    await batch.commit();
+  }
+  async removeContact(uid,contactUid){
+    await this.fs.deleteDoc(this.fs.doc(this.db,'contacts',uid,'items',contactUid));
+  }
+  watchContacts(uid,cb){
+    this.fs.onSnapshot(this.fs.collection(this.db,'contacts',uid,'items'),
+      snap=>{
+        const map={};
+        snap.docs.forEach(d=>{
+          const v=d.data();
+          map[d.id]={uid:d.id,name:v.name||'Без имени',phone:v.phone||'',color:v.color};
+        });
+        cb(map);
+      },
+      err=>snapErr('контакты',err)
+    );
+  }
+  /* ===== группы ===== */
   async createGroup(name,ownerUid,memberUids){
     const ref=this.fs.doc(this.fs.collection(this.db,'groups'));
     await this.fs.setDoc(ref,{
@@ -1265,7 +1292,50 @@ class FBStore{
   async markGroupSeen(gid,uid){
     this.fs.updateDoc(this.fs.doc(this.db,'groups',gid),{['seen.'+uid]:this.fs.serverTimestamp()}).catch(()=>{});
   }
-  /* личные */
+  /* ===== личные чаты ===== */
+  async requestMute(targetUid,ms,by){
+    const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
+    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{until:untilMs,by:by||'',at:Date.now()});
+  }
+  async requestUnmute(targetUid,by){
+    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{until:0,by:by||'',at:Date.now()});
+  }
+  watchMuteReq(uid,cb){
+    return this.fs.onSnapshot(this.fs.doc(this.db,'mutereq',uid),
+      snap=>{
+        if(!snap.exists()) return;
+        const v=snap.data();
+        if(typeof v.until!=='number'){
+          this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
+          return;
+        }
+        this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{
+          mutedUntil:this.fs.Timestamp.fromMillis(v.until),mutedBy:v.by||''
+        }).then(()=>{ this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{}); })
+        .catch(()=>{ this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{}); });
+        cb&&cb(v.until);
+      },
+      err=>snapErr('мут-команда',err)
+    );
+  }
+  chatId(a,b){ return [a,b].sort().join('__'); }
+  watchChats(uid,cb){
+    const q=this.fs.query(
+      this.fs.collection(this.db,'chats'),
+      this.fs.where('participants','array-contains',uid)
+    );
+    this.fs.onSnapshot(q,
+      snap=>{
+        const map={};
+        snap.docs.forEach(d=>{
+          const v=d.data();
+          map[d.id]={lastAt:v.lastAt?.toMillis?.()??0,lastText:v.lastText||'',lastType:v.lastType||'',seen:v.seen||{}};
+        });
+        cb(map);
+      },
+      err=>snapErr('чаты',err)
+    );
+  }
   async sendPayload(chatId,participants,payload,preview){
     const batch=this.fs.writeBatch(this.db);
     batch.set(this.fs.doc(this.fs.collection(this.db,'chats',chatId,'messages')),payload);
@@ -2337,6 +2407,7 @@ function openDM(c){
   store.markSeen(chatId,me.uid); lastSeenMark=Date.now();
   unsubMsgs=store.watchMessages(chatId,renderMessages);
   renderLists();
+  Outbox.showForActive();
 }
 function openGroup(gid){
   const g=groupsMap[gid];
@@ -2351,6 +2422,7 @@ function openGroup(gid){
   store.markGroupSeen(gid,me.uid); lastSeenMark=Date.now();
   unsubMsgs=store.watchGroupMessages(gid,renderMessages);
   renderLists();
+  Outbox.showForActive();
 }
 function resetChatView(){
   renderedIds.clear(); lastMeta=null; unseen=0; atBottom=true; hideJump();
@@ -2455,7 +2527,6 @@ function makeMsgEl(m,cont){
     }
     const t=document.createElement('span'); t.className='t'; t.textContent=fmtTime(m.createdAt);
     head.append(n,t);
-    /* статус только у моих */
     if(mine){
       const st=document.createElement('span'); st.className='mstat '+(m.status||'sent');
       if(m.status==='pending'){
@@ -2464,9 +2535,7 @@ function makeMsgEl(m,cont){
         st.innerHTML='<i data-lucide="loader"></i>'; st.title='Отправляется';
       }else if(m.status==='fail'){
         st.innerHTML='<i data-lucide="alert-triangle"></i><span class="retry" title="Отправить снова"> повтор</span>';
-        st.querySelector('.retry').addEventListener('click',()=>{
-          Outbox.retry(m.localId);
-        });
+        st.querySelector('.retry').addEventListener('click',()=>{ Outbox.retry(m.localId); });
       }else{
         st.innerHTML='<i data-lucide="check"></i>'; st.title='Доставлено';
       }
@@ -2720,11 +2789,9 @@ function appendMsg(m){
   icons();
 }
 
-/* обновить элемент сообщения по localId (статус/замена на серверную копию) */
 function refreshLocalMsg(localId){
   const el=msgList.querySelector('[data-local="'+localId+'"]');
   if(!el) return;
-  /* повторный рендер одного сообщения */
   const m=MsgCache.getByLocal(localId);
   if(!m) return;
   const isGroup=active&&active.kind==='group';
@@ -2738,7 +2805,6 @@ function renderMessages(msgs){
   const visibleCount=[...renderedIds].filter(x=>!x.startsWith('_d')).length;
   const fullRebuild=visibleCount===0 || (msgs.length>0&&!renderedIds.has(msgs[0].id));
   if(msgs.length===0){
-    /* есть локальные сообщения в очереди? не показываем пустоту */
     if(Outbox.countFor(active)>0){
       Outbox.renderLocal();
       return;
@@ -2749,7 +2815,6 @@ function renderMessages(msgs){
   if(fullRebuild){
     msgList.innerHTML=''; renderedIds.clear(); lastMeta=null;
     msgs.forEach(m=>appendMsg(m));
-    /* догружаем локальные из очереди поверх */
     Outbox.renderLocal(true);
     msgScroll.scrollTop=msgScroll.scrollHeight;
     atBottom=true; unseen=0; hideJump();
@@ -2758,7 +2823,6 @@ function renderMessages(msgs){
   const fresh=msgs.filter(m=>!renderedIds.has(m.id));
   fresh.forEach(m=>{
     m._local=m.uid===me.uid;
-    /* если это подтверждение локального — убираем локальную копию-дубль */
     const loc=m.localId&&msgList.querySelector('[data-local="'+m.localId+'"]');
     if(loc) loc.remove();
     appendMsg(m);
@@ -3008,9 +3072,9 @@ function resamplePeaks(arr,n){
 }
 
 /* ==================== ИСХОДЯЩАЯ ОЧЕРЕДЬ ====================
-   Сообщения сначала показываются локально (мгновенно),
-   кладутся в очередь (localStorage) и отправляются фоном.
-   Статусы: pending -> sending -> sent | fail(повтор по клику).
+   Сообщения появляются в чате мгновенно, кладутся в очередь
+   (localStorage) и отправляются фоном с повторами.
+   Статусы: pending(часики) -> sending(loader) -> sent(галочка) | fail(повтор)
 ============================================================= */
 const MsgCache={
   get(){ try{ return JSON.parse(localStorage.getItem('f15_outbox')||'[]'); }catch(e){ return []; } },
@@ -3038,8 +3102,7 @@ const Outbox={
 
   nextLocalId(){ return 'L'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); },
 
-  /* базовая вставка локального сообщения в активный чат */
-  renderLocalItem(m,append){
+  renderLocalItem(m){
     const dk=fmtDay(m.createdAt);
     const isGroup=active&&active.kind==='group';
     const cont=!!(lastMeta&&lastMeta.uid===m.uid&&lastMeta.dk===dk&&(m.createdAt-lastMeta.ts)<5*60000&&!isGroup);
@@ -3056,14 +3119,10 @@ const Outbox={
     icons();
   },
 
-  renderLocal(appendAll){
+  renderLocal(){
     if(!active||!me) return;
-    const mine=this.queue.filter(x=>x.targetId===active.id&&x.kind===active.kind);
-    mine.forEach(m=>{
-      if(m.status==='fail'||m.status==='pending'){
-        this.renderLocalItem(m,true);
-      }
-    });
+    const mine=this.queue.filter(x=>x.targetId===active.id&&x.kind===active.kind&&(x.status==='pending'||x.status==='fail'));
+    mine.forEach(m=>this.renderLocalItem(m));
   },
 
   pushText(t){
@@ -3099,15 +3158,14 @@ const Outbox={
       localId:this.nextLocalId(),
       kind:active.kind, targetId:active.id,
       participants:active.kind==='dm'?[me.uid,active.otherUid]:null,
-      file:p, /* сам файл и метаданные для загрузки */
+      file:p,
       msg:{uid:me.uid,name:me.name,color:me.color,type:p.kind==='image'?'image':'video',
-           data:p.kind==='image'?null:'',w:p.w,h:p.h,
+           data:'',w:p.w,h:p.h,
            mime:p.kind==='video'?(p.file.type||'video/mp4'):'',
            poster:p.kind==='video'?p.poster:'',
            duration:p.kind==='video'?p.duration:0,
            createdAt:Date.now()},
-      preview:{type:p.kind==='image'?'image':'video',
-               text:p.kind==='image'?'Фото':'Видео'},
+      preview:{type:p.kind==='image'?'image':'video',text:p.kind==='image'?'Фото':'Видео'},
       status:'pending', tries:0
     };
     this.queue.push(m); MsgCache.set(this.queue);
@@ -3141,18 +3199,21 @@ const Outbox={
     }
   },
 
+  start(){
+    this.pump();
+  },
+
   async pump(){
     if(this.sending) return;
     this.sending=true;
     try{
       while(true){
-        if(!store||storeFailed){ break; }
-        const item=this.queue.find(x=>x.status==='pending'||x.status==='fail');
-        if(!item) break;
-        if(item.tries>=5){
-          /* исчерпали попытки — ждём ручного повтора */
-          const first=this.queue.find(x=>x.status==='pending');
-          if(!first) break;
+        if(!store||storeFailed) break;
+        let item=this.queue.find(x=>x.status==='pending');
+        if(!item){
+          /* повтор fail-ов, если у них ещё есть попытки */
+          item=this.queue.find(x=>x.status==='fail'&&x.tries<5);
+          if(!item) break;
         }
         item.status='sending'; item.tries=(item.tries||0)+1;
         MsgCache.update(item.localId,{status:'sending'});
@@ -3173,12 +3234,11 @@ const Outbox={
             this.updateStatusInDOM(item.localId,'fail');
           }
           console.warn('outbox:',e);
-          break; /* подождём, попробуем в следующем тике */
+          break;
         }
       }
     }finally{
       this.sending=false;
-      /* если остались недоставленные — запланировать повтор через 5 сек */
       if(this.queue.some(x=>x.status==='pending'||(x.status==='fail'&&x.tries<5))){
         setTimeout(()=>this.pump(),5000);
       }
@@ -3195,7 +3255,6 @@ const Outbox={
         await store.sendGroupPayload(item.targetId,
           {...item.msg,createdAt},{type:'voice',text:'Голосовое · '+fmtDur(item.msg.duration)});
       }else{
-        /* медиа: сначала части */
         await this.uploadAndSendMedia(item,true);
       }
     }else{
@@ -3231,43 +3290,21 @@ const Outbox={
     if(p.kind==='video'){
       payload.poster=p.poster; payload.duration=p.duration;
     }else{
-      payload.data=''; /* данные приходят из parts; для фото в личных кладём сразу, если влезает */
       if(!isGroup&&b64.length<900000){
         delete payload.parts;
         delete payload.mediaId;
         payload.data=dataURL;
       }
     }
-    const preview={type:p.kind==='image'?'image':'video',
-      text:p.kind==='image'?'Фото':'Видео'};
+    const preview={type:p.kind==='image'?'image':'video',text:p.kind==='image'?'Фото':'Видео'};
     if(isGroup){
       await store.sendGroupPayload(item.targetId,payload,preview);
     }else{
       await store.sendPayload(item.targetId,item.participants,payload,preview);
     }
-  },
-
-  /* активный чат: локальные сообщения показываем при входе */
-  showForActive(){
-    if(!active||!me) return;
-    const mine=this.queue.filter(x=>x.targetId===active.id&&x.kind===active.kind&&(x.status==='pending'||x.status==='fail'));
-    mine.forEach(m=>this.renderLocalItem(m,true));
   }
 };
 
-/* патчим открытие чатов, чтобы подмешивать очередь */
-const _openDM=openDM;
-openDM=function(c){
-  _openDM(c);
-  Outbox.showForActive();
-};
-const _openGroup=openGroup;
-openGroup=function(gid){
-  _openGroup(gid);
-  Outbox.showForActive();
-};
-
-/* banner оффлайна */
 window.addEventListener('online',()=>{
   $('#offlineBanner').classList.add('hidden');
   Outbox.pump();
