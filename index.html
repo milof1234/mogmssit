@@ -501,6 +501,7 @@ const digitsOf = s => String(s||'').replace(/\D/g,'');
 const isCreatorPhone = p => digitsOf(p)===CREATOR_DIGITS;
 let adminDigits=new Set();
 let verifiedDigits=new Set();
+let hammerHidden=new Set();
 const isAdminPhone = p => { const d=digitsOf(p); return d!==CREATOR_DIGITS && adminDigits.has(d); };
 const isStaffPhone  = p => isCreatorPhone(p)||isAdminPhone(p);
 
@@ -512,8 +513,9 @@ function badgeEl(kind){
   return s;
 }
 function badgeForPhone(p){
-  if(isCreatorPhone(p)) return badgeEl('crown');
-  if(isAdminPhone(p)) return badgeEl('hammer');
+  const d=digitsOf(p);
+  if(isCreatorPhone(p)) return hammerHidden.has(d)?null:badgeEl('crown');
+  if(isAdminPhone(p)) return hammerHidden.has(d)?null:badgeEl('hammer');
   return null;
 }
 function badgeForUid(uid){
@@ -789,7 +791,7 @@ class FBStore{
       err=>snapErr('профили',err)
     );
   }
-  /* админы + галочки — один документ settings/admins */
+  /* админы + галочки + скрытые молотки — один документ settings/admins */
   watchAdmins(cb){
     this.fs.onSnapshot(this.fs.doc(this.db,'settings','admins'),
       snap=>{
@@ -802,7 +804,11 @@ class FBStore{
         const verified=new Set(Object.keys(ver)
           .filter(k=>ver[k]===true)
           .map(k=>digitsOf(k)));
-        cb(admins,verified);
+        const hide=d.hideHammers||{};
+        const hidden=new Set(Object.keys(hide)
+          .filter(k=>hide[k]===true)
+          .map(k=>digitsOf(k)));
+        cb(admins,verified,hidden);
       },
       err=>snapErr('админы',err)
     );
@@ -818,6 +824,10 @@ class FBStore{
   async setVerified(digits,val){
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {verified:{['+7'+digits]:!!val}},{merge:true});
+  }
+  async setHammerHidden(digits,val){
+    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
+      {hideHammers:{['+7'+digits]:!!val}},{merge:true});
   }
   /* мут — команда mutereq/{uid}, применяет сам замученный */
   async requestMute(targetUid,ms,by){
@@ -1189,7 +1199,7 @@ function enterApp(profile){
   $('#meAv').style.background=me.color;
   const mn=$('#meName');
   mn.textContent=me.name;
-  const myBadge=isCreatorPhone(me.phone)?badgeEl('crown'):badgeForPhone(me.phone);
+  const myBadge=badgeForPhone(me.phone);
   if(myBadge) mn.appendChild(myBadge);
   if(verifiedNow(me.uid)) mn.appendChild(verifyBadge());
   $('#mePhone').textContent=fmtPhone(me.phone||'');
@@ -1199,11 +1209,18 @@ function enterApp(profile){
     if(until>Date.now()) toast('Вас замутили до '+fmtUntil(until),'err');
     else toast('Мут снят','ok');
   });
-  store.watchAdmins((set,verSet)=>{
+  store.watchAdmins((set,verSet,hiddenSet)=>{
     adminDigits=set;
     verifiedDigits=verSet;
+    hammerHidden=hiddenSet;
     refreshStaffButtons();
     renderList(); updateHeader(); updateMuteUI();
+    const mn2=$('#meName');
+    const oldB=mn2.querySelectorAll('.adm-badge');
+    oldB.forEach(x=>x.remove());
+    const myB=badgeForPhone(me.phone);
+    if(myB) mn2.insertBefore(myB,mn2.querySelector('.vbadge'));
+    if(verifiedNow(me.uid)&&!mn2.querySelector('.vbadge')) mn2.appendChild(verifyBadge());
     if(adminOpen) renderAdmin();
   });
   store.watchUsers(map=>{
@@ -1297,11 +1314,29 @@ function renderAdmin(){
 
     const btns=document.createElement('div'); btns.className='mbtns';
     if(targetCreator){
-      const self=document.createElement('span'); self.className='meself'; self.textContent='СОЗДАТЕЛЬ';
-      btns.appendChild(self);
+      const hb=document.createElement('button'); hb.className='mbtn';
+      const hidden=hammerHidden.has(digitsOf(me.phone));
+      hb.textContent=hidden?'Показать молоток':'Скрыть молоток';
+      hb.addEventListener('click',async()=>{
+        hb.disabled=true;
+        try{
+          await store.setHammerHidden(digitsOf(me.phone).slice(1),!hidden);
+          toast(hidden?'Молоток показан':'Молоток скрыт (права сохранены)','ok');
+        }catch(e){ toast('Не получилось: '+humErr(e),'err'); hb.disabled=false; }
+      });
+      btns.appendChild(hb);
     }else if(u.uid===me.uid){
-      const self=document.createElement('span'); self.className='meself'; self.textContent='ЭТО ВЫ';
-      btns.appendChild(self);
+      const hb=document.createElement('button'); hb.className='mbtn';
+      const hidden=hammerHidden.has(digitsOf(me.phone));
+      hb.textContent=hidden?'Показать молоток':'Скрыть молоток';
+      hb.addEventListener('click',async()=>{
+        hb.disabled=true;
+        try{
+          await store.setHammerHidden(digitsOf(me.phone).slice(1),!hidden);
+          toast(hidden?'Молоток показан':'Молоток скрыт (права сохранены)','ok');
+        }catch(e){ toast('Не получилось: '+humErr(e),'err'); hb.disabled=false; }
+      });
+      btns.appendChild(hb);
     }else{
       /* мут */
       if(info){
@@ -1327,7 +1362,7 @@ function renderAdmin(){
           btns.appendChild(b);
         });
       }
-      /* галочка — создатель И админы */
+      /* галочка — создатель и админы */
       if(iAmCreator||iAmAdmin){
         const vb=document.createElement('button');
         vb.className='mbtn vf'+(verifiedNow(u.uid)?' un':'');
