@@ -527,7 +527,6 @@ function verifyBadge(){
   s.innerHTML='<i data-lucide="badge-check"></i>';
   return s;
 }
-/* галочка живёт в settings/admins.verified — как молотки */
 function verifiedNow(uid){
   const u=usersMap[uid];
   if(!u) return false;
@@ -790,7 +789,7 @@ class FBStore{
       err=>snapErr('профили',err)
     );
   }
-  /* админы + галочки живут в одном документе settings/admins */
+  /* админы + галочки — один документ settings/admins */
   watchAdmins(cb){
     this.fs.onSnapshot(this.fs.doc(this.db,'settings','admins'),
       snap=>{
@@ -820,7 +819,7 @@ class FBStore{
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {verified:{['+7'+digits]:!!val}},{merge:true});
   }
-  /* мут — команда mutereq/{uid}, применяет её сам замученный к своему профилю */
+  /* мут — команда mutereq/{uid}, применяет сам замученный */
   async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
     await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
@@ -1150,7 +1149,6 @@ let unsubMsgs=null;
 let renderedIds=new Set(), lastMeta=null, unseen=0, atBottom=true;
 let filterQuery='', lastSeenMark=0;
 let pendingFile=null;
-let staffSig='';
 let adminOpen=false;
 
 function muteInfo(uid){
@@ -1193,6 +1191,7 @@ function enterApp(profile){
   mn.textContent=me.name;
   const myBadge=isCreatorPhone(me.phone)?badgeEl('crown'):badgeForPhone(me.phone);
   if(myBadge) mn.appendChild(myBadge);
+  if(verifiedNow(me.uid)) mn.appendChild(verifyBadge());
   $('#mePhone').textContent=fmtPhone(me.phone||'');
   refreshStaffButtons();
   store.presence(me.uid);
@@ -1210,9 +1209,6 @@ function enterApp(profile){
   store.watchUsers(map=>{
     usersMap=map;
     renderList(); updateHeader(); updateMuteUI();
-    if(active&&unsubMsgs&&isStaffPhone(me.phone)){
-      /* перечитываем сообщения при смене статусов, чтобы значки были свежими */
-    }
     if(adminOpen) renderAdmin();
   });
   store.watchContacts(me.uid,list=>{ contacts=list; renderList(); });
@@ -1269,6 +1265,7 @@ function renderAdmin(){
   users.forEach(u=>{
     const info=muteInfo(u.uid);
     const iAmCreator=me&&isCreatorPhone(me.phone);
+    const iAmAdmin=me&&isAdminPhone(me.phone);
     const targetCreator=isCreatorPhone(u.phone);
     const targetAdmin=isAdminPhone(u.phone);
     const digits10=digitsOf(u.phone).slice(1);
@@ -1317,7 +1314,7 @@ function renderAdmin(){
           }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
         });
         btns.appendChild(b);
-      }else if(iAmCreator||isAdminPhone(me.phone)){
+      }else if(iAmCreator||iAmAdmin){
         [['10 мин',10*60*1000],['1 час',60*60*1000],['24 часа',24*60*60*1000],['Навсегда',0]].forEach(([label,ms])=>{
           const b=document.createElement('button'); b.className='mbtn'; b.textContent=label;
           b.addEventListener('click',async()=>{
@@ -1330,8 +1327,8 @@ function renderAdmin(){
           btns.appendChild(b);
         });
       }
-      /* галочка — только создатель, пишется в settings/admins */
-      if(iAmCreator){
+      /* галочка — создатель И админы */
+      if(iAmCreator||iAmAdmin){
         const vb=document.createElement('button');
         vb.className='mbtn vf'+(verifiedNow(u.uid)?' un':'');
         vb.textContent=verifiedNow(u.uid)?'Убрать ✔':'✔';
