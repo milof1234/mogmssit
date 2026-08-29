@@ -30,7 +30,6 @@
   .screen{height:100%}
   .av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#17130a;flex:none;position:relative}
 
-  /* значки: корона создателя / молоток админа */
   .adm-badge{display:inline-flex;align-items:center;margin-left:5px;padding:2px 4px;border-radius:5px;vertical-align:-2px;flex:none}
   .adm-badge svg{width:11px;height:11px}
   .adm-crown{background:rgba(242,192,105,.22);color:var(--amber-hi)}
@@ -238,7 +237,6 @@
   #lbClose:hover{color:var(--red);border-color:var(--red)}
   #lbClose svg{width:20px;height:20px}
 
-  /* панель создателя/модерации */
   #adminWrap{position:fixed;inset:0;background:rgba(10,9,7,.75);z-index:135;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
   .admin-panel{background:var(--panel);border:1px solid var(--line2);border-radius:18px;width:560px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
   .admin-head{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
@@ -510,10 +508,6 @@ const firebaseConfig = {
   appId: "1:174129518157:web:1b18da4905974fd7ea6e04"
 };
 
-/* =====================================================================
-   ★ СОЗДАТЕЛЬ (корона) — этот номер зашит и в правилах Firestore ★
-   Админы (молоток) выдаются через панель создателя и хранятся в базе.
-   ===================================================================== */
 const CREATOR_DIGITS = '79254699801';
 
 const $ = s => document.querySelector(s);
@@ -600,7 +594,7 @@ function humErr(e){
   const c=(e&&e.code)||'';
   const m=(e&&e.message)||String(e);
   if(c.includes('permission-denied')||/permission/i.test(m))
-    return 'Firestore отклонил операцию — проверьте правила (возможно, вы в муте)';
+    return 'Firestore отклонил операцию — проверьте правила';
   if(c.includes('unavailable')||c.includes('network'))
     return 'Нет соединения с Firebase';
   return m;
@@ -803,31 +797,33 @@ class FBStore{
       err=>snapErr('профили',err)
     );
   }
-  /* ---- админы (динамические, хранятся в settings/admins) ---- */
   watchAdmins(cb){
     this.fs.onSnapshot(this.fs.doc(this.db,'settings','admins'),
       snap=>{
         const d=snap.data();
         const digits=(d&&d.digits)||{};
-        cb(new Set(Object.keys(digits).filter(k=>digits[k]===true)));
+        const set=new Set(Object.keys(digits)
+          .filter(k=>digits[k]===true)
+          .map(k=>digitsOf(k)));
+        cb(set);
       },
       err=>snapErr('админы',err)
     );
   }
   async grantAdmin(digits){
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
-      {digits:{[digits]:true}},{merge:true});
+      {digits:{['+7'+digits]:true}},{merge:true});
   }
   async revokeAdmin(digits){
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
-      {digits:{[digits]:this.fs.deleteField()}},{merge:true});
+      {digits:{['+7'+digits]:this.fs.deleteField()}},{merge:true});
   }
-  /* ---- модерация ---- */
   async setMuted(uid,ms,adminName){
+    const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
     await this.fs.setDoc(this.fs.doc(this.db,'moderation',uid),{
       by:adminName||'',
       at:this.fs.serverTimestamp(),
-      until: ms? this.fs.Timestamp.fromMillis(Date.now()+ms) : null
+      until:this.fs.Timestamp.fromMillis(untilMs)
     });
   }
   async unmute(uid){
@@ -835,12 +831,13 @@ class FBStore{
   }
   watchModeration(cb){
     this.fs.onSnapshot(this.fs.collection(this.db,'moderation'),
+      {includeMetadataChanges:true,source:'server'},
       snap=>{
         const map={};
         snap.docs.forEach(d=>{
           const v=d.data();
-          const until=(v.until&&v.until.toMillis)?v.until.toMillis():0;
-          map[d.id]={until,by:v.by||''};
+          const until=(v.until&&typeof v.until.toMillis==='function')?v.until.toMillis():0;
+          if(until>0) map[d.id]={until,by:v.by||''};
         });
         cb(map);
       },
@@ -1154,14 +1151,15 @@ function isCreatorUid(uid){
 function muteInfo(uid){
   const m=moderationMap[uid];
   if(!m) return null;
-  if(!m.until) return {forever:true,until:0};
-  if(Date.now()<m.until) return {forever:false,until:m.until};
+  const until=(typeof m.until==='number'&&isFinite(m.until)&&m.until>0)?m.until:0;
+  if(!until) return null;
+  if(Date.now()<until) return {forever:false,until};
   return null;
 }
 function muteGuard(){
   const info=me?muteInfo(me.uid):null;
   if(info){
-    toast(info.forever?'Вы в муте — отправка закрыта':'Вы в муте до '+fmtUntil(info.until),'err');
+    toast('Вы в муте до '+fmtUntil(info.until),'err');
     return true;
   }
   return false;
@@ -1222,9 +1220,7 @@ function updateMuteUI(){
   const info=me?muteInfo(me.uid):null;
   const bar=$('#muteBar');
   if(info){
-    $('#muteText').textContent=info.forever
-      ?'Вы в муте — отправка сообщений закрыта'
-      :'Вы в муте '+fmtUntil(info.until)+' — отправка сообщений закрыта';
+    $('#muteText').textContent='Вы в муте '+fmtUntil(info.until)+' — отправка сообщений закрыта';
     bar.classList.remove('hidden');
     $('#composer').classList.add('hidden');
     $('#recbar').classList.add('hidden');
@@ -1237,7 +1233,6 @@ function updateMuteUI(){
   }
 }
 
-/* ---------- ПАНЕЛЬ ---------- */
 function openAdmin(){
   adminOpen=true;
   const creator=me&&isCreatorPhone(me.phone);
@@ -1254,7 +1249,6 @@ function openAdmin(){
  $('#adminClose').addEventListener('click',()=>{ adminOpen=false; $('#adminWrap').classList.add('hidden'); });
  $('#adminWrap').addEventListener('click',e=>{ if(e.target.id==='adminWrap'){ adminOpen=false; $('#adminWrap').classList.add('hidden'); } });
 
-/* выдать/снять админа */
  $('#admAddInput').addEventListener('input',()=>{
   const el=$('#admAddInput');
   const d=el.value.replace(/\D/g,'').slice(0,10);
@@ -1355,19 +1349,29 @@ function renderAdmin(){
     const st=document.createElement('div'); st.className='astate';
     if(info){
       st.classList.add('muted');
-      st.textContent=info.forever?'В МУТЕ: НАВСЕГДА'+(info.by?' · ПОСТАВИЛ: '+info.by:'')
-                                 :'В МУТЕ '+fmtUntil(info.until).toUpperCase()+(info.by?' · ПОСТАВИЛ: '+info.by:'');
+      st.textContent='В МУТЕ '+fmtUntil(info.until).toUpperCase()+(info.by?' · ПОСТАВИЛ: '+info.by:'');
     }else{
       st.textContent=(u.uid===me.uid||Date.now()-u.lastSeen<120000)?'ОНЛАЙН':'БЫЛ(А): '+fmtAgo(u.lastSeen).toUpperCase();
     }
     infoEl.append(nm,meta,st);
 
     const btns=document.createElement('div'); btns.className='mbtns';
-    const protectedRow = u.uid===me.uid || targetCreator;
     if(u.uid===me.uid){
-      const self=document.createElement('span'); self.className='meself';
-      self.textContent=targetCreator?'СОЗДАТЕЛЬ':'СЕБЯ НЕ ЗАМУТИТЬ';
-      btns.appendChild(self);
+      if(info&&iAmCreator){
+        const b=document.createElement('button'); b.className='mbtn un'; b.textContent='Снять мут';
+        b.addEventListener('click',async()=>{
+          b.disabled=true;
+          try{
+            await store.unmute(u.uid);
+            toast('Мут снят: '+u.name,'ok');
+          }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
+        });
+        btns.appendChild(b);
+      }else{
+        const self=document.createElement('span'); self.className='meself';
+        self.textContent=targetCreator?'СОЗДАТЕЛЬ':'СЕБЯ НЕ ЗАМУТИТЬ';
+        btns.appendChild(self);
+      }
     }else if(targetCreator){
       const self=document.createElement('span'); self.className='meself'; self.textContent='СОЗДАТЕЛЬ';
       btns.appendChild(self);
@@ -1393,8 +1397,6 @@ function renderAdmin(){
         });
         btns.appendChild(b);
       });
-    }
-    if(protectedRow&&info){ /* теоретически недостижимо, но на всякий случай */
     }
 
     row.append(av,infoEl,btns);
@@ -1653,7 +1655,7 @@ function makeMsgEl(m,cont){
   if(!cont){
     const head=document.createElement('div'); head.className='msg-head';
     const n=document.createElement('span'); n.className='n';
-    const nT=document.createElement('span'); nT.textContent=mine?(me&&isCreatorPhone(me.phone)?'Вы':'Вы'):m.name;
+    const nT=document.createElement('span'); nT.textContent=mine?'Вы':m.name;
     n.appendChild(nT);
     const bd=badgeForUid(m.uid);
     if(bd) n.appendChild(bd);
@@ -2258,4 +2260,4 @@ icons();
 boot();
 </script>
 </body>
-</html>
+</html>ы
