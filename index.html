@@ -791,7 +791,6 @@ class FBStore{
       err=>snapErr('профили',err)
     );
   }
-  /* админы + галочки + скрытые молотки — один документ settings/admins */
   watchAdmins(cb){
     this.fs.onSnapshot(this.fs.doc(this.db,'settings','admins'),
       snap=>{
@@ -829,7 +828,6 @@ class FBStore{
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {hideHammers:{['+7'+digits]:!!val}},{merge:true});
   }
-  /* мут — команда mutereq/{uid}, применяет сам замученный */
   async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
     await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
@@ -1177,6 +1175,15 @@ function muteGuard(){
   }
   return false;
 }
+/* перерисовка значков у собственного ника в панели профиля */
+function renderMyBadges(){
+  const mn=$('#meName');
+  if(!mn) return;
+  mn.querySelectorAll('.adm-badge,.vbadge').forEach(x=>x.remove());
+  const myB=badgeForPhone(me.phone);
+  if(myB) mn.appendChild(myB);
+  if(verifiedNow(me.uid)) mn.appendChild(verifyBadge());
+}
 function refreshStaffButtons(){
   const staff=me&&isStaffPhone(me.phone);
   $('#btnAdmin').classList.toggle('hidden',!staff);
@@ -1199,10 +1206,8 @@ function enterApp(profile){
   $('#meAv').style.background=me.color;
   const mn=$('#meName');
   mn.textContent=me.name;
-  const myBadge=badgeForPhone(me.phone);
-  if(myBadge) mn.appendChild(myBadge);
-  if(verifiedNow(me.uid)) mn.appendChild(verifyBadge());
   $('#mePhone').textContent=fmtPhone(me.phone||'');
+  renderMyBadges();
   refreshStaffButtons();
   store.presence(me.uid);
   store.watchMuteReq(me.uid,(until)=>{
@@ -1214,13 +1219,8 @@ function enterApp(profile){
     verifiedDigits=verSet;
     hammerHidden=hiddenSet;
     refreshStaffButtons();
+    renderMyBadges();
     renderList(); updateHeader(); updateMuteUI();
-    const mn2=$('#meName');
-    const oldB=mn2.querySelectorAll('.adm-badge');
-    oldB.forEach(x=>x.remove());
-    const myB=badgeForPhone(me.phone);
-    if(myB) mn2.insertBefore(myB,mn2.querySelector('.vbadge'));
-    if(verifiedNow(me.uid)&&!mn2.querySelector('.vbadge')) mn2.appendChild(verifyBadge());
     if(adminOpen) renderAdmin();
   });
   store.watchUsers(map=>{
@@ -1313,7 +1313,8 @@ function renderAdmin(){
     infoEl.append(nm,meta,st);
 
     const btns=document.createElement('div'); btns.className='mbtns';
-    if(targetCreator){
+    if(u.uid===me.uid){
+      /* своя строка: переключатель своего молотка — и админу, и создателю */
       const hb=document.createElement('button'); hb.className='mbtn';
       const hidden=hammerHidden.has(digitsOf(me.phone));
       hb.textContent=hidden?'Показать молоток':'Скрыть молоток';
@@ -1325,18 +1326,9 @@ function renderAdmin(){
         }catch(e){ toast('Не получилось: '+humErr(e),'err'); hb.disabled=false; }
       });
       btns.appendChild(hb);
-    }else if(u.uid===me.uid){
-      const hb=document.createElement('button'); hb.className='mbtn';
-      const hidden=hammerHidden.has(digitsOf(me.phone));
-      hb.textContent=hidden?'Показать молоток':'Скрыть молоток';
-      hb.addEventListener('click',async()=>{
-        hb.disabled=true;
-        try{
-          await store.setHammerHidden(digitsOf(me.phone).slice(1),!hidden);
-          toast(hidden?'Молоток показан':'Молоток скрыт (права сохранены)','ok');
-        }catch(e){ toast('Не получилось: '+humErr(e),'err'); hb.disabled=false; }
-      });
-      btns.appendChild(hb);
+    }else if(targetCreator){
+      const self=document.createElement('span'); self.className='meself'; self.textContent='СОЗДАТЕЛЬ';
+      btns.appendChild(self);
     }else{
       /* мут */
       if(info){
@@ -2263,4 +2255,4 @@ icons();
 boot();
 </script>
 </body>
-</html>
+</html>ыы
