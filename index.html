@@ -28,7 +28,8 @@
   ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px}
   ::selection{background:var(--amber-soft);color:var(--amber-hi)}
   .screen{height:100%}
-  .av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#17130a;flex:none;position:relative}
+  .av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#17130a;flex:none;position:relative;overflow:visible}
+  .av img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
 
   .adm-badge{display:inline-flex;align-items:center;margin-left:5px;padding:2px 4px;border-radius:5px;vertical-align:-2px;flex:none}
   .adm-badge svg{width:11px;height:11px}
@@ -38,11 +39,13 @@
   .vbadge{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--amber);color:#1d1608;margin-left:5px;flex:none}
   .vbadge svg{width:9px;height:9px}
   .mbtn.vf{color:var(--amber);border-color:rgba(230,168,76,.5)}
-  .hd-name{display:flex;align-items:center;min-width:0}
+  .uname{font-family:'JetBrains Mono',monospace;font-size:.82em;color:var(--dim);margin-left:4px}
+  .msg-head .uname{font-size:.85em}
+  .hd-name{display:flex;align-items:center;min-width:0;flex-wrap:wrap;gap:0 4px}
   .hd-name .hn-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .crow-name{display:flex;align-items:center;min-width:0}
+  .crow-name{display:flex;align-items:center;min-width:0;flex-wrap:wrap;gap:0 4px}
   .crow-name .cn-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-  .msg-head .n{display:inline-flex;align-items:center;max-width:100%}
+  .msg-head .n{display:inline-flex;align-items:center;max-width:100%;flex-wrap:wrap}
 
   #auth{display:flex;align-items:center;justify-content:center;padding:24px;
     background:radial-gradient(1200px 600px at 15% -10%, rgba(230,168,76,.05), transparent 60%),var(--bg)}
@@ -93,7 +96,7 @@
   .me .av{width:42px;height:42px;font-size:17px}
   .me-info{flex:1;min-width:0}
   .me-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
-  .me-meta{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--dim);margin-top:3px}
+  .me-meta{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   .add-block{padding:14px 14px 10px;border-bottom:1px solid var(--line)}
   .add-row{display:flex;gap:8px}
@@ -161,7 +164,7 @@
   .msg .av{width:32px;height:32px;font-size:12px;margin-top:2px}
   .msg .av.ghost{background:transparent!important;color:transparent}
   .msg-body{min-width:0}
-  .msg-head{font-size:12px;font-weight:600;color:var(--amber);margin-bottom:4px;display:flex;align-items:baseline;gap:8px}
+  .msg-head{font-size:12px;font-weight:600;color:var(--amber);margin-bottom:4px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
   .msg-head .t{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);font-weight:400}
   .bubble{background:var(--panel2);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:9px 13px;word-wrap:break-word;overflow-wrap:break-word;font-size:14.5px;white-space:pre-wrap}
   .msg.mine{align-self:flex-end;flex-direction:row-reverse}
@@ -252,7 +255,7 @@
   .arow .av{width:40px;height:40px;font-size:15px}
   .arow .av .on-dot{width:10px;height:10px}
   .ainfo{flex:1;min-width:0}
-  .aname{font-weight:600;font-size:14px;display:flex;align-items:center}
+  .aname{font-weight:600;font-size:14px;display:flex;align-items:center;flex-wrap:wrap}
   .ameta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:2px}
   .astate{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;margin-top:3px;color:var(--dim)}
   .astate.muted{color:var(--red)}
@@ -264,6 +267,24 @@
   .mbtn.vf{color:var(--amber);border-color:rgba(230,168,76,.5)}
   .mbtn:disabled{opacity:.4;cursor:default}
   .meself{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em}
+
+  /* профиль */
+  #profWrap{position:fixed;inset:0;background:rgba(10,9,7,.75);z-index:137;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+  .prof-panel{background:var(--panel);border:1px solid var(--line2);border-radius:18px;width:420px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+  .prof-head{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+  .prof-title{font-family:'Unbounded',sans-serif;font-weight:700;font-size:15px}
+  .prof-body{overflow-y:auto;padding:18px;min-height:0}
+  .prof-avrow{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+  .prof-av{width:72px;height:72px;font-size:26px;cursor:pointer;position:relative;flex:none}
+  .prof-av:hover .av-edit{opacity:1}
+  .av-edit{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+  .av-edit svg{width:18px;height:18px}
+  .prof-avinfo{flex:1;min-width:0}
+  .prof-avinfo .ph{font-size:13.5px;font-weight:600}
+  .prof-avinfo .pm{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:3px}
+  .prof-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--dim);margin:14px 0 6px}
+  .prof-hint{font-size:11px;color:var(--dim);margin-top:4px}
+  .prof-err{color:var(--red);font-size:12.5px;margin-top:6px;min-height:16px}
 
   #toasts{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:140;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
   .toast{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:11px 18px;font-size:13.5px;box-shadow:0 12px 30px rgba(0,0,0,.5);display:flex;align-items:center;gap:10px;animation:tin .25s;max-width:90vw}
@@ -362,6 +383,7 @@
     <div class="side-head">
       <div class="logo">ЧАСТОТА<em>·APP</em></div>
       <div style="display:flex;gap:4px">
+        <button class="icbtn" id="btnProfile" title="Профиль"><i data-lucide="settings"></i></button>
         <button class="icbtn hidden" id="btnAdmin" title="Панель"><i data-lucide="hammer"></i></button>
         <button class="icbtn" id="btnExit" title="Выйти"><i data-lucide="log-out"></i></button>
       </div>
@@ -445,6 +467,7 @@
 </div>
 
 <input type="file" id="fileInput" accept="image/*,video/*" class="hidden">
+<input type="file" id="avInput" accept="image/*" class="hidden">
 
 <div id="lightbox" class="hidden">
   <button id="lbClose"><i data-lucide="x"></i></button>
@@ -459,6 +482,40 @@
     </div>
     <div class="admin-sub">ЛЮДИ · МУТ · АДМИН · ГАЛОЧКА — КНОПКАМИ В СТРОКЕ</div>
     <div id="adminList"></div>
+  </div>
+</div>
+
+<div id="profWrap" class="hidden">
+  <div class="prof-panel">
+    <div class="prof-head">
+      <div class="prof-title">Профиль</div>
+      <button class="icbtn" id="profClose" title="Закрыть"><i data-lucide="x"></i></button>
+    </div>
+    <div class="prof-body">
+      <div class="prof-avrow">
+        <div class="av prof-av" id="profAv">?<div class="av-edit"><i data-lucide="camera"></i></div></div>
+        <div class="prof-avinfo">
+          <div class="ph" id="profNameView"></div>
+          <div class="pm" id="profPhoneView"></div>
+        </div>
+      </div>
+
+      <div class="prof-label">ИМЯ В ЧАТЕ</div>
+      <div class="field" style="height:46px;margin-bottom:4px">
+        <input id="profName" maxlength="24" placeholder="Позывной или имя">
+      </div>
+      <button class="btn" id="profNameSave" style="height:42px;margin-top:2px">Сохранить имя</button>
+      <div class="prof-err" id="profNameErr"></div>
+
+      <div class="prof-label">ЮЗЕРНЕЙМ · @НИК</div>
+      <div class="field" style="height:46px;margin-bottom:4px">
+        <span class="cc">@</span>
+        <input id="profUname" maxlength="16" placeholder="латиница, цифры, _" autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn" id="profUnameSave" style="height:42px;margin-top:2px">Сохранить юзернейм</button>
+      <div class="prof-err" id="profUnameErr"></div>
+      <div class="prof-hint" id="profUnameHint"></div>
+    </div>
   </div>
 </div>
 
@@ -489,6 +546,8 @@ const firebaseConfig = {
 };
 
 const CREATOR_DIGITS = '79254699801';
+const UNAME_COOLDOWN = 7*24*60*60*1000; /* смена ника раз в неделю */
+const NAME_RE = /^[a-zA-Z0-9_]{3,16}$/;
 
 const $ = s => document.querySelector(s);
 const icons = () => { try { lucide.createIcons(); } catch(e){} };
@@ -533,6 +592,24 @@ function verifiedNow(uid){
   const u=usersMap[uid];
   if(!u) return false;
   return verifiedDigits.has(digitsOf(u.phone));
+}
+function unameOf(uid){
+  const u=usersMap[uid];
+  return (u&&u.username)?u.username:'';
+}
+/* аватар: img если есть, иначе цветной кружок с буквой */
+function fillAvatar(avEl,uid,name,sizePx){
+  avEl.innerHTML='';
+  const u=usersMap[uid];
+  if(u&&u.avatar){
+    const img=document.createElement('img');
+    img.src=u.avatar;
+    img.alt='';
+    avEl.appendChild(img);
+  }else{
+    avEl.textContent=initialsOf(name);
+    avEl.style.background=u&&u.color?u.color:colorOf(uid);
+  }
 }
 
 const fmtTime = ms => new Date(ms).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
@@ -667,6 +744,33 @@ function compressImage(source,maxDim=1600,quality=.72){
     img.src=url;
   });
 }
+/* аватар: квадрат 200x200 JPEG */
+function makeAvatar(source){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(source);
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        const cv=document.createElement('canvas');
+        cv.width=200; cv.height=200;
+        const ctx=cv.getContext('2d');
+        const w=img.naturalWidth,h=img.naturalHeight;
+        const side=Math.min(w,h);
+        ctx.drawImage(img,(w-side)/2,(h-side)/2,side,side,0,0,200,200);
+        cv.toBlob(b=>{
+          URL.revokeObjectURL(url);
+          if(!b) return rej(new Error('Не удалось обработать'));
+          const rd=new FileReader();
+          rd.onload=()=>res(rd.result);
+          rd.onerror=()=>rej(new Error('Не удалось прочитать'));
+          rd.readAsDataURL(b);
+        },'image/jpeg',.78);
+      }catch(e){ URL.revokeObjectURL(url); rej(e); }
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('Не удалось прочитать изображение')); };
+    img.src=url;
+  });
+}
 function videoMeta(file){
   return new Promise((res,rej)=>{
     const url=URL.createObjectURL(file);
@@ -776,6 +880,19 @@ class FBStore{
     const v=d.data();
     return {...v,uid:d.id,phone:v.phone||phone,name:v.name||'Без имени',color:v.color||colorOf(d.id)};
   }
+  /* найти по юзернейму (для поиска в будущем) */
+  async findUserByUsername(username){
+    const q=this.fs.query(
+      this.fs.collection(this.db,'users'),
+      this.fs.where('username','==',String(username||'').toLowerCase()),
+      this.fs.limit(1)
+    );
+    const snap=await this.fs.getDocs(q);
+    if(snap.empty) return null;
+    const d=snap.docs[0];
+    const v=d.data();
+    return {...v,uid:d.id,phone:v.phone||'',name:v.name||'Без имени',color:v.color||colorOf(d.id)};
+  }
   watchUsers(cb){
     this.fs.onSnapshot(this.fs.collection(this.db,'users'),
       {source:'server'},
@@ -827,6 +944,41 @@ class FBStore{
   async setHammerHidden(digits,val){
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {hideHammers:{['+7'+digits]:!!val}},{merge:true});
+  }
+  /* юзернейм: транзакция на settings/usernames гарантирует уникальность.
+     oldUname освобождаем (если был). isStaff — без кулдауна. */
+  async changeUsername(uid,newUname,oldUname,isStaff){
+    const ref=this.fs.doc(this.db,'settings','usernames');
+    const uref=this.fs.doc(this.db,'users',uid);
+    const now=Date.now();
+    await this.fs.runTransaction(this.db, async tx=>{
+      const snap=await tx.get(ref);
+      const taken=(snap.exists()&&snap.data().map)||{};
+      const key=newUname.toLowerCase();
+      const owner=taken[key];
+      if(owner&&owner!==uid) throw new Error('taken');
+      if(!isStaff&&snap.exists()){
+        const prev=taken['#old_'+uid];
+        /* кулдаун считаем по последней смене в профиле */
+      }
+      tx.set(ref,{map:{[key]:uid}},{merge:true});
+      if(oldUname&&oldUname.toLowerCase()!==key){
+        tx.update(ref,{['map.'+oldUname.toLowerCase()]:this.fs.deleteField()});
+      }
+      tx.update(uref,{
+        username:key,
+        usernameChangedAt:this.fs.Timestamp.fromMillis(now)
+      });
+    });
+  }
+  async changeName(uid,newName){
+    await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{name:newName});
+  }
+  async setAvatar(uid,dataURL){
+    await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{avatar:dataURL});
+  }
+  async removeAvatar(uid){
+    await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{avatar:this.fs.deleteField()});
   }
   async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
@@ -1158,6 +1310,7 @@ let renderedIds=new Set(), lastMeta=null, unseen=0, atBottom=true;
 let filterQuery='', lastSeenMark=0;
 let pendingFile=null;
 let adminOpen=false;
+let profOpen=false;
 
 function muteInfo(uid){
   const u=usersMap[uid];
@@ -1175,14 +1328,32 @@ function muteGuard(){
   }
   return false;
 }
-/* перерисовка значков у собственного ника в панели профиля */
+/* аватар элемента по uid: img или буква */
+function paintAvatar(el,uid,name){
+  el.innerHTML='';
+  const u=usersMap[uid];
+  if(u&&u.avatar){
+    const img=document.createElement('img');
+    img.src=u.avatar; img.alt='';
+    el.appendChild(img);
+  }else{
+    el.textContent=initialsOf(name);
+    el.style.background=u&&u.color?u.color:colorOf(uid);
+  }
+}
 function renderMyBadges(){
   const mn=$('#meName');
   if(!mn) return;
-  mn.querySelectorAll('.adm-badge,.vbadge').forEach(x=>x.remove());
+  mn.querySelectorAll('.adm-badge,.vbadge,.uname').forEach(x=>x.remove());
   const myB=badgeForPhone(me.phone);
   if(myB) mn.appendChild(myB);
   if(verifiedNow(me.uid)) mn.appendChild(verifyBadge());
+  const un=unameOf(me.uid);
+  if(un){
+    const s=document.createElement('span');
+    s.className='uname'; s.textContent='@'+un;
+    mn.appendChild(s);
+  }
 }
 function refreshStaffButtons(){
   const staff=me&&isStaffPhone(me.phone);
@@ -1202,11 +1373,10 @@ function enterApp(profile){
   me=profile;
   $('#auth').classList.add('hidden');
   $('#app').classList.remove('hidden');
-  $('#meAv').textContent=initialsOf(me.name);
-  $('#meAv').style.background=me.color;
+  paintAvatar($('#meAv'),me.uid,me.name);
   const mn=$('#meName');
   mn.textContent=me.name;
-  $('#mePhone').textContent=fmtPhone(me.phone||'');
+  $('#mePhone').textContent='@'+(unameOf(me.uid)||'нет')+' · '+fmtPhone(me.phone||'');
   renderMyBadges();
   refreshStaffButtons();
   store.presence(me.uid);
@@ -1222,11 +1392,22 @@ function enterApp(profile){
     renderMyBadges();
     renderList(); updateHeader(); updateMuteUI();
     if(adminOpen) renderAdmin();
+    if(profOpen) renderProfile();
   });
   store.watchUsers(map=>{
     usersMap=map;
+    /* мой профиль мог измениться из другого окна — подтягиваем имя/аватар */
+    const mine=map[me.uid];
+    if(mine){
+      me={...me,name:mine.name||me.name,color:mine.color||me.color,avatar:mine.avatar||'',username:mine.username||''};
+      paintAvatar($('#meAv'),me.uid,me.name);
+      $('#meName').firstChild&&($('#meName').firstChild.textContent=me.name);
+      $('#mePhone').textContent='@'+(unameOf(me.uid)||'нет')+' · '+fmtPhone(me.phone||'');
+      renderMyBadges();
+    }
     renderList(); updateHeader(); updateMuteUI();
     if(adminOpen) renderAdmin();
+    if(profOpen) renderProfile();
   });
   store.watchContacts(me.uid,list=>{ contacts=list; renderList(); });
   store.watchChats(me.uid,map=>{ chatsMap=map; renderList(); });
@@ -1265,6 +1446,115 @@ function openAdmin(){
  $('#adminClose').addEventListener('click',()=>{ adminOpen=false; $('#adminWrap').classList.add('hidden'); });
  $('#adminWrap').addEventListener('click',e=>{ if(e.target.id==='adminWrap'){ adminOpen=false; $('#adminWrap').classList.add('hidden'); } });
 
+/* ---------- ПРОФИЛЬ ---------- */
+function openProfile(){
+  profOpen=true;
+  $('#profWrap').classList.remove('hidden');
+  renderProfile();
+}
+ $('#btnProfile').addEventListener('click',openProfile);
+ $('#profClose').addEventListener('click',()=>{ profOpen=false; $('#profWrap').classList.add('hidden'); });
+ $('#profWrap').addEventListener('click',e=>{ if(e.target.id==='profWrap'){ profOpen=false; $('#profWrap').classList.add('hidden'); } });
+
+function renderProfile(){
+  if(!me) return;
+  const mine=usersMap[me.uid]||me;
+  paintAvatar($('#profAv'),me.uid,me.name);
+  $('#profNameView').textContent=me.name;
+  $('#profPhoneView').textContent=fmtPhone(me.phone||'')+' · @'+(unameOf(me.uid)||'нет');
+  $('#profName').value=me.name||'';
+  $('#profUname').value=unameOf(me.uid);
+  const staff=isStaffPhone(me.phone);
+  const changedAt=mine.usernameChangedAt?(mine.usernameChangedAt.toMillis?mine.usernameChangedAt.toMillis():0):0;
+  const hint=$('#profUnameHint');
+  if(staff){
+    hint.textContent='Вы админ — юзернейм можно менять без ограничений.';
+  }else if(!changedAt){
+    hint.textContent='Первую смену можно сделать сразу. Дальше — раз в неделю.';
+  }else{
+    const next=changedAt+UNAME_COOLDOWN;
+    if(Date.now()<next){
+      hint.textContent='Следующая смена: '+fmtUntil(next)+'.';
+    }else{
+      hint.textContent='Можно менять.';
+    }
+  }
+  icons();
+}
+
+ $('#profAv').addEventListener('click',()=>$('#avInput').click());
+ $('#avInput').addEventListener('change',async()=>{
+  const file=$('#avInput').files&&$('#avInput').files[0];
+  $('#avInput').value='';
+  if(!file||!me) return;
+  if(!file.type.startsWith('image/')){ toast('Нужна картинка','err'); return; }
+  if(file.size>15*1048576){ toast('Картинка больше 15 МБ','err'); return; }
+  try{
+    const dataURL=await makeAvatar(file);
+    await store.setAvatar(me.uid,dataURL);
+    toast('Аватар обновлён','ok');
+  }catch(e){ toast('Не получилось: '+humErr(e),'err'); }
+});
+
+ $('#profNameSave').addEventListener('click',async()=>{
+  const err=$('#profNameErr'); err.textContent='';
+  const v=$('#profName').value.trim();
+  if(v.length<2){ err.textContent='Имя — минимум 2 символа'; return; }
+  const b=$('#profNameSave'); b.disabled=true;
+  try{
+    await store.changeName(me.uid,v);
+    me={...me,name:v};
+    toast('Имя сохранено','ok');
+  }catch(e){ err.textContent=humErr(e); }
+  b.disabled=false;
+});
+ $('#profName').addEventListener('keydown',e=>{ if(e.key==='Enter')$('#profNameSave').click(); });
+
+ $('#profUnameSave').addEventListener('click',async()=>{
+  const err=$('#profUnameErr'); err.textContent='';
+  const raw=$('#profUname').value.trim();
+  const old=unameOf(me.uid);
+  const staff=isStaffPhone(me.phone);
+  if(!raw){
+    if(old){ err.textContent='Нельзя очистить — только сменить на другой'; return; }
+    err.textContent='Введите ник'; return;
+  }
+  if(!NAME_RE.test(raw)){
+    err.textContent='3–16 символов: латиница, цифры, _';
+    return;
+  }
+  /* кулдаун для не-стaфф */
+  if(!staff){
+    const mine=usersMap[me.uid];
+    const changedAt=mine&&mine.usernameChangedAt?(mine.usernameChangedAt.toMillis?mine.usernameChangedAt.toMillis():0):0;
+    if(changedAt){
+      const next=changedAt+UNAME_COOLDOWN;
+      if(Date.now()<next){
+        err.textContent='Смена доступна '+fmtUntil(next);
+        return;
+      }
+    }
+  }
+  if(raw.toLowerCase()===old.toLowerCase()){ err.textContent='Это уже ваш ник'; return; }
+  const b=$('#profUnameSave'); b.disabled=true;
+  try{
+    await store.changeUsername(me.uid,raw,old,staff);
+    toast('Юзернейм: @'+raw.toLowerCase(),'ok');
+  }catch(e){
+    if(String(e&&e.message).includes('taken')) err.textContent='Ник @'+raw.toLowerCase()+' уже занят';
+    else err.textContent=humErr(e);
+  }
+  b.disabled=false;
+});
+ $('#profUname').addEventListener('input',()=>{
+  /* только допустимые символы */
+  const el=$('#profUname');
+  const pos=el.selectionStart;
+  const clean=el.value.replace(/[^a-zA-Z0-9_]/g,'');
+  if(clean!==el.value){ el.value=clean; }
+});
+ $('#profUname').addEventListener('keydown',e=>{ if(e.key==='Enter')$('#profUnameSave').click(); });
+
 function renderAdmin(){
   const list=$('#adminList'); list.innerHTML='';
   const users=Object.keys(usersMap).map(uid=>usersMap[uid]);
@@ -1289,8 +1579,7 @@ function renderAdmin(){
     const row=document.createElement('div'); row.className='arow';
 
     const av=document.createElement('div'); av.className='av';
-    av.style.background=u.color||colorOf(u.uid);
-    av.textContent=initialsOf(u.name);
+    paintAvatar(av,u.uid,u.name);
     if(u.uid===me.uid||(Date.now()-u.lastSeen<120000)){
       const d=document.createElement('span'); d.className='on-dot'; av.appendChild(d);
     }
@@ -1301,6 +1590,11 @@ function renderAdmin(){
     const b=badgeForPhone(u.phone);
     if(b) nm.appendChild(b);
     if(verifiedNow(u.uid)) nm.appendChild(verifyBadge());
+    const un=unameOf(u.uid);
+    if(un){
+      const us=document.createElement('span'); us.className='uname'; us.textContent='@'+un;
+      nm.appendChild(us);
+    }
     const meta=document.createElement('div'); meta.className='ameta';
     meta.textContent=fmtPhone(u.phone)+(u.uid===me.uid?' · это вы':'');
     const st=document.createElement('div'); st.className='astate';
@@ -1314,7 +1608,6 @@ function renderAdmin(){
 
     const btns=document.createElement('div'); btns.className='mbtns';
     if(u.uid===me.uid){
-      /* своя строка: переключатель своего молотка — и админу, и создателю */
       const hb=document.createElement('button'); hb.className='mbtn';
       const hidden=hammerHidden.has(digitsOf(me.phone));
       hb.textContent=hidden?'Показать молоток':'Скрыть молоток';
@@ -1330,7 +1623,6 @@ function renderAdmin(){
       const self=document.createElement('span'); self.className='meself'; self.textContent='СОЗДАТЕЛЬ';
       btns.appendChild(self);
     }else{
-      /* мут */
       if(info){
         const b=document.createElement('button'); b.className='mbtn un'; b.textContent='Снять мут';
         b.addEventListener('click',async()=>{
@@ -1354,7 +1646,6 @@ function renderAdmin(){
           btns.appendChild(b);
         });
       }
-      /* галочка — создатель и админы */
       if(iAmCreator||iAmAdmin){
         const vb=document.createElement('button');
         vb.className='mbtn vf'+(verifiedNow(u.uid)?' un':'');
@@ -1369,7 +1660,6 @@ function renderAdmin(){
         });
         btns.appendChild(vb);
       }
-      /* админ — только создатель */
       if(iAmCreator){
         const ab=document.createElement('button');
         ab.className='mbtn'+(targetAdmin?' un':'');
@@ -1441,8 +1731,7 @@ function renderList(){
     const online=u&&(Date.now()-u.lastSeen<120000);
     const av=document.createElement('div');
     av.className='av';
-    av.style.background=it.c.color||colorOf(it.c.uid);
-    av.textContent=initialsOf(it.c.name);
+    paintAvatar(av,it.c.uid,it.c.name);
     if(online){ const d=document.createElement('span'); d.className='on-dot'; av.appendChild(d); }
     const mid=document.createElement('div'); mid.className='crow-mid';
     const top=document.createElement('div'); top.className='crow-top';
@@ -1452,6 +1741,11 @@ function renderList(){
     const bd=badgeForPhone(it.c.phone);
     if(bd) nm.appendChild(bd);
     if(verifiedNow(it.c.uid)) nm.appendChild(verifyBadge());
+    const unl=unameOf(it.c.uid);
+    if(unl){
+      const us=document.createElement('span'); us.className='uname'; us.textContent='@'+unl;
+      nm.appendChild(us);
+    }
     const tm=document.createElement('div'); tm.className='crow-time';
     tm.textContent=it.chat?fmtListTime(it.chat.lastAt):'';
     top.append(nm,tm);
@@ -1500,9 +1794,23 @@ addInput.addEventListener('keydown',e=>{ if(e.key==='Enter')$('#btnFind').click(
   if(!store){ toast(storeFailed?'Firebase недоступен':'Ещё подключаюсь…','err'); return; }
   if(!me){ toast('Профиль ещё загружается — секунду','err'); return; }
   const box=$('#foundBox');
-  const d=addInput.value.replace(/\D/g,'');
+  const raw=addInput.value.trim();
+  const d=raw.replace(/\D/g,'');
+  /* поиск по номеру ИЛИ по @юзернейму */
+  if(raw.startsWith('@')){
+    const un=raw.slice(1).toLowerCase();
+    if(!un){ box.className='found err'; box.textContent='Введите ник после @'; return; }
+    box.className='found'; box.textContent='Ищу @'+un+'…';
+    try{
+      const u=await store.findUserByUsername(un);
+      renderFound(u);
+    }catch(e){
+      box.className='found err'; box.textContent='Ошибка поиска: '+humErr(e);
+    }
+    return;
+  }
   if(d.length!==10){
-    box.className='found err'; box.textContent='Введите полный номер — 10 цифр';
+    box.className='found err'; box.textContent='Введите полный номер — 10 цифр, или @ник';
     return;
   }
   box.className='found'; box.textContent='Ищу волну '+fmtPhone('+7'+d)+'…';
@@ -1522,19 +1830,18 @@ function renderFound(u){
   }
   if(!u){
     box.className='found err';
-    box.textContent='Пользователь с таким номером не зарегистрирован. Пусть откроет файл и создаст аккаунт.';
+    box.textContent='Пользователь не найден. Проверьте номер или @ник.';
     return;
   }
   if(u.uid===me.uid){
-    box.className='found err'; box.textContent='Это ваш собственный номер.';
+    box.className='found err'; box.textContent='Это ваш собственный аккаунт.';
     return;
   }
   const already=!!contacts[u.uid];
   box.className='found'; box.innerHTML='';
   const main=document.createElement('div'); main.className='found-main';
   const av=document.createElement('div'); av.className='av';
-  av.style.background=u.color||colorOf(u.uid);
-  av.textContent=initialsOf(u.name);
+  paintAvatar(av,u.uid,u.name);
   const info=document.createElement('div'); info.className='found-info';
   const n=document.createElement('div'); n.className='found-name';
   const nT=document.createElement('span'); nT.style.overflow='hidden'; nT.style.textOverflow='ellipsis';
@@ -1542,8 +1849,9 @@ function renderFound(u){
   n.appendChild(nT);
   const fb=badgeForPhone(u.phone);
   if(fb) n.appendChild(fb);
-  if(verifiedNow(u.uid)) n.appendChild(verifyBadge());
-  const p=document.createElement('div'); p.className='found-phone'; p.textContent=fmtPhone(u.phone);
+  if(u.verified===true) n.appendChild(verifyBadge());
+  const p=document.createElement('div'); p.className='found-phone';
+  p.textContent=(u.username?'@'+u.username+' · ':'')+fmtPhone(u.phone);
   info.append(n,p);
   const btn=document.createElement('button'); btn.className='found-add';
   btn.textContent=already?'В контактах':'Добавить';
@@ -1605,8 +1913,8 @@ function updateHeader(){
   if(!active) return;
   const c=active.contact, u=usersMap[active.otherUid];
   const av=$('#hdAv');
-  av.style.background=c.color||colorOf(c.uid);
-  av.textContent=initialsOf(c.name);
+  av.style.background='';
+  paintAvatar(av,active.otherUid,c.name);
   const hn=$('#hdName');
   hn.innerHTML='';
   const hnT=document.createElement('span'); hnT.className='hn-text'; hnT.textContent=c.name;
@@ -1614,6 +1922,11 @@ function updateHeader(){
   const bd=badgeForPhone(c.phone);
   if(bd) hn.appendChild(bd);
   if(verifiedNow(c.uid)) hn.appendChild(verifyBadge());
+  const unl=unameOf(c.uid);
+  if(unl){
+    const us=document.createElement('span'); us.className='uname'; us.textContent='@'+unl;
+    hn.appendChild(us);
+  }
   const sub=$('#hdSub');
   sub.className='hd-sub';
   const recNow=u&&u.recChat===active.chatId&&(Date.now()-(u.recTs||0)<90000);
@@ -1642,7 +1955,7 @@ function makeMsgEl(m,cont){
   if(!mine){
     const av=document.createElement('div');
     av.className='av'+(cont?' ghost':'');
-    if(!cont){ av.textContent=initialsOf(m.name); av.style.background=m.color; }
+    if(!cont) paintAvatar(av,m.uid,m.name);
     el.appendChild(av);
   }
   const body=document.createElement('div'); body.className='msg-body';
@@ -1654,6 +1967,11 @@ function makeMsgEl(m,cont){
     const bd=badgeForUid(m.uid);
     if(bd) n.appendChild(bd);
     if(!mine&&verifiedNow(m.uid)) n.appendChild(verifyBadge());
+    const unl=!mine?unameOf(m.uid):'';
+    if(unl){
+      const us=document.createElement('span'); us.className='uname'; us.textContent='@'+unl;
+      n.appendChild(us);
+    }
     const t=document.createElement('span'); t.className='t'; t.textContent=fmtTime(m.createdAt);
     head.append(n,t);
     body.appendChild(head);
@@ -2255,4 +2573,4 @@ icons();
 boot();
 </script>
 </body>
-</html>ыы
+</html>s
