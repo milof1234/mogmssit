@@ -18,11 +18,12 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
-  body{background:var(--bg);color:var(--text);font-family:'Golos Text',sans-serif;font-size:15px;line-height:1.45;overflow:hidden}
+  body{background:var(--bg);color:var(--text);font-family:'Golos Text',sans-serif;font-size:15px;line-height:1.45;overflow:hidden;
+    -webkit-tap-highlight-color:transparent}
   .mono{font-family:'JetBrains Mono',monospace}
   .hidden{display:none!important}
-  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-  input,textarea{font-family:inherit;color:var(--text);background:none;border:none;outline:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;touch-action:manipulation}
+  input,textarea{font-family:inherit;color:var(--text);background:none;border:none;outline:none;font-size:16px}
   ::placeholder{color:var(--dim)}
   ::-webkit-scrollbar{width:8px}
   ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px}
@@ -268,7 +269,6 @@
   .mbtn:disabled{opacity:.4;cursor:default}
   .meself{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em}
 
-  /* профиль */
   #profWrap{position:fixed;inset:0;background:rgba(10,9,7,.75);z-index:137;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
   .prof-panel{background:var(--panel);border:1px solid var(--line2);border-radius:18px;width:420px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
   .prof-head{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
@@ -302,20 +302,95 @@
 
   #sideBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:55;display:none}
 
-  @media (max-width:960px){
-    .auth-wrap{grid-template-columns:1fr;gap:32px;max-width:440px}
-    .brand h1{font-size:clamp(38px,10vw,54px)}
-    #authWave{height:56px}
+  /* ================== МОБИЛЬНАЯ ВЁРСТКА ================== */
+  @media (max-width:760px){
+    body{font-size:14.5px}
+    /* вход */
+    #auth{padding:16px;align-items:stretch;overflow-y:auto}
+    .auth-wrap{grid-template-columns:1fr;gap:20px;max-width:440px;margin:auto 0;padding:8px 0 24px}
+    .brand-top{margin-bottom:12px;font-size:10px}
+    .brand h1{font-size:clamp(38px,11vw,54px)}
+    .brand-sub{font-size:14px;margin-top:12px}
+    #authWave{height:48px;margin-top:16px}
+    .auth-card{padding:22px 18px}
+    .field{height:50px}
+
+    /* каркас приложения */
     #app{grid-template-columns:1fr}
-    aside{position:fixed;left:0;top:0;bottom:0;width:320px;max-width:92vw;z-index:60;transform:translateX(-102%);transition:transform .25s;box-shadow:20px 0 60px rgba(0,0,0,.5)}
+    aside{position:fixed;left:0;top:0;bottom:0;width:min(320px,92vw);z-index:60;
+      transform:translateX(-102%);transition:transform .25s;
+      box-shadow:20px 0 60px rgba(0,0,0,.5);
+      padding-top:env(safe-area-inset-top)}
     body.side-open aside{transform:none}
     body.side-open #sideBackdrop{display:block}
     #sideToggle{display:flex}
     #backBtn{display:flex!important}
-    .msg{max-width:92%}
-    .mimg{max-width:100%}
-    footer{padding:10px 12px}
-    .mbtns{max-width:210px}
+    header{height:58px;padding:0 12px;gap:8px;padding-top:env(safe-area-inset-top)}
+    .hd-idle{font-size:12px}
+    .hd-chat .av{width:36px;height:36px;font-size:14px}
+    .hd-name{font-size:14.5px}
+
+    /* лента */
+    #msgList{padding:14px 12px 8px}
+    .msg{max-width:94%;gap:8px}
+    .msg .av{width:28px;height:28px;font-size:11px}
+    .bubble{font-size:14px;padding:8px 12px}
+    .mimg,.mvid,.vposter{max-width:100%;max-height:340px}
+    .voice{min-width:170px}
+    #idleWave{width:220px;height:48px}
+    .chat-empty .big{font-size:18px}
+    #jumpDown{right:12px;bottom:14px}
+
+    /* композер — с запасом под клавиатуру и «жест» iPhone */
+    footer{padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
+    .composer{gap:8px}
+    #txt{padding:11px 15px;font-size:16px;max-height:110px}
+    .rbtn{width:44px;height:44px}
+    .recbar{gap:8px}
+
+    /* списки/блоки в панели */
+    .add-block{padding:12px 12px 8px}
+    .me{padding:12px 14px}
+    .crow{padding:11px 8px}
+    .crow .av{width:42px;height:42px}
+
+    /* тосты ниже верхнего выреза */
+    #toasts{top:calc(env(safe-area-inset-top) + 12px)}
+    .toast{font-size:13px;padding:10px 14px}
+
+    /* админ-панель: во весь экран снизу, как лист */
+    #adminWrap{align-items:flex-end;padding:0}
+    .admin-panel{width:100%;max-height:92vh;border-radius:18px 18px 0 0}
+    .admin-head{padding:14px 16px}
+    .admin-sub{padding:8px 16px 2px}
+    #adminList{padding:4px 16px calc(16px + env(safe-area-inset-bottom))}
+    .arow{flex-wrap:wrap;gap:10px}
+    .arow .av{width:38px;height:38px;font-size:14px}
+    .ainfo{flex:1 1 100%;order:1}
+    .arow .av{order:0}
+    .mbtns{order:2;width:100%;justify-content:flex-start}
+    .mbtn{flex:1 1 auto;text-align:center;min-width:64px}
+
+    /* профиль: тоже лист снизу */
+    #profWrap{align-items:flex-end;padding:0}
+    .prof-panel{width:100%;max-height:92vh;border-radius:18px 18px 0 0}
+    .prof-head{padding:14px 16px}
+    .prof-body{padding:16px calc(16px) calc(20px + env(safe-area-inset-bottom))}
+    .prof-av{width:64px;height:64px;font-size:24px}
+
+    /* лайтбокс и модалки: компактнее */
+    #lightbox{padding:10px}
+    #lbClose{top:calc(env(safe-area-inset-top) + 10px);right:12px}
+    .modal{padding:20px 18px;width:100%}
+  }
+  /* очень узкие экраны */
+  @media (max-width:360px){
+    .mbtns .mbtn{padding:0 8px;font-size:11px}
+    .msg{max-width:100%}
+  }
+  /*landscape на телефоне — панель уже, тосты сверху*/
+  @media (max-width:900px) and (orientation:landscape){
+    aside{width:300px}
   }
   #backBtn{display:none}
 </style>
@@ -399,9 +474,9 @@
     <div class="add-block">
       <div class="add-row">
         <div class="field">
-          <input id="addInput" placeholder="Номер или поиск по имени" autocomplete="off">
+          <input id="addInput" placeholder="Номер, @ник или поиск" autocomplete="off">
         </div>
-        <button class="addbtn" id="btnFind" title="Найти по номеру"><i data-lucide="user-plus"></i></button>
+        <button class="addbtn" id="btnFind" title="Найти"><i data-lucide="user-plus"></i></button>
       </div>
       <div id="foundBox"></div>
     </div>
@@ -432,7 +507,7 @@
       <div class="chat-empty" id="chatEmpty">
         <canvas id="idleWave"></canvas>
         <div class="big">Выберите волну</div>
-        <p>Слева — ваши собеседники. Или добавьте нового по номеру телефона: контакт появится у вас обоих.</p>
+        <p>Откройте меню слева — собеседники, или добавьте нового по номеру.</p>
       </div>
       <div id="msgList" class="hidden"></div>
       <button id="jumpDown" class="hidden"><span id="jumpCount"></span><i data-lucide="chevron-down"></i></button>
@@ -480,7 +555,7 @@
       <div class="admin-title" id="adminTitle"></div>
       <button class="icbtn" id="adminClose" title="Закрыть"><i data-lucide="x"></i></button>
     </div>
-    <div class="admin-sub">ЛЮДИ · МУТ · АДМИН · ГАЛОЧКА — КНОПКАМИ В СТРОКЕ</div>
+    <div class="admin-sub">ЛЮДИ · МУТ · АДМИН · ГАЛОЧКА</div>
     <div id="adminList"></div>
   </div>
 </div>
@@ -510,7 +585,7 @@
       <div class="prof-label">ЮЗЕРНЕЙМ · @НИК</div>
       <div class="field" style="height:46px;margin-bottom:4px">
         <span class="cc">@</span>
-        <input id="profUname" maxlength="16" placeholder="латиница, цифры, _" autocomplete="off" spellcheck="false">
+        <input id="profUname" maxlength="16" placeholder="латиница, цифры, _" autocomplete="off" spellcheck="false" autocapitalize="off">
       </div>
       <button class="btn" id="profUnameSave" style="height:42px;margin-top:2px">Сохранить юзернейм</button>
       <div class="prof-err" id="profUnameErr"></div>
@@ -546,11 +621,12 @@ const firebaseConfig = {
 };
 
 const CREATOR_DIGITS = '79254699801';
-const UNAME_COOLDOWN = 7*24*60*60*1000; /* смена ника раз в неделю */
+const UNAME_COOLDOWN = 7*24*60*60*1000;
 const NAME_RE = /^[a-zA-Z0-9_]{3,16}$/;
 
 const $ = s => document.querySelector(s);
 const icons = () => { try { lucide.createIcons(); } catch(e){} };
+const isMobile = () => window.matchMedia('(max-width:760px)').matches;
 
 function hashStr(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return Math.abs(h); }
 const AV_COLORS=['#c98a5e','#8fa876','#cdb45e','#a5778a','#7ba3a8','#c96e5e','#94a86e','#b0885e','#7f96b0','#a8926e','#8a9e8a','#b07860','#c98aa8','#86a8a0','#a8a06e'];
@@ -597,14 +673,12 @@ function unameOf(uid){
   const u=usersMap[uid];
   return (u&&u.username)?u.username:'';
 }
-/* аватар: img если есть, иначе цветной кружок с буквой */
-function fillAvatar(avEl,uid,name,sizePx){
+function paintAvatar(avEl,uid,name){
   avEl.innerHTML='';
   const u=usersMap[uid];
   if(u&&u.avatar){
     const img=document.createElement('img');
-    img.src=u.avatar;
-    img.alt='';
+    img.src=u.avatar; img.alt='';
     avEl.appendChild(img);
   }else{
     avEl.textContent=initialsOf(name);
@@ -744,7 +818,6 @@ function compressImage(source,maxDim=1600,quality=.72){
     img.src=url;
   });
 }
-/* аватар: квадрат 200x200 JPEG */
 function makeAvatar(source){
   return new Promise((res,rej)=>{
     const url=URL.createObjectURL(source);
@@ -880,7 +953,6 @@ class FBStore{
     const v=d.data();
     return {...v,uid:d.id,phone:v.phone||phone,name:v.name||'Без имени',color:v.color||colorOf(d.id)};
   }
-  /* найти по юзернейму (для поиска в будущем) */
   async findUserByUsername(username){
     const q=this.fs.query(
       this.fs.collection(this.db,'users'),
@@ -945,8 +1017,6 @@ class FBStore{
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {hideHammers:{['+7'+digits]:!!val}},{merge:true});
   }
-  /* юзернейм: транзакция на settings/usernames гарантирует уникальность.
-     oldUname освобождаем (если был). isStaff — без кулдауна. */
   async changeUsername(uid,newUname,oldUname,isStaff){
     const ref=this.fs.doc(this.db,'settings','usernames');
     const uref=this.fs.doc(this.db,'users',uid);
@@ -957,10 +1027,6 @@ class FBStore{
       const key=newUname.toLowerCase();
       const owner=taken[key];
       if(owner&&owner!==uid) throw new Error('taken');
-      if(!isStaff&&snap.exists()){
-        const prev=taken['#old_'+uid];
-        /* кулдаун считаем по последней смене в профиле */
-      }
       tx.set(ref,{map:{[key]:uid}},{merge:true});
       if(oldUname&&oldUname.toLowerCase()!==key){
         tx.update(ref,{['map.'+oldUname.toLowerCase()]:this.fs.deleteField()});
@@ -976,9 +1042,6 @@ class FBStore{
   }
   async setAvatar(uid,dataURL){
     await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{avatar:dataURL});
-  }
-  async removeAvatar(uid){
-    await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{avatar:this.fs.deleteField()});
   }
   async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
@@ -1328,7 +1391,6 @@ function muteGuard(){
   }
   return false;
 }
-/* аватар элемента по uid: img или буква */
 function paintAvatar(el,uid,name){
   el.innerHTML='';
   const u=usersMap[uid];
@@ -1374,8 +1436,7 @@ function enterApp(profile){
   $('#auth').classList.add('hidden');
   $('#app').classList.remove('hidden');
   paintAvatar($('#meAv'),me.uid,me.name);
-  const mn=$('#meName');
-  mn.textContent=me.name;
+  $('#meName').textContent=me.name;
   $('#mePhone').textContent='@'+(unameOf(me.uid)||'нет')+' · '+fmtPhone(me.phone||'');
   renderMyBadges();
   refreshStaffButtons();
@@ -1396,12 +1457,11 @@ function enterApp(profile){
   });
   store.watchUsers(map=>{
     usersMap=map;
-    /* мой профиль мог измениться из другого окна — подтягиваем имя/аватар */
     const mine=map[me.uid];
     if(mine){
       me={...me,name:mine.name||me.name,color:mine.color||me.color,avatar:mine.avatar||'',username:mine.username||''};
       paintAvatar($('#meAv'),me.uid,me.name);
-      $('#meName').firstChild&&($('#meName').firstChild.textContent=me.name);
+      $('#meName').childNodes[0]&&($('#meName').childNodes[0].textContent=me.name);
       $('#mePhone').textContent='@'+(unameOf(me.uid)||'нет')+' · '+fmtPhone(me.phone||'');
       renderMyBadges();
     }
@@ -1446,7 +1506,6 @@ function openAdmin(){
  $('#adminClose').addEventListener('click',()=>{ adminOpen=false; $('#adminWrap').classList.add('hidden'); });
  $('#adminWrap').addEventListener('click',e=>{ if(e.target.id==='adminWrap'){ adminOpen=false; $('#adminWrap').classList.add('hidden'); } });
 
-/* ---------- ПРОФИЛЬ ---------- */
 function openProfile(){
   profOpen=true;
   $('#profWrap').classList.remove('hidden');
@@ -1473,11 +1532,7 @@ function renderProfile(){
     hint.textContent='Первую смену можно сделать сразу. Дальше — раз в неделю.';
   }else{
     const next=changedAt+UNAME_COOLDOWN;
-    if(Date.now()<next){
-      hint.textContent='Следующая смена: '+fmtUntil(next)+'.';
-    }else{
-      hint.textContent='Можно менять.';
-    }
+    hint.textContent=(Date.now()<next)?('Следующая смена: '+fmtUntil(next)+'.'):'Можно менять.';
   }
   icons();
 }
@@ -1523,7 +1578,6 @@ function renderProfile(){
     err.textContent='3–16 символов: латиница, цифры, _';
     return;
   }
-  /* кулдаун для не-стaфф */
   if(!staff){
     const mine=usersMap[me.uid];
     const changedAt=mine&&mine.usernameChangedAt?(mine.usernameChangedAt.toMillis?mine.usernameChangedAt.toMillis():0):0;
@@ -1547,9 +1601,7 @@ function renderProfile(){
   b.disabled=false;
 });
  $('#profUname').addEventListener('input',()=>{
-  /* только допустимые символы */
   const el=$('#profUname');
-  const pos=el.selectionStart;
   const clean=el.value.replace(/[^a-zA-Z0-9_]/g,'');
   if(clean!==el.value){ el.value=clean; }
 });
@@ -1719,7 +1771,7 @@ function renderList(){
     const e=document.createElement('div');
     e.className='list-empty';
     e.textContent = Object.keys(contacts).length===0
-      ? 'Пока никого. Введите номер телефона наверху — контакт появится у вас обоих.'
+      ? 'Пока никого. Введите номер или @ник наверху.'
       : 'Ничего не найдено по запросу.';
     wrap.appendChild(e);
     return;
@@ -1772,7 +1824,7 @@ const addInput=$('#addInput');
 addInput.addEventListener('input',()=>{
   const raw=addInput.value;
   const hasLetters=/[a-zA-Zа-яА-ЯёЁ]/.test(raw);
-  if(!hasLetters){
+  if(!hasLetters && !raw.startsWith('@')){
     const d=raw.replace(/\D/g,'').slice(0,10);
     let out=d;
     if(d.length>0) out='('+d.slice(0,3);
@@ -1796,7 +1848,6 @@ addInput.addEventListener('keydown',e=>{ if(e.key==='Enter')$('#btnFind').click(
   const box=$('#foundBox');
   const raw=addInput.value.trim();
   const d=raw.replace(/\D/g,'');
-  /* поиск по номеру ИЛИ по @юзернейму */
   if(raw.startsWith('@')){
     const un=raw.slice(1).toLowerCase();
     if(!un){ box.className='found err'; box.textContent='Введите ник после @'; return; }
@@ -1896,6 +1947,8 @@ function openChat(c){
   store.markSeen(chatId,me.uid); lastSeenMark=Date.now();
   unsubMsgs=store.watchMessages(chatId,renderMessages);
   renderList();
+  /* на телефоне панель закрываем при открытии чата */
+  closeDrawer();
 }
 function closeChat(){
   if(unsubMsgs){ unsubMsgs(); unsubMsgs=null; }
@@ -1913,7 +1966,6 @@ function updateHeader(){
   if(!active) return;
   const c=active.contact, u=usersMap[active.otherUid];
   const av=$('#hdAv');
-  av.style.background='';
   paintAvatar(av,active.otherUid,c.name);
   const hn=$('#hdName');
   hn.innerHTML='';
@@ -2267,7 +2319,7 @@ txt.addEventListener('input',()=>{
   btnMic.classList.toggle('hidden',has);
 });
 txt.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendText(); }
+  if(e.key==='Enter'&&!e.shiftKey&&!isMobile()){ e.preventDefault(); sendText(); }
 });
 async function sendText(){
   if(!active) return;
@@ -2280,6 +2332,7 @@ async function sendText(){
   const payload={uid:me.uid,name:me.name,color:me.color,type:'text',text:t,createdAt:store.fs.serverTimestamp()};
   try{ await store.sendPayload(chatId,parts,payload,{type:'text',text:t.slice(0,80)}); }
   catch(e){ toast('Не отправилось: '+humErr(e),'err'); }
+  msgScroll.scrollTop=msgScroll.scrollHeight;
 }
 btnSend.addEventListener('click',sendText);
 
@@ -2573,4 +2626,4 @@ icons();
 boot();
 </script>
 </body>
-</html>s
+</html>ы
