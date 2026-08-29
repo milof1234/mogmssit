@@ -221,7 +221,6 @@
   .empty-state p{font-size:13px;max-width:320px}
   .day-sep{align-self:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);margin:18px 0 8px;display:flex;align-items:center;gap:12px}
   .day-sep::before,.day-sep::after{content:"";width:60px;height:1px;background:var(--line)}
-  .sysmsg{align-self:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--dim);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:5px 14px;margin-top:14px}
 
   .msg{display:flex;gap:10px;margin-top:14px;max-width:82%}
   .msg.cont{margin-top:4px}
@@ -1430,7 +1429,6 @@ let store=null, storeFailed=false;
 async function boot(){
   const hint=$('#modeHint');
   const bootErr=$('#bootErr');
-  /* таймаут: если за 15 сек не подключились — показываем причину */
   const timeout=setTimeout(()=>{
     if(!store){
       hint.innerHTML='<span class="dot red"></span><span>НЕ УДАЛОСЬ ПОДКЛЮЧИТЬСЯ ЗА 15 СЕК</span>';
@@ -2381,6 +2379,7 @@ function renderFound(u){
   icons();
 }
 
+/* открытие чатов */
 function openDM(c){
   const chatId=store.chatId(me.uid,c.uid);
   if(unsubMsgs){ unsubMsgs(); unsubMsgs=null; }
@@ -2824,8 +2823,10 @@ async function sendText(){
     }else{
       await store.sendPayload(active.id,[me.uid,active.otherUid],{...base,type:'text',text:t},{type:'text',text:t.slice(0,80)});
     }
+  }catch(e){
+    toast('Не отправилось: '+humErr(e),'err');
+    txt.value=t;
   }
-  catch(e){ toast('Не отправилось: '+humErr(e),'err'); }
   msgScroll.scrollTop=msgScroll.scrollHeight;
 }
 btnSend.addEventListener('click',sendText);
