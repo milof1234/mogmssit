@@ -16,7 +16,6 @@
     --amber:#e6a84c; --amber-hi:#f2c069; --amber-soft:rgba(230,168,76,.13);
     --red:#e0604a; --green:#8fae72;
   }
-  /* ====== ТЕМЫ ====== */
   body[data-theme="light"]{
     --bg:#f4f1ea; --panel:#fffdf8; --panel2:#efe9dd; --line:#ddd5c4; --line2:#c9c0ab;
     --text:#2b2519; --muted:#6f6650; --dim:#9a9078;
@@ -29,15 +28,16 @@
   body[data-theme="light"] .abtn.go,
   body[data-theme="light"] .found-add,
   body[data-theme="light"] .addbtn,
-  body[data-theme="light"] .vbadge{color:#fff}
-  body[data-theme="light"] .msg.mine .bubble{
-    background:var(--amber); border-color:var(--amber); color:#fff;
-  }
+  body[data-theme="light"] .vbadge,
+  body[data-theme="light"] .gmake-btn{color:#fff}
+  body[data-theme="light"] .msg.mine .bubble{background:var(--amber);border-color:var(--amber);color:#fff}
   body[data-theme="light"] .msg.mine .vtime{color:rgba(255,255,255,.75)}
   body[data-theme="light"] .msg.mine .adm-badge{background:rgba(255,255,255,.3);color:#fff}
   body[data-theme="light"] .msg:not(.mine) .playbtn{color:var(--amber)}
-  body[data-theme="light"] #auth{
-    background:radial-gradient(1200px 600px at 15% -10%, rgba(192,122,30,.08), transparent 60%),var(--bg)}
+  body[data-theme="light"] #auth{background:radial-gradient(1200px 600px at 15% -10%, rgba(192,122,30,.08), transparent 60%),var(--bg)}
+  body[data-theme="light"] #adminWrap,body[data-theme="light"] #profWrap,
+  body[data-theme="light"] #groupMakeWrap,body[data-theme="light"] #groupWrap,
+  body[data-theme="light"] #modalWrap{background:rgba(60,50,30,.4)}
 
   body[data-theme="wave"]{
     --bg:#081120; --panel:#0c1829; --panel2:#12233c; --line:#1b3355; --line2:#27496f;
@@ -45,30 +45,21 @@
     --amber:#3fd4c7; --amber-hi:#7ce9df; --amber-soft:rgba(63,212,199,.14);
     --red:#f0705e; --green:#5fd08a;
   }
-  body[data-theme="wave"] .msg.mine .bubble{
-    background:linear-gradient(135deg,#2ba8c9,#3fd4a0);
-    border-color:transparent; color:#04202a;
-  }
+  body[data-theme="wave"] .msg.mine .bubble{background:linear-gradient(135deg,#2ba8c9,#3fd4a0);border-color:transparent;color:#04202a}
   body[data-theme="wave"] .msg.mine .vtime{color:rgba(4,32,42,.6)}
   body[data-theme="wave"] .msg.mine .adm-badge{background:rgba(4,32,42,.18);color:#04202a}
   body[data-theme="wave"] .av{color:#04202a}
-  body[data-theme="wave"] #auth{
-    background:radial-gradient(1000px 500px at 80% -10%, rgba(63,212,199,.1), transparent 60%),
-               radial-gradient(800px 400px at 10% 110%, rgba(43,168,201,.12), transparent 60%),var(--bg)}
+  body[data-theme="wave"] #auth{background:radial-gradient(1000px 500px at 80% -10%, rgba(63,212,199,.1), transparent 60%),radial-gradient(800px 400px at 10% 110%, rgba(43,168,201,.12), transparent 60%),var(--bg)}
   body[data-theme="wave"] .crow.active{background:rgba(63,212,199,.1)}
-  body[data-theme="wave"] #authWave{filter:hue-rotate(150deg) saturate(1.4)}
-  body[data-theme="wave"] #idleWave{filter:hue-rotate(150deg) saturate(1.4)}
+  body[data-theme="wave"] #authWave,body[data-theme="wave"] #idleWave,
   body[data-theme="wave"] .vwave{filter:hue-rotate(150deg) saturate(1.4)}
-  body[data-theme="wave"] .rec-ind{color:var(--red)}
-  body[data-theme="wave"] .media-badge{background:rgba(8,17,32,.7)}
 
   body.theme-transition,
   body.theme-transition *{transition:background-color .25s,color .25s,border-color .25s!important}
 
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
-  body{background:var(--bg);color:var(--text);font-family:'Golos Text',sans-serif;font-size:15px;line-height:1.45;overflow:hidden;
-    -webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:'Golos Text',sans-serif;font-size:15px;line-height:1.45;overflow:hidden;-webkit-tap-highlight-color:transparent}
   .mono{font-family:'JetBrains Mono',monospace}
   .hidden{display:none!important}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;touch-action:manipulation}
@@ -87,10 +78,10 @@
   .adm-crown{background:rgba(242,192,105,.22);color:var(--amber-hi)}
   .adm-hammer{background:var(--amber-soft);color:var(--amber)}
   .msg.mine .adm-badge{background:rgba(29,22,8,.16);color:#1d1608}
-  body[data-theme="wave"] .adm-hammer{color:var(--amber)}
+  body[data-theme="light"] .msg.mine .adm-badge{background:rgba(255,255,255,.3);color:#fff}
+  body[data-theme="wave"] .msg.mine .adm-badge{background:rgba(4,32,42,.18);color:#04202a}
   .vbadge{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--amber);color:#1d1608;margin-left:5px;flex:none}
-  body[data-theme="light"] .vbadge,
-  body[data-theme="wave"] .vbadge{color:#fff}
+  body[data-theme="light"] .vbadge,body[data-theme="wave"] .vbadge{color:#fff}
   .mbtn.vf{color:var(--amber);border-color:rgba(230,168,76,.5)}
   body[data-theme="wave"] .mbtn.vf{border-color:rgba(63,212,199,.5)}
   .uname{font-family:'JetBrains Mono',monospace;font-size:.82em;color:var(--dim);margin-left:4px}
@@ -110,8 +101,10 @@
   .brand-sub{color:var(--muted);margin-top:20px;max-width:420px}
   #authWave{width:100%;height:84px;display:block;margin-top:30px}
   .mode-hint{font-size:10px;letter-spacing:.18em;color:var(--dim);margin-top:16px;display:flex;align-items:center;gap:8px}
-  .mode-hint .dot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+  .mode-hint .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);flex:none}
   .mode-hint .dot.red{background:var(--red)}
+  .mode-hint .dot.pulse{animation:blink 1s infinite}
+  #bootErr{color:var(--red);font-size:11px;letter-spacing:.06em;margin-top:8px;max-width:460px;font-family:'JetBrains Mono',monospace}
 
   .auth-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:30px 28px;box-shadow:0 30px 60px rgba(0,0,0,.4)}
   body[data-theme="light"] .auth-card{box-shadow:0 30px 60px rgba(120,100,60,.15)}
@@ -157,6 +150,11 @@
   .me-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
   .me-meta{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+  .gmake{padding:12px 14px 10px;border-bottom:1px solid var(--line)}
+  .gmake-btn{width:100%;height:40px;border-radius:10px;border:1px dashed var(--line2);color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600;transition:all .15s}
+  .gmake-btn:hover{color:var(--amber);border-color:var(--amber);background:var(--amber-soft)}
+  .gmake-btn svg{width:15px;height:15px}
+
   .add-block{padding:14px 14px 10px;border-bottom:1px solid var(--line)}
   .add-row{display:flex;gap:8px}
   .add-row .field{flex:1;height:46px;margin-bottom:0}
@@ -182,6 +180,7 @@
   .list-label{padding:14px 18px 8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;color:var(--dim);display:flex;justify-content:space-between}
   .list-label b{color:var(--text);font-weight:500}
   #chatList{flex:1;overflow-y:auto;padding:0 8px 12px;min-height:0}
+  #groupList{padding:0 8px;flex:none;max-height:38%;overflow-y:auto}
   .list-empty{padding:26px 18px;color:var(--dim);font-size:13px;line-height:1.55;text-align:center}
   .crow{display:flex;gap:12px;padding:11px 10px;border-radius:12px;cursor:pointer;transition:background .15s;align-items:center}
   .crow:hover{background:var(--panel2)}
@@ -201,7 +200,7 @@
   #sideToggle{display:none}
   .hd-idle{font-family:'Unbounded',sans-serif;font-weight:700;font-size:13px;color:var(--muted)}
   .hd-idle em{font-style:normal;color:var(--amber)}
-  .hd-chat{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+  .hd-chat{display:flex;align-items:center;gap:12px;flex:1;min-width:0;cursor:pointer}
   .hd-chat .av{width:40px;height:40px;font-size:15px}
   .hd-chat .av .rec-dot{position:absolute;right:-2px;top:-2px;width:12px;height:12px;border-radius:50%;background:var(--red);border:2px solid var(--panel);animation:blink 1s infinite}
   .hd-sub{color:var(--dim);display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em}
@@ -222,6 +221,7 @@
   .empty-state p{font-size:13px;max-width:320px}
   .day-sep{align-self:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);margin:18px 0 8px;display:flex;align-items:center;gap:12px}
   .day-sep::before,.day-sep::after{content:"";width:60px;height:1px;background:var(--line)}
+  .sysmsg{align-self:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--dim);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:5px 14px;margin-top:14px}
 
   .msg{display:flex;gap:10px;margin-top:14px;max-width:82%}
   .msg.cont{margin-top:4px}
@@ -280,6 +280,7 @@
   .abtn.no:hover{color:var(--red);border-color:var(--red)}
 
   #muteBar{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px;background:rgba(224,96,74,.1);border:1px solid var(--red);border-radius:14px;padding:13px 16px;color:var(--red);font-size:13.5px}
+  body[data-theme="dark"] #muteBar{color:#f0b3a8}
   #muteBar svg{width:18px;height:18px;flex:none}
 
   #jumpDown{position:absolute;right:22px;bottom:20px;height:38px;padding:0 14px;border-radius:99px;background:var(--panel2);border:1px solid var(--line2);color:var(--text);display:flex;align-items:center;gap:8px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
@@ -335,6 +336,7 @@
   .mbtn{height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--line2);color:var(--muted);font-size:12px;font-weight:600;transition:all .15s}
   .mbtn:hover{color:var(--amber);border-color:var(--amber)}
   .mbtn.un{color:var(--red);border-color:rgba(224,96,74,.5)}
+  body[data-theme="dark"] .mbtn.un{color:#f0b3a8}
   .mbtn.un:hover{color:#fff;background:var(--red);border-color:var(--red)}
   .mbtn.vf{color:var(--amber);border-color:rgba(230,168,76,.5)}
   .mbtn:disabled{opacity:.4;cursor:default}
@@ -367,6 +369,31 @@
   .sw-dark{background:#0f0e0b}
   .sw-light{background:#f4f1ea}
   .sw-wave{background:linear-gradient(135deg,#2ba8c9,#3fd4a0)}
+
+  .gpick{max-height:220px;overflow-y:auto;border:1px solid var(--line);border-radius:12px;margin-top:6px}
+  .gpick-row{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .15s}
+  .gpick-row:last-child{border-bottom:none}
+  .gpick-row:hover{background:var(--panel2)}
+  .gpick-row .av{width:34px;height:34px;font-size:13px}
+  .gpick-row .gn{flex:1;font-size:13.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gpick-row .chk{width:20px;height:20px;border-radius:6px;border:1px solid var(--line2);flex:none;display:flex;align-items:center;justify-content:center;color:transparent}
+  .gpick-row.sel .chk{background:var(--amber);border-color:var(--amber);color:#1a1408}
+  body[data-theme="light"] .gpick-row.sel .chk{color:#fff}
+  body[data-theme="wave"] .gpick-row.sel .chk{color:#04202a}
+  .gpick-row.sel .chk svg{width:13px;height:13px}
+  .gmem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .gmem:last-child{border-bottom:none}
+  .gmem .av{width:36px;height:36px;font-size:14px}
+  .gmem .gi{flex:1;min-width:0}
+  .gmem .gn2{font-weight:600;font-size:13.5px;display:flex;align-items:center;flex-wrap:wrap}
+  .gmem .gp2{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+
+  #groupMakeWrap,#groupWrap{position:fixed;inset:0;background:rgba(10,9,7,.75);z-index:137;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+  body[data-theme="light"] #groupMakeWrap,body[data-theme="light"] #groupWrap{background:rgba(60,50,30,.4)}
+  .group-panel{background:var(--panel);border:1px solid var(--line2);border-radius:18px;width:420px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+  .group-head{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+  .group-title{font-family:'Unbounded',sans-serif;font-weight:700;font-size:15px}
+  .group-body{overflow-y:auto;padding:18px;min-height:0}
 
   #toasts{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:140;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
   .toast{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:11px 18px;font-size:13.5px;box-shadow:0 12px 30px rgba(0,0,0,.5);display:flex;align-items:center;gap:10px;animation:tin .25s;max-width:90vw}
@@ -429,7 +456,7 @@
     .rbtn{width:44px;height:44px}
     .recbar{gap:8px}
 
-    .add-block{padding:12px 12px 8px}
+    .add-block,.gmake{padding:12px 12px 8px}
     .me{padding:12px 14px}
     .crow{padding:11px 8px}
     .crow .av{width:42px;height:42px}
@@ -437,9 +464,9 @@
     #toasts{top:calc(env(safe-area-inset-top) + 12px)}
     .toast{font-size:13px;padding:10px 14px}
 
-    #adminWrap{align-items:flex-end;padding:0}
-    .admin-panel{width:100%;max-height:92vh;border-radius:18px 18px 0 0}
-    .admin-head{padding:14px 16px}
+    #adminWrap,#profWrap,#groupMakeWrap,#groupWrap{align-items:flex-end;padding:0}
+    .admin-panel,.prof-panel,.group-panel{width:100%;max-height:92vh;border-radius:18px 18px 0 0}
+    .admin-head,.prof-head,.group-head{padding:14px 16px}
     .admin-sub{padding:8px 16px 2px}
     #adminList{padding:4px 16px calc(16px + env(safe-area-inset-bottom))}
     .arow{flex-wrap:wrap;gap:10px}
@@ -448,11 +475,7 @@
     .arow .av{order:0}
     .mbtns{order:2;width:100%;justify-content:flex-start}
     .mbtn{flex:1 1 auto;text-align:center;min-width:64px}
-
-    #profWrap{align-items:flex-end;padding:0}
-    .prof-panel{width:100%;max-height:92vh;border-radius:18px 18px 0 0}
-    .prof-head{padding:14px 16px}
-    .prof-body{padding:16px calc(16px) calc(20px + env(safe-area-inset-bottom))}
+    .prof-body,.group-body{padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
     .prof-av{width:64px;height:64px;font-size:24px}
 
     #lightbox{padding:10px}
@@ -474,11 +497,12 @@
 <div id="auth" class="screen">
   <div class="auth-wrap">
     <section class="brand">
-      <div class="brand-top mono">ТЕКСТ · ГОЛОС · ФОТО · ВИДЕО · 1 НОМЕР = 1 АККАУНТ</div>
+      <div class="brand-top mono">ТЕКСТ · ГОЛОС · ФОТО · ВИДЕО · ГРУППЫ</div>
       <h1>ЧАСТО<br>ТА<em>·APP</em></h1>
-      <p class="brand-sub">Мессенджер без границ: добавляйте людей по номеру, отправляйте текст, голосовые, фото и видео. Каждый чат — своя частота.</p>
+      <p class="brand-sub">Мессенджер: личные чаты и группы, текст, голосовые, фото и видео. Каждый чат — своя частота.</p>
       <canvas id="authWave"></canvas>
-      <div class="mode-hint mono" id="modeHint"><span class="dot"></span><span>ПОДКЛЮЧЕНИЕ К FIREBASE…</span></div>
+      <div class="mode-hint mono" id="modeHint"><span class="dot pulse"></span><span>ПОДКЛЮЧЕНИЕ К FIREBASE…</span></div>
+      <div id="bootErr" class="hidden"></div>
     </section>
 
     <section class="auth-card">
@@ -545,6 +569,10 @@
       </div>
     </div>
 
+    <div class="gmake">
+      <button class="gmake-btn" id="btnNewGroup"><i data-lucide="users-round"></i>Создать группу</button>
+    </div>
+
     <div class="add-block">
       <div class="add-row">
         <div class="field">
@@ -555,6 +583,8 @@
       <div id="foundBox"></div>
     </div>
 
+    <div class="list-label"><span>ГРУППЫ</span><span><b id="groupCount">0</b></span></div>
+    <div id="groupList"></div>
     <div class="list-label"><span>СОБЕСЕДНИКИ</span><span><b id="listCount">0</b></span></div>
     <div id="chatList"></div>
     <div class="side-foot" id="sideFoot">ЧАСТНАЯ ЛИНИЯ · FIRESTORE</div>
@@ -573,6 +603,7 @@
         </div>
       </div>
       <div class="spacer"></div>
+      <button class="icbtn hidden" id="btnGroupInfo" title="Состав группы"><i data-lucide="info"></i></button>
       <button class="icbtn hidden" id="btnAdminTop" title="Панель"><i data-lucide="hammer"></i></button>
       <button class="icbtn" id="btnDelContact" title="Удалить из контактов"><i data-lucide="user-x"></i></button>
     </header>
@@ -581,7 +612,7 @@
       <div class="chat-empty" id="chatEmpty">
         <canvas id="idleWave"></canvas>
         <div class="big">Выберите волну</div>
-        <p>Откройте меню слева — собеседники, или добавьте нового по номеру.</p>
+        <p>Откройте меню слева — собеседники и группы, или добавьте нового по номеру.</p>
       </div>
       <div id="msgList" class="hidden"></div>
       <button id="jumpDown" class="hidden"><span id="jumpCount"></span><i data-lucide="chevron-down"></i></button>
@@ -621,6 +652,41 @@
 <div id="lightbox" class="hidden">
   <button id="lbClose"><i data-lucide="x"></i></button>
   <img id="lbImg" alt="">
+</div>
+
+<div id="groupMakeWrap" class="hidden">
+  <div class="group-panel prof-panel">
+    <div class="group-head prof-head">
+      <div class="prof-title">Новая группа</div>
+      <button class="icbtn" id="gmClose" title="Закрыть"><i data-lucide="x"></i></button>
+    </div>
+    <div class="group-body prof-body">
+      <div class="prof-label" style="margin-top:0">НАЗВАНИЕ ГРУППЫ</div>
+      <div class="field" style="height:46px;margin-bottom:4px">
+        <input id="gmName" maxlength="40" placeholder="Например: Экипаж">
+      </div>
+      <div class="prof-err" id="gmErr"></div>
+      <div class="prof-label">УЧАСТНИКИ ИЗ КОНТАКТОВ</div>
+      <div class="gpick" id="gmPick"></div>
+      <button class="btn" id="gmCreate" style="margin-top:14px">Создать группу <i data-lucide="users-round"></i></button>
+    </div>
+  </div>
+</div>
+
+<div id="groupWrap" class="hidden">
+  <div class="group-panel">
+    <div class="group-head">
+      <div class="group-title">Состав группы</div>
+      <button class="icbtn" id="gInfoClose" title="Закрыть"><i data-lucide="x"></i></button>
+    </div>
+    <div class="group-body">
+      <div class="prof-label" style="margin-top:0">УЧАСТНИКИ</div>
+      <div id="gMemList"></div>
+      <div class="prof-label">ДОБАВИТЬ ИЗ КОНТАКТОВ</div>
+      <div id="gAddList"></div>
+      <button class="btn danger" id="gLeave" style="margin-top:18px;height:44px">Покинуть группу <i data-lucide="log-out"></i></button>
+    </div>
+  </div>
 </div>
 
 <div id="adminWrap" class="hidden">
@@ -667,15 +733,9 @@
 
       <div class="prof-label">ТЕМА</div>
       <div class="theme-picker">
-        <button class="theme-opt" data-theme="dark">
-          <span class="swatch sw-dark"></span>Тёмная
-        </button>
-        <button class="theme-opt" data-theme="light">
-          <span class="swatch sw-light"></span>Светлая
-        </button>
-        <button class="theme-opt" data-theme="wave">
-          <span class="swatch sw-wave"></span>Волна
-        </button>
+        <button class="theme-opt" data-theme="dark"><span class="swatch sw-dark"></span>Тёмная</button>
+        <button class="theme-opt" data-theme="light"><span class="swatch sw-light"></span>Светлая</button>
+        <button class="theme-opt" data-theme="wave"><span class="swatch sw-wave"></span>Волна</button>
       </div>
     </div>
   </div>
@@ -715,7 +775,6 @@ const $ = s => document.querySelector(s);
 const icons = () => { try { lucide.createIcons(); } catch(e){} };
 const isMobile = () => window.matchMedia('(max-width:760px)').matches;
 
-/* ---------- ТЕМЫ ---------- */
 function applyTheme(t){
   document.body.setAttribute('data-theme',t);
   localStorage.setItem('f15_theme',t);
@@ -1085,37 +1144,27 @@ class FBStore{
       snap=>{
         const d=snap.data()||{};
         const digits=d.digits||{};
-        const admins=new Set(Object.keys(digits)
-          .filter(k=>digits[k]===true)
-          .map(k=>digitsOf(k)));
+        const admins=new Set(Object.keys(digits).filter(k=>digits[k]===true).map(k=>digitsOf(k)));
         const ver=d.verified||{};
-        const verified=new Set(Object.keys(ver)
-          .filter(k=>ver[k]===true)
-          .map(k=>digitsOf(k)));
+        const verified=new Set(Object.keys(ver).filter(k=>ver[k]===true).map(k=>digitsOf(k)));
         const hide=d.hideHammers||{};
-        const hidden=new Set(Object.keys(hide)
-          .filter(k=>hide[k]===true)
-          .map(k=>digitsOf(k)));
+        const hidden=new Set(Object.keys(hide).filter(k=>hide[k]===true).map(k=>digitsOf(k)));
         cb(admins,verified,hidden);
       },
       err=>snapErr('админы',err)
     );
   }
   async grantAdmin(digits){
-    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
-      {digits:{['+7'+digits]:true}},{merge:true});
+    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),{digits:{['+7'+digits]:true}},{merge:true});
   }
   async revokeAdmin(digits){
-    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
-      {digits:{['+7'+digits]:this.fs.deleteField()}},{merge:true});
+    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),{digits:{['+7'+digits]:this.fs.deleteField()}},{merge:true});
   }
   async setVerified(digits,val){
-    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
-      {verified:{['+7'+digits]:!!val}},{merge:true});
+    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),{verified:{['+7'+digits]:!!val}},{merge:true});
   }
   async setHammerHidden(digits,val){
-    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
-      {hideHammers:{['+7'+digits]:!!val}},{merge:true});
+    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),{hideHammers:{['+7'+digits]:!!val}},{merge:true});
   }
   async changeUsername(uid,newUname,oldUname){
     const ref=this.fs.doc(this.db,'settings','usernames');
@@ -1131,10 +1180,7 @@ class FBStore{
       if(oldUname&&oldUname.toLowerCase()!==key){
         tx.update(ref,{['map.'+oldUname.toLowerCase()]:this.fs.deleteField()});
       }
-      tx.update(uref,{
-        username:key,
-        usernameChangedAt:this.fs.Timestamp.fromMillis(now)
-      });
+      tx.update(uref,{username:key,usernameChangedAt:this.fs.Timestamp.fromMillis(now)});
     });
   }
   async changeName(uid,newName){
@@ -1143,16 +1189,76 @@ class FBStore{
   async setAvatar(uid,dataURL){
     await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{avatar:dataURL});
   }
+  async createGroup(name,ownerUid,memberUids){
+    const ref=this.fs.doc(this.fs.collection(this.db,'groups'));
+    await this.fs.setDoc(ref,{
+      name, ownerId:ownerUid,
+      participants:[ownerUid,...memberUids],
+      createdAt:this.fs.serverTimestamp(),
+      lastAt:this.fs.serverTimestamp(),
+      lastText:'Группа создана', lastType:'system',
+      seen:{[ownerUid]:this.fs.serverTimestamp()}
+    });
+    return ref.id;
+  }
+  watchGroups(uid,cb){
+    const q=this.fs.query(
+      this.fs.collection(this.db,'groups'),
+      this.fs.where('participants','array-contains',uid)
+    );
+    this.fs.onSnapshot(q,
+      snap=>{
+        const map={};
+        snap.docs.forEach(d=>{
+          const v=d.data();
+          map[d.id]={id:d.id,name:v.name||'Группа',ownerId:v.ownerId||'',
+            participants:v.participants||[],lastAt:v.lastAt?.toMillis?.()??0,
+            lastText:v.lastText||'',lastType:v.lastType||'',seen:v.seen||{}};
+        });
+        cb(map);
+      },
+      err=>snapErr('группы',err)
+    );
+  }
+  async sendGroupPayload(gid,payload,preview){
+    const batch=this.fs.writeBatch(this.db);
+    batch.set(this.fs.doc(this.fs.collection(this.db,'groups',gid,'messages')),payload);
+    batch.update(this.fs.doc(this.db,'groups',gid),{
+      lastAt:this.fs.serverTimestamp(),lastText:preview.text,lastType:preview.type
+    });
+    await batch.commit();
+  }
+  watchGroupMessages(gid,cb){
+    const q=this.fs.query(
+      this.fs.collection(this.db,'groups',gid,'messages'),
+      this.fs.orderBy('createdAt','asc'),
+      this.fs.limitToLast(300)
+    );
+    return this.fs.onSnapshot(q,
+      snap=>{
+        cb(snap.docs.map(d=>{
+          const v=d.data();
+          return {id:d.id,...v,createdAt:v.createdAt?.toMillis?.()??Date.now()};
+        }));
+      },
+      err=>snapErr('сообщения',err)
+    );
+  }
+  async groupAddMember(gid,uid){
+    await this.fs.updateDoc(this.fs.doc(this.db,'groups',gid),{participants:this.fs.arrayUnion(uid)});
+  }
+  async groupRemoveMember(gid,uid){
+    await this.fs.updateDoc(this.fs.doc(this.db,'groups',gid),{participants:this.fs.arrayRemove(uid)});
+  }
+  async markGroupSeen(gid,uid){
+    this.fs.updateDoc(this.fs.doc(this.db,'groups',gid),{['seen.'+uid]:this.fs.serverTimestamp()}).catch(()=>{});
+  }
   async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
-    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
-      until:untilMs, by:by||'', at:Date.now()
-    });
+    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{until:untilMs,by:by||'',at:Date.now()});
   }
   async requestUnmute(targetUid,by){
-    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
-      until:0, by:by||'', at:Date.now()
-    });
+    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{until:0,by:by||'',at:Date.now()});
   }
   watchMuteReq(uid,cb){
     return this.fs.onSnapshot(this.fs.doc(this.db,'mutereq',uid),
@@ -1164,13 +1270,9 @@ class FBStore{
           return;
         }
         this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{
-          mutedUntil:this.fs.Timestamp.fromMillis(v.until),
-          mutedBy:v.by||''
-        }).then(()=>{
-          this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
-        }).catch(()=>{
-          this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
-        });
+          mutedUntil:this.fs.Timestamp.fromMillis(v.until),mutedBy:v.by||''
+        }).then(()=>{ this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{}); })
+        .catch(()=>{ this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{}); });
         cb&&cb(v.until);
       },
       err=>snapErr('мут-команда',err)
@@ -1223,10 +1325,8 @@ class FBStore{
   }
   async sendPayload(chatId,participants,payload,preview){
     const batch=this.fs.writeBatch(this.db);
-    const mref=this.fs.doc(this.fs.collection(this.db,'chats',chatId,'messages'));
-    batch.set(mref,payload);
-    const cref=this.fs.doc(this.db,'chats',chatId);
-    batch.set(cref,{
+    batch.set(this.fs.doc(this.fs.collection(this.db,'chats',chatId,'messages')),payload);
+    batch.set(this.fs.doc(this.db,'chats',chatId),{
       participants,
       lastAt:this.fs.serverTimestamp(),
       lastText:preview.text,lastType:preview.type,
@@ -1248,9 +1348,34 @@ class FBStore{
       if(onProgress) onProgress(done/arr.length);
     }
   }
+  async writeGroupParts(gid,mediaId,arr,onProgress){
+    const base=[this.db,'groups',gid,'media',mediaId,'parts'];
+    let done=0;
+    const B=10;
+    for(let s=0;s<arr.length;s+=B){
+      const batch=this.fs.writeBatch(this.db);
+      for(let i=s;i<Math.min(s+B,arr.length);i++){
+        batch.set(this.fs.doc(...base,'p'+i),{i,d:arr[i]});
+      }
+      await batch.commit();
+      done=Math.min(s+B,arr.length);
+      if(onProgress) onProgress(done/arr.length);
+    }
+  }
   async readParts(chatId,mediaId){
     const q=this.fs.query(
       this.fs.collection(this.db,'chats',chatId,'media',mediaId,'parts'),
+      this.fs.orderBy('i')
+    );
+    const snap=await this.fs.getDocs(q);
+    const out=[];
+    snap.docs.forEach(d=>out[d.data().i]=d.data().d);
+    for(let i=0;i<out.length;i++) if(!out[i]) throw new Error('Часть '+i+' не найдена — видео повреждено');
+    return out;
+  }
+  async readGroupParts(gid,mediaId){
+    const q=this.fs.query(
+      this.fs.collection(this.db,'groups',gid,'media',mediaId,'parts'),
       this.fs.orderBy('i')
     );
     const snap=await this.fs.getDocs(q);
@@ -1286,8 +1411,7 @@ class FBStore{
   }
   async setRec(uid,chatId){
     try{
-      await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),
-        {recChat:chatId||'',recTs:chatId?Date.now():0});
+      await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{recChat:chatId||'',recTs:chatId?Date.now():0});
     }catch(e){}
   }
   async leave(){ if(this._pInt)clearInterval(this._pInt); await this.signOut(this.auth); }
@@ -1304,6 +1428,16 @@ class FBStore{
 let store=null, storeFailed=false;
 
 async function boot(){
+  const hint=$('#modeHint');
+  const bootErr=$('#bootErr');
+  /* таймаут: если за 15 сек не подключились — показываем причину */
+  const timeout=setTimeout(()=>{
+    if(!store){
+      hint.innerHTML='<span class="dot red"></span><span>НЕ УДАЛОСЬ ПОДКЛЮЧИТЬСЯ ЗА 15 СЕК</span>';
+      bootErr.classList.remove('hidden');
+      bootErr.textContent='Вероятная причина: файл открыт как file:// (двойной клик) — модули Firebase блокируются. Запустите через локальный сервер (python -m http.server 8000) или хостинг (Netlify Drop). Либо блокировщик режет gstatic.com.';
+    }
+  },15000);
   try{
     const V='10.12.2';
     const [appM,authM,fsM]=await Promise.all([
@@ -1313,7 +1447,9 @@ async function boot(){
     ]);
     const app=appM.initializeApp(firebaseConfig);
     store=new FBStore({auth:authM,fs:fsM},app);
+    clearTimeout(timeout);
     $('#modeHint').innerHTML='<span class="dot"></span><span>FIREBASE · ВОЛНА АКТИВНА</span>';
+    bootErr.classList.add('hidden');
     store.onAuthStateChanged(store.auth, async user=>{
       if(!user||window._leaving) return;
       const p=await store.getProfile(user.uid);
@@ -1321,9 +1457,10 @@ async function boot(){
       else{ try{ await store.signOut(store.auth); }catch(_){} }
     });
   }catch(e){
-    storeFailed=true;
-    $('#modeHint').innerHTML='<span class="dot red"></span><span>FIREBASE НЕДОСТУПЕН · ПРОВЕРЬТЕ ИНТЕРНЕТ</span>';
-    toast('Не удалось подключиться к Firebase','err');
+    clearTimeout(timeout);
+    hint.innerHTML='<span class="dot red"></span><span>ОШИБКА ПОДКЛЮЧЕНИЯ</span>';
+    bootErr.classList.remove('hidden');
+    bootErr.textContent='Причина: '+((e&&e.message)||e);
   }
   icons();
 }
@@ -1466,6 +1603,7 @@ const authWave=$('#authWave');
 let me=null;
 let contacts={};
 let chatsMap={};
+let groupsMap={};
 let usersMap={};
 let active=null;
 let unsubMsgs=null;
@@ -1474,6 +1612,8 @@ let filterQuery='', lastSeenMark=0;
 let pendingFile=null;
 let adminOpen=false;
 let profOpen=false;
+let gmOpen=false, gmSelected=new Set();
+let gInfoOpen=false;
 
 function muteInfo(uid){
   const u=usersMap[uid];
@@ -1491,17 +1631,22 @@ function muteGuard(){
   }
   return false;
 }
-function paintAvatar(el,uid,name){
-  el.innerHTML='';
+function paintAvatar(avEl,uid,name){
+  avEl.innerHTML='';
   const u=usersMap[uid];
   if(u&&u.avatar){
     const img=document.createElement('img');
     img.src=u.avatar; img.alt='';
-    el.appendChild(img);
+    avEl.appendChild(img);
   }else{
-    el.textContent=initialsOf(name);
-    el.style.background=u&&u.color?u.color:colorOf(uid);
+    avEl.textContent=initialsOf(name);
+    avEl.style.background=u&&u.color?u.color:colorOf(uid);
   }
+}
+function paintGroupAvatar(el,gid,name){
+  el.innerHTML='';
+  el.textContent=initialsOf(name);
+  el.style.background=colorOf('grp_'+gid);
 }
 function renderMyBadges(){
   const mn=$('#meName');
@@ -1551,7 +1696,7 @@ function enterApp(profile){
     hammerHidden=hiddenSet;
     refreshStaffButtons();
     renderMyBadges();
-    renderList(); updateHeader(); updateMuteUI();
+    renderLists(); updateHeader(); updateMuteUI();
     if(adminOpen) renderAdmin();
     if(profOpen) renderProfile();
   });
@@ -1565,12 +1710,14 @@ function enterApp(profile){
       $('#mePhone').textContent='@'+(unameOf(me.uid)||'нет')+' · '+fmtPhone(me.phone||'');
       renderMyBadges();
     }
-    renderList(); updateHeader(); updateMuteUI();
+    renderLists(); updateHeader(); updateMuteUI();
     if(adminOpen) renderAdmin();
     if(profOpen) renderProfile();
+    if(gInfoOpen&&active&&active.kind==='group') renderGroupInfo();
   });
-  store.watchContacts(me.uid,list=>{ contacts=list; renderList(); });
-  store.watchChats(me.uid,map=>{ chatsMap=map; renderList(); });
+  store.watchContacts(me.uid,list=>{ contacts=list; renderLists(); });
+  store.watchChats(me.uid,map=>{ chatsMap=map; renderLists(); });
+  store.watchGroups(me.uid,map=>{ groupsMap=map; renderLists(); });
   icons();
 }
 
@@ -1605,6 +1752,150 @@ function openAdmin(){
  $('#btnAdminTop').addEventListener('click',openAdmin);
  $('#adminClose').addEventListener('click',()=>{ adminOpen=false; $('#adminWrap').classList.add('hidden'); });
  $('#adminWrap').addEventListener('click',e=>{ if(e.target.id==='adminWrap'){ adminOpen=false; $('#adminWrap').classList.add('hidden'); } });
+
+ $('#btnNewGroup').addEventListener('click',()=>{
+  gmOpen=true; gmSelected=new Set();
+  $('#gmName').value=''; $('#gmErr').textContent='';
+  renderGroupPick();
+  $('#groupMakeWrap').classList.remove('hidden');
+});
+ $('#gmClose').addEventListener('click',()=>{ gmOpen=false; $('#groupMakeWrap').classList.add('hidden'); });
+ $('#groupMakeWrap').addEventListener('click',e=>{ if(e.target.id==='groupMakeWrap'){ gmOpen=false; $('#groupMakeWrap').classList.add('hidden'); } });
+
+function renderGroupPick(){
+  const box=$('#gmPick'); box.innerHTML='';
+  const list=Object.keys(contacts).map(uid=>contacts[uid]);
+  if(!list.length){
+    const e=document.createElement('div');
+    e.style.cssText='padding:14px;color:var(--dim);font-size:12.5px;text-align:center';
+    e.textContent='Сначала добавьте собеседников — они появятся здесь.';
+    box.appendChild(e);
+    return;
+  }
+  list.sort((A,B)=>A.name.localeCompare(B.name,'ru'));
+  list.forEach(c=>{
+    const row=document.createElement('div'); row.className='gpick-row';
+    const av=document.createElement('div'); av.className='av';
+    paintAvatar(av,c.uid,c.name);
+    const gn=document.createElement('div'); gn.className='gn'; gn.textContent=c.name;
+    const chk=document.createElement('span'); chk.className='chk';
+    chk.innerHTML='<i data-lucide="check"></i>';
+    row.append(av,gn,chk);
+    row.addEventListener('click',()=>{
+      if(gmSelected.has(c.uid)){ gmSelected.delete(c.uid); row.classList.remove('sel'); }
+      else{ gmSelected.add(c.uid); row.classList.add('sel'); }
+      icons();
+    });
+    box.appendChild(row);
+  });
+  icons();
+}
+
+ $('#gmCreate').addEventListener('click',async()=>{
+  const err=$('#gmErr'); err.textContent='';
+  const name=$('#gmName').value.trim();
+  if(name.length<2){ err.textContent='Название — минимум 2 символа'; return; }
+  const btn=$('#gmCreate'); btn.disabled=true;
+  try{
+    await store.createGroup(name,me.uid,[...gmSelected]);
+    toast('Группа «'+name+'» создана','ok');
+    gmOpen=false; $('#groupMakeWrap').classList.add('hidden');
+  }catch(e){ err.textContent=humErr(e); }
+  btn.disabled=false;
+});
+ $('#gmName').addEventListener('keydown',e=>{ if(e.key==='Enter')$('#gmCreate').click(); });
+
+ $('#btnGroupInfo').addEventListener('click',()=>{
+  if(!active||active.kind!=='group') return;
+  gInfoOpen=true;
+  renderGroupInfo();
+  $('#groupWrap').classList.remove('hidden');
+});
+ $('#gInfoClose').addEventListener('click',()=>{ gInfoOpen=false; $('#groupWrap').classList.add('hidden'); });
+ $('#groupWrap').addEventListener('click',e=>{ if(e.target.id==='groupWrap'){ gInfoOpen=false; $('#groupWrap').classList.add('hidden'); } });
+
+function renderGroupInfo(){
+  if(!active||active.kind!=='group') return;
+  const g=groupsMap[active.id];
+  if(!g){ $('#groupWrap').classList.add('hidden'); gInfoOpen=false; return; }
+  const iAmOwner=g.ownerId===me.uid;
+  const mem=$('#gMemList'); mem.innerHTML='';
+  g.participants.forEach(uid=>{
+    const u=usersMap[uid];
+    const name=u?u.name:'Участник';
+    const row=document.createElement('div'); row.className='gmem';
+    const av=document.createElement('div'); av.className='av';
+    paintAvatar(av,uid,name);
+    const gi=document.createElement('div'); gi.className='gi';
+    const gn2=document.createElement('div'); gn2.className='gn2';
+    gn2.appendChild(document.createTextNode(name+(uid===me.uid?' (вы)':'')));
+    const bb=badgeForPhone(u?u.phone:'');
+    if(bb) gn2.appendChild(bb);
+    if(verifiedNow(uid)) gn2.appendChild(verifyBadge());
+    const unl=unameOf(uid);
+    if(unl){
+      const us=document.createElement('span'); us.className='uname'; us.textContent='@'+unl;
+      gn2.appendChild(us);
+    }
+    const gp2=document.createElement('div'); gp2.className='gp2';
+    gp2.textContent=(uid===g.ownerId?'владелец':'участник')+(u?' · '+fmtPhone(u.phone):'');
+    gi.append(gn2,gp2);
+    row.append(av,gi);
+    if(iAmOwner&&uid!==me.uid){
+      const rm=document.createElement('button'); rm.className='mbtn un'; rm.textContent='Исключить';
+      rm.addEventListener('click',async()=>{
+        rm.disabled=true;
+        try{
+          await store.groupRemoveMember(g.id,uid);
+          toast(name+' исключён(а)','ok');
+        }catch(e){ toast('Не получилось: '+humErr(e),'err'); rm.disabled=false; }
+      });
+      row.appendChild(rm);
+    }
+    mem.appendChild(row);
+  });
+  const add=$('#gAddList'); add.innerHTML='';
+  const cand=Object.keys(contacts).map(uid=>contacts[uid]).filter(c=>!g.participants.includes(c.uid));
+  if(!cand.length){
+    const e=document.createElement('div');
+    e.style.cssText='padding:8px 0;color:var(--dim);font-size:12px';
+    e.textContent='Все ваши контакты уже в группе.';
+    add.appendChild(e);
+  }
+  cand.sort((A,B)=>A.name.localeCompare(B.name,'ru'));
+  cand.forEach(c=>{
+    const row=document.createElement('div'); row.className='gmem';
+    const av=document.createElement('div'); av.className='av';
+    paintAvatar(av,c.uid,c.name);
+    const gi=document.createElement('div'); gi.className='gi';
+    const gn2=document.createElement('div'); gn2.className='gn2'; gn2.textContent=c.name;
+    const gp2=document.createElement('div'); gp2.className='gp2'; gp2.textContent='@'+(unameOf(c.uid)||'—');
+    gi.append(gn2,gp2);
+    const add=document.createElement('button'); add.className='mbtn vf'; add.textContent='Добавить';
+    add.addEventListener('click',async()=>{
+      add.disabled=true;
+      try{
+        await store.groupAddMember(g.id,c.uid);
+        toast(c.name+' добавлен(а) в группу','ok');
+      }catch(e){ toast('Не получилось: '+humErr(e),'err'); add.disabled=false; }
+    });
+    row.append(av,gi,add);
+    add.appendChild(row);
+  });
+  const leave=$('#gLeave');
+  leave.onclick=async()=>{
+    if(leave.disabled) return;
+    leave.disabled=true;
+    try{
+      await store.groupRemoveMember(active.id,me.uid);
+      toast('Вы покинули группу «'+g.name+'»','ok');
+      gInfoOpen=false; $('#groupWrap').classList.add('hidden');
+      closeChat();
+    }catch(e){ toast('Не получилось: '+humErr(e),'err'); }
+    leave.disabled=false;
+  };
+  icons();
+}
 
 function openProfile(){
   profOpen=true;
@@ -1861,6 +2152,56 @@ function unreadFor(chat){
   if(!chat||!chat.lastAt) return false;
   return chat.lastAt>seenMillis(chat);
 }
+
+function renderLists(){
+  renderGroups();
+  renderList();
+  $('#groupCount').textContent=Object.keys(groupsMap).length;
+}
+function renderGroups(){
+  const wrap=$('#groupList'); wrap.innerHTML='';
+  const items=Object.keys(groupsMap).map(id=>groupsMap[id]);
+  items.sort((A,B)=>(B.lastAt||0)-(A.lastAt||0));
+  if(!items.length){
+    const e=document.createElement('div');
+    e.className='list-empty';
+    e.style.padding='8px 14px';
+    e.textContent='Групп пока нет.';
+    wrap.appendChild(e);
+    return;
+  }
+  items.forEach(g=>{
+    const row=document.createElement('div');
+    row.className='crow'+(active&&active.kind==='group'&&active.id===g.id?' active':'');
+    const av=document.createElement('div');
+    av.className='av';
+    paintGroupAvatar(av,g.id,g.name);
+    const mid=document.createElement('div'); mid.className='crow-mid';
+    const top=document.createElement('div'); top.className='crow-top';
+    const nm=document.createElement('div'); nm.className='crow-name';
+    const nmT=document.createElement('span'); nmT.className='cn-text'; nmT.textContent=g.name;
+    nm.appendChild(nmT);
+    const tm=document.createElement('div'); tm.className='crow-time';
+    tm.textContent=g.lastAt?fmtListTime(g.lastAt):'';
+    top.append(nm,tm);
+    const bot=document.createElement('div'); bot.className='crow-bot';
+    const last=document.createElement('div'); last.className='crow-last';
+    const typeMap={voice:'Голосовое',image:'Фото',video:'Видео',system:''};
+    if(g.lastText){
+      last.textContent=g.participants.length+' чел. · '+(g.lastType!=='text'&&typeMap[g.lastType]!==undefined?typeMap[g.lastType]:g.lastText);
+    }else{ last.textContent='Новая группа'; }
+    bot.appendChild(last);
+    if(unreadFor(g)){
+      const dot=document.createElement('span'); dot.className='crow-dot';
+      bot.appendChild(dot);
+    }
+    mid.append(top,bot);
+    row.append(av,mid);
+    row.addEventListener('click',()=>{ openGroup(g.id); closeDrawer(); });
+    wrap.appendChild(row);
+  });
+}
+
 function renderList(){
   const wrap=$('#chatList'); wrap.innerHTML='';
   const items=Object.keys(contacts).map(uid=>{
@@ -1889,7 +2230,7 @@ function renderList(){
   }
   filtered.forEach(it=>{
     const row=document.createElement('div');
-    row.className='crow'+(active&&active.contact.uid===it.c.uid?' active':'');
+    row.className='crow'+(active&&active.kind==='dm'&&active.id===it.c.uid?' active':'');
     const u=usersMap[it.c.uid];
     const online=u&&(Date.now()-u.lastSeen<120000);
     const av=document.createElement('div');
@@ -1925,7 +2266,7 @@ function renderList(){
     }
     mid.append(top,bot);
     row.append(av,mid);
-    row.addEventListener('click',()=>{ openChat(it.c); closeDrawer(); });
+    row.addEventListener('click',()=>{ openDM(it.c); closeDrawer(); });
     wrap.appendChild(row);
   });
   icons();
@@ -2023,7 +2364,7 @@ function renderFound(u){
     try{
       await store.addContact(me,u);
       contacts[u.uid]={uid:u.uid,name:u.name,phone:u.phone,color:u.color||colorOf(u.uid)};
-      renderList();
+      renderLists();
       toast(u.name+' добавлен(а) — контакт теперь есть у вас обоих','ok');
       $('#foundBox').innerHTML='';
       addInput.value='';
@@ -2040,10 +2381,34 @@ function renderFound(u){
   icons();
 }
 
-function openChat(c){
+function openDM(c){
   const chatId=store.chatId(me.uid,c.uid);
   if(unsubMsgs){ unsubMsgs(); unsubMsgs=null; }
-  active={contact:c,chatId,otherUid:c.uid};
+  active={kind:'dm',id:c.uid,chatId,title:c.name,otherUid:c.uid,contact:c};
+  resetChatView();
+  $('#btnGroupInfo').classList.add('hidden');
+  $('#btnDelContact').classList.remove('hidden');
+  updateHeader();
+  updateMuteUI();
+  store.markSeen(chatId,me.uid); lastSeenMark=Date.now();
+  unsubMsgs=store.watchMessages(chatId,renderMessages);
+  renderLists();
+}
+function openGroup(gid){
+  const g=groupsMap[gid];
+  if(!g) return;
+  if(unsubMsgs){ unsubMsgs(); unsubMsgs=null; }
+  active={kind:'group',id:gid,title:g.name};
+  resetChatView();
+  $('#btnGroupInfo').classList.remove('hidden');
+  $('#btnDelContact').classList.add('hidden');
+  updateHeader();
+  updateMuteUI();
+  store.markGroupSeen(gid,me.uid); lastSeenMark=Date.now();
+  unsubMsgs=store.watchGroupMessages(gid,renderMessages);
+  renderLists();
+}
+function resetChatView(){
   renderedIds.clear(); lastMeta=null; unseen=0; atBottom=true; hideJump();
   clearPending();
   $('#chatEmpty').classList.add('hidden');
@@ -2052,13 +2417,6 @@ function openChat(c){
   $('#chatFooter').classList.remove('hidden');
   $('#hdIdle').classList.add('hidden');
   $('#hdChat').classList.remove('hidden');
-  $('#btnDelContact').classList.remove('hidden');
-  updateHeader();
-  updateMuteUI();
-  store.markSeen(chatId,me.uid); lastSeenMark=Date.now();
-  unsubMsgs=store.watchMessages(chatId,renderMessages);
-  renderList();
-  closeDrawer();
 }
 function closeChat(){
   if(unsubMsgs){ unsubMsgs(); unsubMsgs=null; }
@@ -2070,42 +2428,55 @@ function closeChat(){
   $('#hdIdle').classList.remove('hidden');
   $('#hdChat').classList.add('hidden');
   $('#btnDelContact').classList.add('hidden');
-  renderList();
+  $('#btnGroupInfo').classList.add('hidden');
+  renderLists();
 }
 function updateHeader(){
   if(!active) return;
-  const c=active.contact, u=usersMap[active.otherUid];
   const av=$('#hdAv');
-  paintAvatar(av,active.otherUid,c.name);
   const hn=$('#hdName');
   hn.innerHTML='';
-  const hnT=document.createElement('span'); hnT.className='hn-text'; hnT.textContent=c.name;
-  hn.appendChild(hnT);
-  const bd=badgeForPhone(c.phone);
-  if(bd) hn.appendChild(bd);
-  if(verifiedNow(c.uid)) hn.appendChild(verifyBadge());
-  const unl=unameOf(c.uid);
-  if(unl){
-    const us=document.createElement('span'); us.className='uname'; us.textContent='@'+unl;
-    hn.appendChild(us);
-  }
   const sub=$('#hdSub');
   sub.className='hd-sub';
-  const recNow=u&&u.recChat===active.chatId&&(Date.now()-(u.recTs||0)<90000);
-  if(recNow){
-    sub.classList.add('rec');
-    sub.innerHTML='<span class="live-dot"></span>';
-    sub.appendChild(document.createTextNode('записывает голосовое…'));
-  }else if(u&&(Date.now()-u.lastSeen<120000)){
-    sub.innerHTML='<span class="live-dot"></span>';
-    sub.appendChild(document.createTextNode('онлайн · '+fmtPhone(c.phone)));
+  if(active.kind==='dm'){
+    const c=active.contact, u=usersMap[active.otherUid];
+    paintAvatar(av,active.otherUid,c.name);
+    const hnT=document.createElement('span'); hnT.className='hn-text'; hnT.textContent=c.name;
+    hn.appendChild(hnT);
+    const bd=badgeForPhone(c.phone);
+    if(bd) hn.appendChild(bd);
+    if(verifiedNow(c.uid)) hn.appendChild(verifyBadge());
+    const unl=unameOf(c.uid);
+    if(unl){
+      const us=document.createElement('span'); us.className='uname'; us.textContent='@'+unl;
+      hn.appendChild(us);
+    }
+    const recNow=u&&u.recChat===active.chatId&&(Date.now()-(u.recTs||0)<90000);
+    if(recNow){
+      sub.classList.add('rec');
+      sub.innerHTML='<span class="live-dot"></span>';
+      sub.appendChild(document.createTextNode('записывает голосовое…'));
+    }else if(u&&(Date.now()-u.lastSeen<120000)){
+      sub.innerHTML='<span class="live-dot"></span>';
+      sub.appendChild(document.createTextNode('онлайн · '+fmtPhone(c.phone)));
+    }else{
+      sub.textContent=fmtAgo(u?u.lastSeen:0)+' · '+fmtPhone(c.phone);
+    }
+    const oldDot=av.querySelector('.rec-dot'); if(oldDot)oldDot.remove();
+    if(recNow){ const d=document.createElement('span'); d.className='rec-dot'; av.appendChild(d); }
   }else{
-    sub.textContent=fmtAgo(u?u.lastSeen:0)+' · '+fmtPhone(c.phone);
+    const g=groupsMap[active.id];
+    if(!g) return;
+    paintGroupAvatar(av,active.id,g.name);
+    const hnT=document.createElement('span'); hnT.className='hn-text'; hnT.textContent=g.name;
+    hn.appendChild(hnT);
+    sub.textContent=g.participants.length+' участник(ов) · нажмите для состава';
   }
-  const oldDot=av.querySelector('.rec-dot'); if(oldDot)oldDot.remove();
-  if(recNow){ const d=document.createElement('span'); d.className='rec-dot'; av.appendChild(d); }
   icons();
 }
+ $('#hdChat').addEventListener('click',()=>{
+  if(active&&active.kind==='group'){ $('#btnGroupInfo').click(); }
+});
 setInterval(()=>{ if(active)updateHeader(); },5000);
 
 const msgList=$('#msgList'), msgScroll=$('#msgScroll');
@@ -2113,15 +2484,17 @@ const msgList=$('#msgList'), msgScroll=$('#msgScroll');
 function makeMsgEl(m,cont){
   const el=document.createElement('div');
   const mine=m.uid===me.uid;
-  el.className='msg'+(mine?' mine':'')+(cont?' cont':'');
+  const isGroup=active&&active.kind==='group';
+  el.className='msg'+(mine?' mine':'')+(cont&&!isGroup?' cont':'');
   if(!mine){
     const av=document.createElement('div');
-    av.className='av'+(cont?' ghost':'');
-    if(!cont) paintAvatar(av,m.uid,m.name);
+    av.className='av';
+    if(cont&&!isGroup) av.classList.add('ghost');
+    if(!cont||isGroup) paintAvatar(av,m.uid,m.name);
     el.appendChild(av);
   }
   const body=document.createElement('div'); body.className='msg-body';
-  if(!cont){
+  if(!cont||isGroup){
     const head=document.createElement('div'); head.className='msg-head';
     const n=document.createElement('span'); n.className='n';
     const nT=document.createElement('span'); nT.textContent=mine?'Вы':m.name;
@@ -2183,12 +2556,15 @@ function buildVideoPlaceholder(m){
     ph.appendChild(b);
   }
   ph.addEventListener('click',async()=>{
+    if(!active) return;
     if(ph.classList.contains('loading')) return;
     ph.classList.add('loading');
     play.innerHTML='<span><i data-lucide="loader"></i></span>';
     icons();
     try{
-      const parts=await store.readParts(active.chatId,m.mediaId);
+      const parts=active.kind==='group'
+        ? await store.readGroupParts(active.id,m.mediaId)
+        : await store.readParts(active.id,m.mediaId);
       const blob=dataURLToBlob('data:'+(m.mime||'video/mp4')+';base64,'+parts.join(''));
       const v=document.createElement('video');
       v.className='mvid';
@@ -2365,7 +2741,8 @@ function buildVoice(m,mine){
 function appendMsg(m){
   if(renderedIds.has(m.id)) return;
   const dk=fmtDay(m.createdAt);
-  const cont=!!(lastMeta&&lastMeta.uid===m.uid&&lastMeta.dk===dk&&(m.createdAt-lastMeta.ts)<5*60000);
+  const isGroup=active&&active.kind==='group';
+  const cont=!!(lastMeta&&lastMeta.uid===m.uid&&lastMeta.dk===dk&&(m.createdAt-lastMeta.ts)<5*60000&&!isGroup);
   if(!lastMeta||lastMeta.dk!==dk){
     const sep=document.createElement('div');
     sep.className='day-sep'; sep.textContent=dk;
@@ -2404,13 +2781,16 @@ function renderMessages(msgs){
     blip();
     if(atBottom&&document.visibilityState==='visible') markSeenNow();
   }
-  renderList();
 }
 
 function markSeenNow(){
   if(!active) return;
   const now=Date.now();
-  if(now-lastSeenMark>3000){ lastSeenMark=now; store.markSeen(active.chatId,me.uid); }
+  if(now-lastSeenMark>3000){
+    lastSeenMark=now;
+    if(active.kind==='group') store.markGroupSeen(active.id,me.uid);
+    else store.markSeen(active.id,me.uid);
+  }
 }
 function showJump(){ $('#jumpDown').classList.remove('hidden'); $('#jumpCount').textContent=unseen||''; }
 function hideJump(){ $('#jumpDown').classList.add('hidden'); }
@@ -2437,10 +2817,14 @@ async function sendText(){
   const t=txt.value.trim(); if(!t) return;
   txt.value=''; txt.style.height='auto';
   btnSend.classList.add('hidden'); btnMic.classList.remove('hidden');
-  const chatId=active.chatId;
-  const parts=[me.uid,active.otherUid];
-  const payload={uid:me.uid,name:me.name,color:me.color,type:'text',text:t,createdAt:store.fs.serverTimestamp()};
-  try{ await store.sendPayload(chatId,parts,payload,{type:'text',text:t.slice(0,80)}); }
+  const base={uid:me.uid,name:me.name,color:me.color,createdAt:store.fs.serverTimestamp()};
+  try{
+    if(active.kind==='group'){
+      await store.sendGroupPayload(active.id,{...base,type:'text',text:t},{type:'text',text:t.slice(0,80)});
+    }else{
+      await store.sendPayload(active.id,[me.uid,active.otherUid],{...base,type:'text',text:t},{type:'text',text:t.slice(0,80)});
+    }
+  }
   catch(e){ toast('Не отправилось: '+humErr(e),'err'); }
   msgScroll.scrollTop=msgScroll.scrollHeight;
 }
@@ -2510,17 +2894,20 @@ async function sendMedia(){
   const p=pendingFile;
   const btn=$('#attSend');
   btn.disabled=true;
-  const chatId=active.chatId;
-  const participants=[me.uid,active.otherUid];
   const base={uid:me.uid,name:me.name,color:me.color,createdAt:store.fs.serverTimestamp()};
+
+  const writePartsFn = active.kind==='group'
+    ? (mid,arr,pr)=>store.writeGroupParts(active.id,mid,arr,pr)
+    : (mid,arr,pr)=>store.writeParts(active.id,mid,arr,pr);
+  const sendFn = active.kind==='group'
+    ? (payload,prev)=>store.sendGroupPayload(active.id,payload,prev)
+    : (payload,prev)=>store.sendPayload(active.id,[me.uid,active.otherUid],payload,prev);
 
   try{
     if(p.kind==='image'){
       setAttUI(p.origName,'Отправка…',0.05,p.url);
       const dataURL=await blobToDataURL(p.file);
-      await store.sendPayload(chatId,participants,
-        {...base,type:'image',data:dataURL,w:p.w,h:p.h},
-        {type:'image',text:'Фото'});
+      await sendFn({...base,type:'image',data:dataURL,w:p.w,h:p.h},{type:'image',text:'Фото'});
       setAttUI(p.origName,'Готово',1,p.url);
       clearPending();
     }else{
@@ -2532,10 +2919,10 @@ async function sendMedia(){
       const mime=p.file.type||'video/mp4';
       const chunks=splitBase64(b64,600000);
       if(chunks.length>140){ toast('Видео слишком тяжёлое — выберите короче или меньше','err'); btn.disabled=false; setAttUI(p.origName,'Отменено',0,p.poster); return; }
-      await store.writeParts(chatId,mediaId,chunks,
+      await writePartsFn(mediaId,chunks,
         f=>setAttUI(p.origName,'Отправка видео… '+Math.round(f*100)+'%',f,p.poster));
       setAttUI(p.origName,'Сохраняю…',1,p.poster);
-      await store.sendPayload(chatId,participants,
+      await sendFn(
         {...base,type:'video',mediaId,mime,parts:chunks.length,size:p.file.size,
          poster:p.poster,duration:p.duration,w:p.w,h:p.h},
         {type:'video',text:'Видео · '+fmtDur(p.duration)});
@@ -2614,11 +3001,14 @@ async function startRecording(){
     const rd=new FileReader();
     rd.onload=async()=>{
       const peaks=resamplePeaks(livePeaks,56);
-      const chatId=active.chatId, parts=[me.uid,active.otherUid];
-      const payload={uid:me.uid,name:me.name,color:me.color,type:'voice',
+      const base={uid:me.uid,name:me.name,color:me.color,type:'voice',
         audio:rd.result,peaks,duration:Math.round(secs),createdAt:store.fs.serverTimestamp()};
       try{
-        await store.sendPayload(chatId,parts,payload,{type:'voice',text:'Голосовое · '+fmtDur(secs)});
+        if(active.kind==='group'){
+          await store.sendGroupPayload(active.id,base,{type:'voice',text:'Голосовое · '+fmtDur(secs)});
+        }else{
+          await store.sendPayload(active.id,[me.uid,active.otherUid],base,{type:'voice',text:'Голосовое · '+fmtDur(secs)});
+        }
       }catch(e){ toast('Не отправилось: '+humErr(e),'err'); }
     };
     rd.readAsDataURL(blob);
@@ -2650,7 +3040,7 @@ async function startRecording(){
   $('#composer').classList.add('hidden');
   $('#recbar').classList.remove('hidden');
   $('#recTimer').textContent='0:00';
-  store.setRec(me.uid,active.chatId);
+  store.setRec(me.uid,active.id);
   recorder.start();
 }
 function stopRecording(){ if(recorder&&recorder.state!=='inactive')recorder.stop(); }
@@ -2712,7 +3102,7 @@ function openModal(title,text,okLabel,action){
   });
 });
  $('#btnDelContact').addEventListener('click',()=>{
-  if(!active) return;
+  if(!active||active.kind!=='dm') return;
   const c=active.contact;
   openModal('Удалить из контактов?',
     c.name+' исчезнет из вашего списка (у него(неё) вы останетесь). История переписки останется в Firebase.',
@@ -2720,7 +3110,7 @@ function openModal(title,text,okLabel,action){
       try{
         await store.removeContact(me.uid,c.uid);
         delete contacts[c.uid];
-        renderList();
+        renderLists();
         toast(c.name+' удалён(а) из контактов');
         closeChat(); closeDrawer();
       }catch(e){ toast('Не удалось: '+humErr(e),'err'); }
