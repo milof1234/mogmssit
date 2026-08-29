@@ -243,18 +243,6 @@
   .admin-title{font-family:'Unbounded',sans-serif;font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px}
   .admin-title .adm-badge{margin-left:0}
   .admin-sub{padding:10px 18px 4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--dim)}
-  .adm-manage{padding:6px 18px 2px;display:flex;gap:8px}
-  .adm-manage .field{flex:1;height:42px;margin:0}
-  .adm-manage .addbtn{width:42px;height:42px}
-  #admAdmins{padding:2px 18px 8px}
-  .adm-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
-  .adm-item:last-child{border-bottom:none}
-  .adm-item .av{width:32px;height:32px;font-size:13px}
-  .adm-item .ai2{flex:1;min-width:0}
-  .adm-item .an2{font-weight:600;font-size:13.5px;display:flex;align-items:center}
-  .adm-item .ap2{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted)}
-  .adm-rm{height:30px;padding:0 10px;border-radius:8px;border:1px solid var(--line2);color:var(--muted);font-size:12px;font-weight:600;flex:none}
-  .adm-rm:hover{color:#fff;background:var(--red);border-color:var(--red)}
   #adminList{overflow-y:auto;padding:6px 18px 16px;min-height:0;flex:1}
   .arow{display:flex;gap:12px;align-items:center;padding:13px 2px;border-bottom:1px solid var(--line)}
   .arow:last-child{border-bottom:none}
@@ -302,7 +290,7 @@
     .msg{max-width:92%}
     .mimg{max-width:100%}
     footer{padding:10px 12px}
-    .mbtns{max-width:150px}
+    .mbtns{max-width:170px}
   }
   #backBtn{display:none}
 </style>
@@ -465,19 +453,7 @@
       <div class="admin-title" id="adminTitle"></div>
       <button class="icbtn" id="adminClose" title="Закрыть"><i data-lucide="x"></i></button>
     </div>
-
-    <div id="admSec" class="hidden">
-      <div class="admin-sub">АДМИНИСТРАТОРЫ · МОЛОТОК У НИКА</div>
-      <div class="adm-manage">
-        <div class="field">
-          <input id="admAddInput" placeholder="Номер нового админа" autocomplete="off">
-        </div>
-        <button class="addbtn" id="admAddBtn" title="Выдать админа"><i data-lucide="user-plus"></i></button>
-      </div>
-      <div id="admAdmins"></div>
-    </div>
-
-    <div class="admin-sub">ЛЮДИ · МУТ ОДНИМ НАЖАТИЕМ</div>
+    <div class="admin-sub">ЛЮДИ · МУТ И АДМИН — КНОПКАМИ В СТРОКЕ</div>
     <div id="adminList"></div>
   </div>
 </div>
@@ -817,10 +793,7 @@ class FBStore{
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {digits:{['+7'+digits]:this.fs.deleteField()}},{merge:true});
   }
-  /* ==== МУТ ЧЕРЕЗ КОМАНДУ mutereq/{targetUid} ====
-     админ пишет команду (в чужой документ mutereq — там открытые правила),
-     приложение самого замученного, увидев команду, ставит mutedUntil
-     В СВОЙ профиль (свой документ — всегда разрешено) и удаляет команду */
+  /* МУТ: команда mutereq/{uid} — замученный сам применяет её к своему профилю */
   async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
     await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
@@ -838,12 +811,10 @@ class FBStore{
         if(!snap.exists()) return;
         const v=snap.data();
         const until=(typeof v.until==='number')?v.until:0;
-        /* применяем к СЕБЕ: свой профиль — правила разрешают */
         this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{
           mutedUntil:this.fs.Timestamp.fromMillis(until),
           mutedBy:v.by||''
         }).then(()=>{
-          /* команду удаляем, чтобы не срабатывала повторно */
           this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
         }).catch(()=>{
           this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
@@ -1195,7 +1166,6 @@ function enterApp(profile){
   $('#mePhone').textContent=fmtPhone(me.phone||'');
   refreshStaffButtons();
   store.presence(me.uid);
-  /* слушаем мут-команды на себя */
   store.watchMuteReq(me.uid,(until)=>{
     if(until>Date.now()) toast('Вас замутили до '+fmtUntil(until),'err');
     else toast('Мут снят','ok');
@@ -1241,7 +1211,6 @@ function updateMuteUI(){
 function openAdmin(){
   adminOpen=true;
   const creator=me&&isCreatorPhone(me.phone);
-  $('#admSec').classList.toggle('hidden',!creator);
   const ttl=$('#adminTitle');
   ttl.innerHTML='';
   ttl.appendChild(badgeEl(creator?'crown':'hammer'));
@@ -1254,70 +1223,7 @@ function openAdmin(){
  $('#adminClose').addEventListener('click',()=>{ adminOpen=false; $('#adminWrap').classList.add('hidden'); });
  $('#adminWrap').addEventListener('click',e=>{ if(e.target.id==='adminWrap'){ adminOpen=false; $('#adminWrap').classList.add('hidden'); } });
 
- $('#admAddInput').addEventListener('input',()=>{
-  const el=$('#admAddInput');
-  const d=el.value.replace(/\D/g,'').slice(0,10);
-  let out=d;
-  if(d.length>0) out='('+d.slice(0,3);
-  if(d.length>=4) out+=') '+d.slice(3,6);
-  if(d.length>=7) out+='-'+d.slice(6,8);
-  if(d.length>=9) out+='-'+d.slice(8,10);
-  el.value=out;
-});
- $('#admAddInput').addEventListener('keydown',e=>{ if(e.key==='Enter')$('#admAddBtn').click(); });
- $('#admAddBtn').addEventListener('click',async()=>{
-  const d=$('#admAddInput').value.replace(/\D/g,'');
-  if(d.length!==10){ toast('Введите полный номер — 10 цифр','err'); return; }
-  const full='7'+d;
-  if(full===CREATOR_DIGITS){ toast('Создатель уже есть — корона не выдаётся','err'); return; }
-  if(adminDigits.has(full)){ toast('Этот номер уже админ','err'); return; }
-  try{
-    await store.grantAdmin(full);
-    toast('Админ выдан: '+fmtPhone('+7'+d),'ok');
-    $('#admAddInput').value='';
-  }catch(e){ toast('Не получилось: '+humErr(e),'err'); }
-});
-
-function renderAdminList(){
-  const box=$('#admAdmins'); box.innerHTML='';
-  const arr=[...adminDigits].sort();
-  if(!arr.length){
-    const e=document.createElement('div');
-    e.className='list-empty';
-    e.style.padding='6px 0 10px';
-    e.textContent='Админов пока нет. Выдайте молоток по номеру выше.';
-    box.appendChild(e);
-    return;
-  }
-  arr.forEach(full=>{
-    const u=Object.values(usersMap).find(x=>digitsOf(x.phone)===full);
-    const row=document.createElement('div'); row.className='adm-item';
-    const av=document.createElement('div'); av.className='av';
-    av.style.background=u?(u.color||colorOf(u.uid)):colorOf(full);
-    av.textContent=u?initialsOf(u.name):'?';
-    const ai=document.createElement('div'); ai.className='ai2';
-    const an=document.createElement('div'); an.className='an2';
-    an.textContent=u?u.name:'Ещё не заходил(а)';
-    const ap=document.createElement('div'); ap.className='ap2';
-    ap.textContent=fmtPhone('+7'+full.slice(1));
-    ai.append(an,ap);
-    const rm=document.createElement('button'); rm.className='adm-rm'; rm.textContent='Снять';
-    rm.addEventListener('click',async()=>{
-      rm.disabled=true;
-      try{
-        await store.revokeAdmin(full);
-        toast('Молоток снят: '+(u?u.name:fmtPhone('+7'+full.slice(1))),'ok');
-      }catch(e){ toast('Не получилось: '+humErr(e),'err'); rm.disabled=false; }
-    });
-    row.append(av,ai,rm);
-    box.appendChild(row);
-  });
-  icons();
-}
-
 function renderAdmin(){
-  if(me&&isCreatorPhone(me.phone)) renderAdminList();
-
   const list=$('#adminList'); list.innerHTML='';
   const users=Object.keys(usersMap).map(uid=>usersMap[uid]);
   users.sort((A,B)=>{
@@ -1335,6 +1241,8 @@ function renderAdmin(){
     const info=muteInfo(u.uid);
     const iAmCreator=me&&isCreatorPhone(me.phone);
     const targetCreator=isCreatorPhone(u.phone);
+    const targetAdmin=isAdminPhone(u.phone);
+    const digits10=digitsOf(u.phone).slice(1);
     const row=document.createElement('div'); row.className='arow';
 
     const av=document.createElement('div'); av.className='av';
@@ -1364,31 +1272,51 @@ function renderAdmin(){
     if(targetCreator){
       const self=document.createElement('span'); self.className='meself'; self.textContent='СОЗДАТЕЛЬ';
       btns.appendChild(self);
-    }else if(info){
-      const b=document.createElement('button'); b.className='mbtn un'; b.textContent='Снять мут';
-      b.addEventListener('click',async()=>{
-        b.disabled=true;
-        try{
-          await store.requestUnmute(u.uid,me.name);
-          toast('Мут снят: '+u.name,'ok');
-        }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
-      });
-      btns.appendChild(b);
     }else if(u.uid===me.uid){
       const self=document.createElement('span'); self.className='meself'; self.textContent='ЭТО ВЫ';
       btns.appendChild(self);
-    }else if(iAmCreator||isAdminPhone(me.phone)){
-      [['10 мин',10*60*1000],['1 час',60*60*1000],['24 часа',24*60*60*1000],['Навсегда',0]].forEach(([label,ms])=>{
-        const b=document.createElement('button'); b.className='mbtn'; b.textContent=label;
+    }else{
+      if(info){
+        const b=document.createElement('button'); b.className='mbtn un'; b.textContent='Снять мут';
         b.addEventListener('click',async()=>{
           b.disabled=true;
           try{
-            await store.requestMute(u.uid,ms,me.name);
-            toast((ms?'Мут '+label.toLowerCase():'Мут навсегда')+': '+u.name,'ok');
+            await store.requestUnmute(u.uid,me.name);
+            toast('Мут снят: '+u.name,'ok');
           }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
         });
         btns.appendChild(b);
-      });
+      }else if(iAmCreator||isAdminPhone(me.phone)){
+        [['10 мин',10*60*1000],['1 час',60*60*1000],['24 часа',24*60*60*1000],['Навсегда',0]].forEach(([label,ms])=>{
+          const b=document.createElement('button'); b.className='mbtn'; b.textContent=label;
+          b.addEventListener('click',async()=>{
+            b.disabled=true;
+            try{
+              await store.requestMute(u.uid,ms,me.name);
+              toast((ms?'Мут '+label.toLowerCase():'Мут навсегда')+': '+u.name,'ok');
+            }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
+          });
+          btns.appendChild(b);
+        });
+      }
+      if(iAmCreator){
+        const ab=document.createElement('button');
+        ab.className='mbtn'+(targetAdmin?' un':'');
+        ab.textContent=targetAdmin?'Снять админа':'Админ';
+        ab.addEventListener('click',async()=>{
+          ab.disabled=true;
+          try{
+            if(targetAdmin){
+              await store.revokeAdmin(digits10);
+              toast('Молоток снят: '+u.name,'ok');
+            }else{
+              await store.grantAdmin(digits10);
+              toast('Админ выдан: '+u.name,'ok');
+            }
+          }catch(e){ toast('Не получилось: '+humErr(e),'err'); ab.disabled=false; }
+        });
+        btns.appendChild(ab);
+      }
     }
 
     row.append(av,infoEl,btns);
