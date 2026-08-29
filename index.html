@@ -30,6 +30,15 @@
   .screen{height:100%}
   .av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#17130a;flex:none;position:relative}
 
+  .adm-hammer{display:inline-flex;align-items:center;margin-left:5px;padding:2px 4px;border-radius:5px;background:var(--amber-soft);color:var(--amber);vertical-align:-2px;flex:none}
+  .adm-hammer svg{width:11px;height:11px}
+  .msg.mine .adm-hammer{background:rgba(29,22,8,.14);color:#1d1608}
+  .hd-name{display:flex;align-items:center;min-width:0}
+  .hd-name .hn-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .crow-name{display:flex;align-items:center;min-width:0}
+  .crow-name .cn-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .msg-head .n{display:inline-flex;align-items:center;max-width:100%}
+
   #auth{display:flex;align-items:center;justify-content:center;padding:24px;
     background:radial-gradient(1200px 600px at 15% -10%, rgba(230,168,76,.05), transparent 60%),var(--bg)}
   .auth-wrap{display:grid;grid-template-columns:1.15fr .95fr;gap:56px;max-width:980px;width:100%;align-items:center}
@@ -78,7 +87,7 @@
   .me{display:flex;align-items:center;gap:12px;padding:12px 18px 14px;border-bottom:1px solid var(--line)}
   .me .av{width:42px;height:42px;font-size:17px}
   .me-info{flex:1;min-width:0}
-  .me-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .me-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
   .me-meta{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--dim);margin-top:3px}
 
   .add-block{padding:14px 14px 10px;border-bottom:1px solid var(--line)}
@@ -92,7 +101,7 @@
   .found-main{display:flex;align-items:center;gap:12px}
   .found .av{width:40px;height:40px;font-size:15px}
   .found-info{flex:1;min-width:0}
-  .found-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .found-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
   .found-phone{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
   .found-add{height:38px;padding:0 14px;border-radius:10px;background:var(--amber);color:#1a1408;font-weight:600;font-size:13px;flex:none}
   .found-add:disabled{background:var(--panel);color:var(--dim);border:1px solid var(--line)}
@@ -108,7 +117,6 @@
   .crow .av{width:44px;height:44px;font-size:16px}
   .crow-mid{flex:1;min-width:0}
   .crow-top{display:flex;align-items:center;gap:8px}
-  .crow-name{font-weight:600;font-size:14px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .crow-time{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);flex:none}
   .crow-bot{display:flex;align-items:center;gap:8px;margin-top:2px}
   .crow-last{font-size:12.5px;color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -124,7 +132,6 @@
   .hd-chat{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
   .hd-chat .av{width:40px;height:40px;font-size:15px}
   .hd-chat .av .rec-dot{position:absolute;right:-2px;top:-2px;width:12px;height:12px;border-radius:50%;background:var(--red);border:2px solid var(--panel);animation:blink 1s infinite}
-  .hd-name{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hd-sub{color:var(--dim);display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em}
   .hd-sub .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
   .hd-sub.rec{color:var(--red)}
@@ -195,6 +202,9 @@
   .abtn.no{background:var(--panel);border:1px solid var(--line);color:var(--muted)}
   .abtn.no:hover{color:var(--red);border-color:var(--red)}
 
+  #muteBar{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px;background:rgba(224,96,74,.1);border:1px solid var(--red);border-radius:14px;padding:13px 16px;color:#f0b3a8;font-size:13.5px}
+  #muteBar svg{width:18px;height:18px;flex:none}
+
   #jumpDown{position:absolute;right:22px;bottom:20px;height:38px;padding:0 14px;border-radius:99px;background:var(--panel2);border:1px solid var(--line2);color:var(--text);display:flex;align-items:center;gap:8px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
   #jumpDown:hover{border-color:var(--amber);color:var(--amber)}
   #jumpDown svg{width:15px;height:15px}
@@ -225,6 +235,31 @@
   #lbClose:hover{color:var(--red);border-color:var(--red)}
   #lbClose svg{width:20px;height:20px}
 
+  /* панель модерации */
+  #adminWrap{position:fixed;inset:0;background:rgba(10,9,7,.75);z-index:135;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+  .admin-panel{background:var(--panel);border:1px solid var(--line2);border-radius:18px;width:540px;max-width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+  .admin-head{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+  .admin-title{font-family:'Unbounded',sans-serif;font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px}
+  .admin-title .adm-hammer{margin-left:0}
+  .admin-sub{padding:10px 18px 4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--dim)}
+  #adminList{overflow-y:auto;padding:6px 18px 16px;min-height:0}
+  .arow{display:flex;gap:12px;align-items:center;padding:13px 2px;border-bottom:1px solid var(--line)}
+  .arow:last-child{border-bottom:none}
+  .arow .av{width:40px;height:40px;font-size:15px}
+  .arow .av .on-dot{width:10px;height:10px}
+  .ainfo{flex:1;min-width:0}
+  .aname{font-weight:600;font-size:14px;display:flex;align-items:center}
+  .ameta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:2px}
+  .astate{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;margin-top:3px;color:var(--dim)}
+  .astate.muted{color:var(--red)}
+  .mbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;flex:none}
+  .mbtn{height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--line2);color:var(--muted);font-size:12px;font-weight:600;transition:all .15s}
+  .mbtn:hover{color:var(--amber);border-color:var(--amber)}
+  .mbtn.un{color:#f0b3a8;border-color:rgba(224,96,74,.5)}
+  .mbtn.un:hover{color:#fff;background:var(--red);border-color:var(--red)}
+  .mbtn:disabled{opacity:.4;cursor:default}
+  .meself{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em}
+
   #toasts{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:140;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
   .toast{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:11px 18px;font-size:13.5px;box-shadow:0 12px 30px rgba(0,0,0,.5);display:flex;align-items:center;gap:10px;animation:tin .25s;max-width:90vw}
   .toast.err{border-color:var(--red);color:#f0b3a8}
@@ -254,6 +289,7 @@
     .msg{max-width:92%}
     .mimg{max-width:100%}
     footer{padding:10px 12px}
+    .mbtns{max-width:150px}
   }
   #backBtn{display:none}
 </style>
@@ -320,7 +356,10 @@
   <aside id="side">
     <div class="side-head">
       <div class="logo">ЧАСТОТА<em>·APP</em></div>
-      <button class="icbtn" id="btnExit" title="Выйти"><i data-lucide="log-out"></i></button>
+      <div style="display:flex;gap:4px">
+        <button class="icbtn hidden" id="btnAdmin" title="Модерация"><i data-lucide="hammer"></i></button>
+        <button class="icbtn" id="btnExit" title="Выйти"><i data-lucide="log-out"></i></button>
+      </div>
     </div>
     <div class="me">
       <div class="av" id="meAv"></div>
@@ -372,7 +411,8 @@
     </div>
 
     <footer id="chatFooter" class="hidden">
-      <div id="attachbar" class="hidden">
+      <div id="muteBar" class="hidden"><i data-lucide="mic-off"></i><span id="muteText"></span></div>
+      <div id="attachbar" class="hidden" style="margin-top:10px">
         <img id="attThumb" class="hidden" alt="">
         <div id="attInfo">
           <div id="attName"></div>
@@ -405,6 +445,17 @@
   <img id="lbImg" alt="">
 </div>
 
+<div id="adminWrap" class="hidden">
+  <div class="admin-panel">
+    <div class="admin-head">
+      <div class="admin-title"><span class="adm-hammer"><i data-lucide="hammer"></i></span>Модерация</div>
+      <button class="icbtn" id="adminClose" title="Закрыть"><i data-lucide="x"></i></button>
+    </div>
+    <div class="admin-sub">МУТ ЗАКРЫВАЕТ ОТПРАВКУ: ТЕКСТ · ГОЛОС · ФОТО · ВИДЕО</div>
+    <div id="adminList"></div>
+  </div>
+</div>
+
 <div id="sideBackdrop"></div>
 
 <div id="modalWrap" class="hidden">
@@ -431,6 +482,12 @@ const firebaseConfig = {
   appId: "1:174129518157:web:1b18da4905974fd7ea6e04"
 };
 
+/* =====================================================================
+   ★★★ АДМИНИСТРАТОРЫ — сплошные цифры номера ★★★
+   Список должен совпадать со списком в правилах Firestore!
+   ===================================================================== */
+const ADMIN_DIGITS = new Set(['79251672982','79254699801']);
+
 const $ = s => document.querySelector(s);
 const icons = () => { try { lucide.createIcons(); } catch(e){} };
 
@@ -439,6 +496,15 @@ const AV_COLORS=['#c98a5e','#8fa876','#cdb45e','#a5778a','#7ba3a8','#c96e5e','#9
 const colorOf = id => AV_COLORS[hashStr(id)%AV_COLORS.length];
 const initialsOf = n => (n||'?').trim().charAt(0).toUpperCase();
 const digitsOf = s => String(s||'').replace(/\D/g,'');
+const isAdminPhone = p => ADMIN_DIGITS.has(digitsOf(p));
+function hammerBadge(){
+  const s=document.createElement('span');
+  s.className='adm-hammer';
+  s.title='Администратор';
+  s.innerHTML='<i data-lucide="hammer"></i>';
+  return s;
+}
+
 const fmtTime = ms => new Date(ms).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
 function fmtPhone(p){
   const d=digitsOf(p).replace(/^7/,'');
@@ -474,6 +540,13 @@ function fmtAgo(ms){
   if(h<24) return 'был(а) '+h+' ч назад';
   return 'был(а) '+new Date(ms).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
 }
+function fmtUntil(ms){
+  const d=new Date(ms), now=new Date();
+  const sameDay=d.toDateString()===now.toDateString();
+  const t=fmtTime(ms);
+  if(sameDay) return 'до '+t;
+  return d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' '+t;
+}
 
 function toast(msg,type=''){
   const t=document.createElement('div');
@@ -487,7 +560,7 @@ function humErr(e){
   const c=(e&&e.code)||'';
   const m=(e&&e.message)||String(e);
   if(c.includes('permission-denied')||/permission/i.test(m))
-    return 'Firestore отклонил операцию — обновите правила безопасности';
+    return 'Firestore отклонил операцию — проверьте правила (возможно, вы в муте)';
   if(c.includes('unavailable')||c.includes('network'))
     return 'Нет соединения с Firebase';
   return m;
@@ -517,6 +590,16 @@ function blip(){
     o.connect(g); g.connect(sharedAC.destination);
     o.start(); o.stop(sharedAC.currentTime+.24);
   }catch(e){}
+}
+
+function safeSeek(media,t){
+  try{
+    if(!media||typeof t!=='number'||!isFinite(t)||t<0) return false;
+    const d=media.duration;
+    if(d===Infinity||!isFinite(d)) return false;
+    media.currentTime=Math.min(t,Math.max(0,d-.01));
+    return true;
+  }catch(_){ return false; }
 }
 
 function blobToDataURL(blob){
@@ -588,11 +671,11 @@ function splitBase64(b64,chunk){
   for(let i=0;i<b64.length;i+=chunk) out.push(b64.slice(i,i+chunk));
   return out;
 }
-/* общий AudioContext для проверки записей (не для звука) */
 let decodeAC=null;
 function getDecodeAC(){
   try{
     if(!decodeAC||decodeAC.state==='closed') decodeAC=new (window.AudioContext||window.webkitAudioContext)();
+    if(decodeAC.state==='suspended') decodeAC.resume().catch(()=>{});
     return decodeAC;
   }catch(e){ return null; }
 }
@@ -678,6 +761,32 @@ class FBStore{
         cb(map);
       },
       err=>snapErr('профили',err)
+    );
+  }
+  /* ---- модерация ---- */
+  async setMuted(uid,ms,adminName){
+    /* ms===0 → навсегда (until:null); иначе Timestamp */
+    await this.fs.setDoc(this.fs.doc(this.db,'moderation',uid),{
+      by:adminName||'',
+      at:this.fs.serverTimestamp(),
+      until: ms? this.fs.Timestamp.fromMillis(Date.now()+ms) : null
+    });
+  }
+  async unmute(uid){
+    await this.fs.deleteDoc(this.fs.doc(this.db,'moderation',uid));
+  }
+  watchModeration(cb){
+    this.fs.onSnapshot(this.fs.collection(this.db,'moderation'),
+      snap=>{
+        const map={};
+        snap.docs.forEach(d=>{
+          const v=d.data();
+          const until=(v.until&&v.until.toMillis)?v.until.toMillis():0;
+          map[d.id]={until,by:v.by||''};
+        });
+        cb(map);
+      },
+      err=>snapErr('модерация',err)
     );
   }
   async addContact(myProfile,user){
@@ -971,11 +1080,35 @@ let me=null;
 let contacts={};
 let chatsMap={};
 let usersMap={};
+let moderationMap={};
 let active=null;
 let unsubMsgs=null;
 let renderedIds=new Set(), lastMeta=null, unseen=0, atBottom=true;
 let filterQuery='', lastSeenMark=0;
 let pendingFile=null;
+let admSig='';
+let adminOpen=false;
+
+function isAdminUid(uid){
+  const u=usersMap[uid];
+  return !!(u&&isAdminPhone(u.phone));
+}
+/* активный мут: {forever,until} или null */
+function muteInfo(uid){
+  const m=moderationMap[uid];
+  if(!m) return null;
+  if(!m.until) return {forever:true,until:0};
+  if(Date.now()<m.until) return {forever:false,until:m.until};
+  return null;
+}
+function muteGuard(){
+  const info=me?muteInfo(me.uid):null;
+  if(info){
+    toast(info.forever?'Вы в муте — отправка закрыта':'Вы в муте до '+fmtUntil(info.until),'err');
+    return true;
+  }
+  return false;
+}
 
 function enterApp(profile){
   me=profile;
@@ -983,14 +1116,141 @@ function enterApp(profile){
   $('#app').classList.remove('hidden');
   $('#meAv').textContent=initialsOf(me.name);
   $('#meAv').style.background=me.color;
-  $('#meName').textContent=me.name;
+  const mn=$('#meName');
+  mn.textContent=me.name;
+  if(isAdminPhone(me.phone)) mn.appendChild(hammerBadge());
   $('#mePhone').textContent=fmtPhone(me.phone||'');
+  $('#btnAdmin').classList.toggle('hidden',!isAdminPhone(me.phone));
   store.presence(me.uid);
-  store.watchUsers(map=>{ usersMap=map; renderList(); updateHeader(); });
+  store.watchUsers(map=>{
+    usersMap=map;
+    renderList(); updateHeader();
+    const sig=Object.keys(map).filter(uid=>isAdminPhone(map[uid].phone)).sort().join(',');
+    if(sig!==admSig){
+      admSig=sig;
+      if(active&&unsubMsgs){ unsubMsgs(); unsubMsgs=store.watchMessages(active.chatId,renderMessages); }
+    }
+  });
+  store.watchModeration(map=>{
+    moderationMap=map;
+    updateMuteUI();
+    if(adminOpen) renderAdmin();
+  });
   store.watchContacts(me.uid,list=>{ contacts=list; renderList(); });
   store.watchChats(me.uid,map=>{ chatsMap=map; renderList(); });
   icons();
 }
+
+function updateMuteUI(){
+  const info=me?muteInfo(me.uid):null;
+  const bar=$('#muteBar');
+  if(info){
+    $('#muteText').textContent=info.forever
+      ?'Вы в муте — отправка сообщений закрыта администратором'
+      :'Вы в муте '+fmtUntil(info.until)+' — отправка сообщений закрыта';
+    bar.classList.remove('hidden');
+    $('#composer').classList.add('hidden');
+    $('#recbar').classList.add('hidden');
+    $('#attachbar').classList.add('hidden');
+  }else{
+    bar.classList.add('hidden');
+    if(active&&!pendingFile&&!(recorder&&recorder.state==='recording')){
+      $('#composer').classList.remove('hidden');
+    }
+  }
+}
+
+/* ---------- ПАНЕЛЬ МОДЕРАЦИИ ---------- */
+ $('#btnAdmin').addEventListener('click',()=>{
+  adminOpen=true;
+  $('#adminWrap').classList.remove('hidden');
+  renderAdmin();
+});
+ $('#adminClose').addEventListener('click',()=>{ adminOpen=false; $('#adminWrap').classList.add('hidden'); });
+ $('#adminWrap').addEventListener('click',e=>{ if(e.target.id==='adminWrap'){ adminOpen=false; $('#adminWrap').classList.add('hidden'); } });
+
+function renderAdmin(){
+  const list=$('#adminList'); list.innerHTML='';
+  const users=Object.keys(usersMap).map(uid=>usersMap[uid]);
+  users.sort((A,B)=>{
+    /* замученные сверху */
+    const ma=muteInfo(A.uid)?1:0, mb=muteInfo(B.uid)?1:0;
+    if(ma!==mb) return mb-ma;
+    return A.name.localeCompare(B.name,'ru');
+  });
+
+  if(!users.length){
+    list.innerHTML='<div class="list-empty">Пока никого нет.</div>';
+    return;
+  }
+
+  users.forEach(u=>{
+    const info=muteInfo(u.uid);
+    const row=document.createElement('div'); row.className='arow';
+
+    const av=document.createElement('div'); av.className='av';
+    av.style.background=u.color||colorOf(u.uid);
+    av.textContent=initialsOf(u.name);
+    if(u.uid===me.uid||(Date.now()-u.lastSeen<120000)){
+      const d=document.createElement('span'); d.className='on-dot'; av.appendChild(d);
+    }
+
+    const infoEl=document.createElement('div'); infoEl.className='ainfo';
+    const nm=document.createElement('div'); nm.className='aname';
+    const nmT=document.createElement('span'); nmT.textContent=u.name;
+    nm.appendChild(nmT);
+    if(isAdminPhone(u.phone)) nm.appendChild(hammerBadge());
+    const meta=document.createElement('div'); meta.className='ameta';
+    meta.textContent=fmtPhone(u.phone)+(u.uid===me.uid?' · это вы':'');
+    const st=document.createElement('div'); st.className='astate';
+    if(info){
+      st.classList.add('muted');
+      st.textContent=info.forever?'В МУТЕ: НАВСЕГДА'+(info.by?' · поставил: '+info.by:'')
+                                 :'В МУТЕ '+fmtUntil(info.until).toUpperCase()+(info.by?' · ПОСТАВИЛ: '+info.by:'');
+    }else{
+      st.textContent=(u.uid===me.uid||Date.now()-u.lastSeen<120000)?'ОНЛАЙН':'БЫЛ(А): '+fmtAgo(u.lastSeen).toUpperCase();
+    }
+    infoEl.append(nm,meta,st);
+
+    const btns=document.createElement('div'); btns.className='mbtns';
+    if(u.uid===me.uid){
+      const self=document.createElement('span'); self.className='meself'; self.textContent='СЕБЯ НЕ ЗАМУТИТЬ';
+      btns.appendChild(self);
+    }else if(info){
+      const b=document.createElement('button'); b.className='mbtn un'; b.textContent='Снять мут';
+      b.addEventListener('click',async()=>{
+        b.disabled=true;
+        try{
+          await store.unmute(u.uid);
+          toast('Мут снят: '+u.name,'ok');
+        }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
+      });
+      btns.appendChild(b);
+    }else{
+      [['10 мин',10*60*1000],['1 час',60*60*1000],['24 часа',24*60*60*1000],['Навсегда',0]].forEach(([label,ms])=>{
+        const b=document.createElement('button'); b.className='mbtn'; b.textContent=label;
+        b.addEventListener('click',async()=>{
+          b.disabled=true;
+          try{
+            await store.setMuted(u.uid,ms,me.name);
+            toast((ms?'Мут '+label.toLowerCase():'Мут навсегда')+': '+u.name,'ok');
+          }catch(e){
+            toast('Не получилось: '+humErr(e),'err');
+            b.disabled=false;
+          }
+        });
+        btns.appendChild(b);
+      });
+    }
+
+    row.append(av,infoEl,btns);
+    list.appendChild(row);
+  });
+  icons();
+}
+
+/* тик: обновляем баннер/панель (истёкшие муты, минуты) */
+setInterval(()=>{ updateMuteUI(); if(adminOpen) renderAdmin(); },30000);
 
 function seenMillis(chat){
   if(!chat||!chat.seen) return 0;
@@ -1040,7 +1300,10 @@ function renderList(){
     if(online){ const d=document.createElement('span'); d.className='on-dot'; av.appendChild(d); }
     const mid=document.createElement('div'); mid.className='crow-mid';
     const top=document.createElement('div'); top.className='crow-top';
-    const nm=document.createElement('div'); nm.className='crow-name'; nm.textContent=it.c.name;
+    const nm=document.createElement('div'); nm.className='crow-name';
+    const nmT=document.createElement('span'); nmT.className='cn-text'; nmT.textContent=it.c.name;
+    nm.appendChild(nmT);
+    if(isAdminPhone(it.c.phone)) nm.appendChild(hammerBadge());
     const tm=document.createElement('div'); tm.className='crow-time';
     tm.textContent=it.chat?fmtListTime(it.chat.lastAt):'';
     top.append(nm,tm);
@@ -1060,6 +1323,7 @@ function renderList(){
     row.addEventListener('click',()=>{ openChat(it.c); closeDrawer(); });
     wrap.appendChild(row);
   });
+  icons();
 }
 
 const addInput=$('#addInput');
@@ -1124,7 +1388,11 @@ function renderFound(u){
   av.style.background=u.color||colorOf(u.uid);
   av.textContent=initialsOf(u.name);
   const info=document.createElement('div'); info.className='found-info';
-  const n=document.createElement('div'); n.className='found-name'; n.textContent=u.name;
+  const n=document.createElement('div'); n.className='found-name';
+  const nT=document.createElement('span'); nT.style.overflow='hidden'; nT.style.textOverflow='ellipsis';
+  nT.textContent=u.name;
+  n.appendChild(nT);
+  if(isAdminPhone(u.phone)) n.appendChild(hammerBadge());
   const p=document.createElement('div'); p.className='found-phone'; p.textContent=fmtPhone(u.phone);
   info.append(n,p);
   const btn=document.createElement('button'); btn.className='found-add';
@@ -1149,6 +1417,7 @@ function renderFound(u){
   const note=document.createElement('div'); note.className='found-note';
   note.textContent='Контакт взаимный: '+u.name+' увидит вас в списке автоматически.';
   box.appendChild(note);
+  icons();
 }
 
 function openChat(c){
@@ -1165,6 +1434,7 @@ function openChat(c){
   $('#hdChat').classList.remove('hidden');
   $('#btnDelContact').classList.remove('hidden');
   updateHeader();
+  updateMuteUI();
   store.markSeen(chatId,me.uid); lastSeenMark=Date.now();
   unsubMsgs=store.watchMessages(chatId,renderMessages);
   renderList();
@@ -1187,7 +1457,11 @@ function updateHeader(){
   const av=$('#hdAv');
   av.style.background=c.color||colorOf(c.uid);
   av.textContent=initialsOf(c.name);
-  $('#hdName').textContent=c.name;
+  const hn=$('#hdName');
+  hn.innerHTML='';
+  const hnT=document.createElement('span'); hnT.className='hn-text'; hnT.textContent=c.name;
+  hn.appendChild(hnT);
+  if(isAdminPhone(c.phone)) hn.appendChild(hammerBadge());
   const sub=$('#hdSub');
   sub.className='hd-sub';
   const recNow=u&&u.recChat===active.chatId&&(Date.now()-(u.recTs||0)<90000);
@@ -1203,6 +1477,7 @@ function updateHeader(){
   }
   const oldDot=av.querySelector('.rec-dot'); if(oldDot)oldDot.remove();
   if(recNow){ const d=document.createElement('span'); d.className='rec-dot'; av.appendChild(d); }
+  icons();
 }
 setInterval(()=>{ if(active)updateHeader(); },5000);
 
@@ -1221,7 +1496,10 @@ function makeMsgEl(m,cont){
   const body=document.createElement('div'); body.className='msg-body';
   if(!cont){
     const head=document.createElement('div'); head.className='msg-head';
-    const n=document.createElement('span'); n.textContent=mine?'Вы':m.name;
+    const n=document.createElement('span'); n.className='n';
+    const nT=document.createElement('span'); nT.textContent=mine?'Вы':m.name;
+    n.appendChild(nT);
+    if(isAdminUid(m.uid)) n.appendChild(hammerBadge());
     const t=document.createElement('span'); t.className='t'; t.textContent=fmtTime(m.createdAt);
     head.append(n,t);
     body.appendChild(head);
@@ -1308,7 +1586,7 @@ function openLightbox(src){
 function closeLightbox(){ $('#lightbox').classList.add('hidden'); $('#lbImg').src=''; }
  $('#lbClose').addEventListener('click',closeLightbox);
  $('#lightbox').addEventListener('click',e=>{ if(e.target.id==='lightbox')closeLightbox(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeLightbox(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeLightbox(); } });
 
 function buildVoice(m,mine){
   const wrap=document.createElement('div'); wrap.className='voice';
@@ -1375,7 +1653,7 @@ function buildVoice(m,mine){
       const onSeek=()=>{
         audio.removeEventListener('seeked',onSeek);
         if(isFinite(audio.duration)&&audio.duration>0) effDur=audio.duration;
-        try{ audio.currentTime=0; }catch(_){}
+        safeSeek(audio,0);
       };
       audio.addEventListener('seeked',onSeek);
       try{ audio.currentTime=1e7; }catch(_){}
@@ -1426,7 +1704,7 @@ function buildVoice(m,mine){
   audio.addEventListener('ended',()=>{
     setIcon(false);
     draw(0);
-    try{ audio.currentTime=0; }catch(_){}
+    safeSeek(audio,0);
     totalLabel();
   });
   audio.addEventListener('timeupdate',()=>{
@@ -1439,9 +1717,7 @@ function buildVoice(m,mine){
     const r=cv.getBoundingClientRect();
     const frac=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));
     const d=effDur||((isFinite(audio.duration)&&audio.duration>0)?audio.duration:0);
-    if(d>0){
-      try{ audio.currentTime=frac*d; }catch(_){}
-    }
+    if(d>0) safeSeek(audio,frac*d);
   });
   dur.addEventListener('click',()=>{
     rateIdx=(rateIdx+1)%rates.length;
@@ -1523,6 +1799,7 @@ txt.addEventListener('keydown',e=>{
 });
 async function sendText(){
   if(!active) return;
+  if(muteGuard()) return;
   const t=txt.value.trim(); if(!t) return;
   txt.value=''; txt.style.height='auto';
   btnSend.classList.add('hidden'); btnMic.classList.remove('hidden');
@@ -1535,7 +1812,11 @@ async function sendText(){
 btnSend.addEventListener('click',sendText);
 
 const fileInput=$('#fileInput');
- $('#btnAttach').addEventListener('click',()=>{ if(active&&!pendingFile)fileInput.click(); });
+ $('#btnAttach').addEventListener('click',()=>{
+  if(!active||pendingFile) return;
+  if(muteGuard()) return;
+  fileInput.click();
+});
 
 fileInput.addEventListener('change',async()=>{
   const file=fileInput.files&&fileInput.files[0];
@@ -1590,6 +1871,7 @@ function setAttUI(name,meta,prog,thumb){
 
 async function sendMedia(){
   if(!active||!pendingFile) return;
+  if(muteGuard()){ return; }
   const p=pendingFile;
   const btn=$('#attSend');
   btn.disabled=true;
@@ -1633,7 +1915,6 @@ async function sendMedia(){
   btn.disabled=false;
 }
 
-/* ---------- ЗАПИСЬ ГОЛОСОВЫХ (исправлено для телефонов) ---------- */
 let mediaStream=null, recorder=null, audioCtx=null, analyser=null;
 let recTimerInt=null, sampleInt=null, recStart=0, recCancelled=false, livePeaks=[];
 
@@ -1641,6 +1922,7 @@ btnMic.addEventListener('click',startRecording);
 
 async function startRecording(){
   if(!active||pendingFile){ return; }
+  if(muteGuard()) return;
   if(!navigator.mediaDevices||!window.MediaRecorder){ toast('Запись не поддерживается этим браузером','err'); return; }
   try{
     mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});
@@ -1649,7 +1931,6 @@ async function startRecording(){
   const mime=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac']
     .find(m=>{ try{ return MediaRecorder.isTypeSupported(m); }catch(_){ return false; } })||'';
 
-  /* Safari капризен к опциям — создаём с fallback */
   try{
     recorder=new MediaRecorder(mediaStream,{mimeType:mime||undefined,audioBitsPerSecond:32000});
   }catch(e){
@@ -1664,14 +1945,19 @@ async function startRecording(){
     mediaStream.getTracks().forEach(t=>t.stop());
     if(audioCtx){ try{audioCtx.close();}catch(e){} audioCtx=null; }
     clearInterval(recTimerInt); clearInterval(sampleInt);
-    $('#recbar').classList.add('hidden'); $('#composer').classList.remove('hidden');
+    $('#recbar').classList.add('hidden');
+    if(me&&muteInfo(me.uid)){
+      updateMuteUI();
+      store.setRec(me.uid,'');
+      return; /* замучили во время записи — не отправляем */
+    }
+    $('#composer').classList.remove('hidden');
     if(me) store.setRec(me.uid,'');
     if(recCancelled||!active) return;
     if(!chunks.length){ toast('Запись пустая — попробуйте ещё раз','err'); return; }
 
     const blob=new Blob(chunks,{type:(mime||'audio/webm').split(';')[0]});
 
-    /* ПРОВЕРКА ПЕРЕД ОТПРАВКОЙ: декодируем; заодно получаем точную длительность */
     let realDur=0;
     try{
       const ac=getDecodeAC();
@@ -1684,7 +1970,7 @@ async function startRecording(){
 
     if(!realDur){
       toast('Запись не удалась (пустой или битый файл) — запишите ещё раз','err');
-      return; /* битое НЕ отправляем */
+      return;
     }
 
     const secs=realDur;
@@ -1730,7 +2016,6 @@ async function startRecording(){
   $('#recbar').classList.remove('hidden');
   $('#recTimer').textContent='0:00';
   store.setRec(me.uid,active.chatId);
-  /* без нарезки: Safari склеивает фрагменты криво — берём один цельный blob */
   recorder.start();
 }
 function stopRecording(){ if(recorder&&recorder.state!=='inactive')recorder.stop(); }
