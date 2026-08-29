@@ -341,7 +341,7 @@
       </div>
 
       <div id="formReg" class="hidden">
-        <div class="step-title">Новая волna</div>
+        <div class="step-title">Новая волна</div>
         <div class="step-sub">На один номер — один аккаунт, навсегда.</div>
         <div class="field">
           <span class="cc">+7</span>
@@ -477,7 +477,7 @@
       <div id="admAdmins"></div>
     </div>
 
-    <div class="admin-sub">ЛЮДИ · МУТ СТАВИТСЯ ОДНИМ НАЖАТИЕМ</div>
+    <div class="admin-sub">ЛЮДИ · МУТ ОДНИМ НАЖАТИЕМ</div>
     <div id="adminList"></div>
   </div>
 </div>
@@ -594,7 +594,7 @@ function humErr(e){
   const c=(e&&e.code)||'';
   const m=(e&&e.message)||String(e);
   if(c.includes('permission-denied')||/permission/i.test(m))
-    return 'Firestore отклонил операцию — правила не пропустили';
+    return 'Firestore отклонил операцию';
   if(c.includes('unavailable')||c.includes('network'))
     return 'Нет соединения с Firebase';
   return m;
@@ -605,10 +605,7 @@ function snapErr(name,err){
   const c=(err&&err.code)||'unknown';
   if(_snapErrShown.has(c)) return;
   _snapErrShown.add(c);
-  if(c.includes('permission-denied'))
-    toast('Firestore: обновите правила безопасности','err');
-  else
-    toast('Ошибка синхронизации ('+name+'): '+c,'err');
+  toast('Ошибка синхронизации ('+name+'): '+c,'err');
 }
 
 let sharedAC=null;
@@ -740,9 +737,9 @@ class FBStore{
       await this.fs.setDoc(this.fs.doc(this.db,'users',cred.user.uid),{
         uid:cred.user.uid,phone,name,color:colorOf(cred.user.uid),
         createdAt:this.fs.serverTimestamp(),lastSeen:this.fs.serverTimestamp(),
-        recChat:'',recTs:0,mutedUntil:0
+        recChat:'',recTs:0
       });
-      return {uid:cred.user.uid,phone,name,color:colorOf(cred.user.uid),mutedUntil:0};
+      return {uid:cred.user.uid,phone,name,color:colorOf(cred.user.uid)};
     }catch(e){
       try{ await this.deleteUser(cred.user); }catch(_){}
       try{ await this.signOut(this.auth); }catch(_){}
@@ -784,10 +781,9 @@ class FBStore{
     const v=d.data();
     return {...v,uid:d.id,phone:v.phone||phone,name:v.name||'Без имени',color:v.color||colorOf(d.id)};
   }
-  /* юзеры — ЕДИНСТВЕННЫЙ источник данных о муте (поле mutedUntil) */
   watchUsers(cb){
     this.fs.onSnapshot(this.fs.collection(this.db,'users'),
-      {includeMetadataChanges:true,source:'server'},
+      {source:'server'},
       snap=>{
         const map={};
         snap.docs.forEach(d=>{
@@ -821,19 +817,41 @@ class FBStore{
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {digits:{['+7'+digits]:this.fs.deleteField()}},{merge:true});
   }
-  /* МУТ: пишем дату прямо в профиль цельсобеседника */
-  async setMuted(uid,ms,adminName){
+  /* ==== МУТ ЧЕРЕЗ КОМАНДУ mutereq/{targetUid} ====
+     админ пишет команду (в чужой документ mutereq — там открытые правила),
+     приложение самого замученного, увидев команду, ставит mutedUntil
+     В СВОЙ профиль (свой документ — всегда разрешено) и удаляет команду */
+  async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
-    await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{
-      mutedUntil:this.fs.Timestamp.fromMillis(untilMs),
-      mutedBy:adminName||''
+    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
+      until:untilMs, by:by||'', at:Date.now()
     });
   }
-  async unmute(uid){
-    await this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{
-      mutedUntil:this.fs.Timestamp.fromMillis(0),
-      mutedBy:''
+  async requestUnmute(targetUid,by){
+    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
+      until:0, by:by||'', at:Date.now()
     });
+  }
+  watchMuteReq(uid,cb){
+    return this.fs.onSnapshot(this.fs.doc(this.db,'mutereq',uid),
+      snap=>{
+        if(!snap.exists()) return;
+        const v=snap.data();
+        const until=(typeof v.until==='number')?v.until:0;
+        /* применяем к СЕБЕ: свой профиль — правила разрешают */
+        this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{
+          mutedUntil:this.fs.Timestamp.fromMillis(until),
+          mutedBy:v.by||''
+        }).then(()=>{
+          /* команду удаляем, чтобы не срабатывала повторно */
+          this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
+        }).catch(()=>{
+          this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
+        });
+        cb&&cb(until);
+      },
+      err=>snapErr('мут-команда',err)
+    );
   }
   async addContact(myProfile,user){
     if(!myProfile||!myProfile.uid) throw new Error('Профиль не загружен — перезайдите в аккаунт');
@@ -1177,6 +1195,11 @@ function enterApp(profile){
   $('#mePhone').textContent=fmtPhone(me.phone||'');
   refreshStaffButtons();
   store.presence(me.uid);
+  /* слушаем мут-команды на себя */
+  store.watchMuteReq(me.uid,(until)=>{
+    if(until>Date.now()) toast('Вас замутили до '+fmtUntil(until),'err');
+    else toast('Мут снят','ok');
+  });
   store.watchAdmins(set=>{
     adminDigits=set;
     refreshStaffButtons();
@@ -1300,7 +1323,7 @@ function renderAdmin(){
   users.sort((A,B)=>{
     const ma=muteInfo(A.uid)?1:0, mb=muteInfo(B.uid)?1:0;
     if(ma!==mb) return mb-ma;
-    return A.name.localeCompare(B.c?B.c.name:B.name,'ru');
+    return A.name.localeCompare(B.name,'ru');
   });
 
   if(!users.length){
@@ -1338,23 +1361,7 @@ function renderAdmin(){
     infoEl.append(nm,meta,st);
 
     const btns=document.createElement('div'); btns.className='mbtns';
-    if(u.uid===me.uid){
-      if(info&&iAmCreator){
-        const b=document.createElement('button'); b.className='mbtn un'; b.textContent='Снять мут';
-        b.addEventListener('click',async()=>{
-          b.disabled=true;
-          try{
-            await store.unmute(u.uid);
-            toast('Мут снят','ok');
-          }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
-        });
-        btns.appendChild(b);
-      }else{
-        const self=document.createElement('span'); self.className='meself';
-        self.textContent=targetCreator?'СОЗДАТЕЛЬ':'СЕБЯ НЕ ЗАМУТИТЬ';
-        btns.appendChild(self);
-      }
-    }else if(targetCreator){
+    if(targetCreator){
       const self=document.createElement('span'); self.className='meself'; self.textContent='СОЗДАТЕЛЬ';
       btns.appendChild(self);
     }else if(info){
@@ -1362,18 +1369,21 @@ function renderAdmin(){
       b.addEventListener('click',async()=>{
         b.disabled=true;
         try{
-          await store.unmute(u.uid);
+          await store.requestUnmute(u.uid,me.name);
           toast('Мут снят: '+u.name,'ok');
         }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
       });
       btns.appendChild(b);
+    }else if(u.uid===me.uid){
+      const self=document.createElement('span'); self.className='meself'; self.textContent='ЭТО ВЫ';
+      btns.appendChild(self);
     }else if(iAmCreator||isAdminPhone(me.phone)){
       [['10 мин',10*60*1000],['1 час',60*60*1000],['24 часа',24*60*60*1000],['Навсегда',0]].forEach(([label,ms])=>{
         const b=document.createElement('button'); b.className='mbtn'; b.textContent=label;
         b.addEventListener('click',async()=>{
           b.disabled=true;
           try{
-            await store.setMuted(u.uid,ms,me.name);
+            await store.requestMute(u.uid,ms,me.name);
             toast((ms?'Мут '+label.toLowerCase():'Мут навсегда')+': '+u.name,'ok');
           }catch(e){ toast('Не получилось: '+humErr(e),'err'); b.disabled=false; }
         });
