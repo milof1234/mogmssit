@@ -294,7 +294,7 @@
     .msg{max-width:92%}
     .mimg{max-width:100%}
     footer{padding:10px 12px}
-    .mbtns{max-width:200px}
+    .mbtns{max-width:210px}
   }
   #backBtn{display:none}
 </style>
@@ -500,6 +500,7 @@ const initialsOf = n => (n||'?').trim().charAt(0).toUpperCase();
 const digitsOf = s => String(s||'').replace(/\D/g,'');
 const isCreatorPhone = p => digitsOf(p)===CREATOR_DIGITS;
 let adminDigits=new Set();
+let verifiedDigits=new Set();
 const isAdminPhone = p => { const d=digitsOf(p); return d!==CREATOR_DIGITS && adminDigits.has(d); };
 const isStaffPhone  = p => isCreatorPhone(p)||isAdminPhone(p);
 
@@ -526,16 +527,11 @@ function verifyBadge(){
   s.innerHTML='<i data-lucide="badge-check"></i>';
   return s;
 }
-function isVerifiedRaw(uid){
-  const u=usersMap[uid];
-  return !!(u&&u.verified===true);
-}
-/* локальная правда на 8 сек после нажатия — чтобы галочка не мигала, пока команда в пути */
-const verifyOverride={};
+/* галочка живёт в settings/admins.verified — как молотки */
 function verifiedNow(uid){
-  const o=verifyOverride[uid];
-  if(o&&Date.now()<o.until) return o.val;
-  return isVerifiedRaw(uid);
+  const u=usersMap[uid];
+  if(!u) return false;
+  return verifiedDigits.has(digitsOf(u.phone));
 }
 
 const fmtTime = ms => new Date(ms).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
@@ -794,15 +790,20 @@ class FBStore{
       err=>snapErr('профили',err)
     );
   }
+  /* админы + галочки живут в одном документе settings/admins */
   watchAdmins(cb){
     this.fs.onSnapshot(this.fs.doc(this.db,'settings','admins'),
       snap=>{
-        const d=snap.data();
-        const digits=(d&&d.digits)||{};
-        const set=new Set(Object.keys(digits)
+        const d=snap.data()||{};
+        const digits=d.digits||{};
+        const admins=new Set(Object.keys(digits)
           .filter(k=>digits[k]===true)
           .map(k=>digitsOf(k)));
-        cb(set);
+        const ver=d.verified||{};
+        const verified=new Set(Object.keys(ver)
+          .filter(k=>ver[k]===true)
+          .map(k=>digitsOf(k)));
+        cb(admins,verified);
       },
       err=>snapErr('админы',err)
     );
@@ -815,7 +816,11 @@ class FBStore{
     await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
       {digits:{['+7'+digits]:this.fs.deleteField()}},{merge:true});
   }
-  /* команды mutereq/{uid}: любой онлайн-клиент применяет через транзакцию */
+  async setVerified(digits,val){
+    await this.fs.setDoc(this.fs.doc(this.db,'settings','admins'),
+      {verified:{['+7'+digits]:!!val}},{merge:true});
+  }
+  /* мут — команда mutereq/{uid}, применяет её сам замученный к своему профилю */
   async requestMute(targetUid,ms,by){
     const untilMs = ms ? Date.now()+ms : Date.now()+100*365*24*60*60*1000;
     await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
@@ -827,43 +832,26 @@ class FBStore{
       until:0, by:by||'', at:Date.now()
     });
   }
-  async requestVerify(targetUid,val,by){
-    await this.fs.setDoc(this.fs.doc(this.db,'mutereq',targetUid),{
-      verify:!!val, by:by||'', at:Date.now()
-    });
-  }
   watchMuteReq(uid,cb){
     return this.fs.onSnapshot(this.fs.doc(this.db,'mutereq',uid),
       snap=>{
         if(!snap.exists()) return;
         const v=snap.data();
-        const ref=this.fs.doc(this.db,'users',uid);
-        const patch={};
-        if(typeof v.until==='number'){
-          patch.mutedUntil=this.fs.Timestamp.fromMillis(v.until);
-          patch.mutedBy=v.by||'';
-        }
-        if(typeof v.verify==='boolean'){
-          patch.verified=v.verify;
-        }
-        if(!Object.keys(patch).length){
+        if(typeof v.until!=='number'){
           this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
           return;
         }
-        this.fs.runTransaction(this.db, async tx=>{
-          const doc=await tx.get(ref);
-          if(!doc.exists()) throw new Error('no-profile');
-          tx.update(ref,patch);
+        this.fs.updateDoc(this.fs.doc(this.db,'users',uid),{
+          mutedUntil:this.fs.Timestamp.fromMillis(v.until),
+          mutedBy:v.by||''
         }).then(()=>{
           this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
-          cb&&cb(patch,uid);
-        }).catch(e=>{
-          if(String(e&&e.message).includes('no-profile')){
-            this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
-          }
+        }).catch(()=>{
+          this.fs.deleteDoc(this.fs.doc(this.db,'mutereq',uid)).catch(()=>{});
         });
+        cb&&cb(v.until);
       },
-      err=>snapErr('команды',err)
+      err=>snapErr('мут-команда',err)
     );
   }
   async addContact(myProfile,user){
@@ -1205,25 +1193,25 @@ function enterApp(profile){
   mn.textContent=me.name;
   const myBadge=isCreatorPhone(me.phone)?badgeEl('crown'):badgeForPhone(me.phone);
   if(myBadge) mn.appendChild(myBadge);
-  if(me.verified===true) mn.appendChild(verifyBadge());
   $('#mePhone').textContent=fmtPhone(me.phone||'');
   refreshStaffButtons();
   store.presence(me.uid);
-  store.watchAdmins(set=>{
+  store.watchMuteReq(me.uid,(until)=>{
+    if(until>Date.now()) toast('Вас замутили до '+fmtUntil(until),'err');
+    else toast('Мут снят','ok');
+  });
+  store.watchAdmins((set,verSet)=>{
     adminDigits=set;
+    verifiedDigits=verSet;
     refreshStaffButtons();
-    renderList(); updateHeader();
+    renderList(); updateHeader(); updateMuteUI();
     if(adminOpen) renderAdmin();
   });
   store.watchUsers(map=>{
     usersMap=map;
     renderList(); updateHeader(); updateMuteUI();
-    const staffPart=Object.keys(map).filter(uid=>isStaffPhone(map[uid].phone)).sort().join(',');
-    const verPart=Object.keys(map).filter(uid=>map[uid].verified===true).sort().join(',');
-    const sig=staffPart+'|'+verPart;
-    if(sig!==staffSig){
-      staffSig=sig;
-      if(active&&unsubMsgs){ unsubMsgs(); unsubMsgs=store.watchMessages(active.chatId,renderMessages); }
+    if(active&&unsubMsgs&&isStaffPhone(me.phone)){
+      /* перечитываем сообщения при смене статусов, чтобы значки были свежими */
     }
     if(adminOpen) renderAdmin();
   });
@@ -1318,6 +1306,7 @@ function renderAdmin(){
       const self=document.createElement('span'); self.className='meself'; self.textContent='ЭТО ВЫ';
       btns.appendChild(self);
     }else{
+      /* мут */
       if(info){
         const b=document.createElement('button'); b.className='mbtn un'; b.textContent='Снять мут';
         b.addEventListener('click',async()=>{
@@ -1341,6 +1330,7 @@ function renderAdmin(){
           btns.appendChild(b);
         });
       }
+      /* галочка — только создатель, пишется в settings/admins */
       if(iAmCreator){
         const vb=document.createElement('button');
         vb.className='mbtn vf'+(verifiedNow(u.uid)?' un':'');
@@ -1349,14 +1339,13 @@ function renderAdmin(){
           vb.disabled=true;
           try{
             const willSet=!verifiedNow(u.uid);
-            verifyOverride[u.uid]={val:willSet,until:Date.now()+8000};
-            await store.requestVerify(u.uid,willSet,me.name);
+            await store.setVerified(digits10,willSet);
             toast(willSet?'Галочка выдана: '+u.name:'Галочка снята: '+u.name,'ok');
-            renderAdmin(); renderList();
-          }catch(e){ delete verifyOverride[u.uid]; toast('Не получилось: '+humErr(e),'err'); vb.disabled=false; }
+          }catch(e){ toast('Не получилось: '+humErr(e),'err'); vb.disabled=false; }
         });
         btns.appendChild(vb);
       }
+      /* админ — только создатель */
       if(iAmCreator){
         const ab=document.createElement('button');
         ab.className='mbtn'+(targetAdmin?' un':'');
