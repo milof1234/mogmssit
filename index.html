@@ -225,11 +225,9 @@
     <div id="top-nav">
       <div class="nav-logo">Messenger</div>
       <div class="nav-actions">
-        <!-- Кнопка Создателя (Корона) -->
         <button id="admin-btn-top" class="nav-btn creator-btn" title="Панель Создателя">
           <svg class="crown-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
         </button>
-        <!-- Кнопка Админа (Молоток) -->
         <button id="admin-hammer-btn" class="nav-btn admin-btn" title="Панель Админа">
           <svg class="hammer-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.71 7.04l-3.75-3.75a1 1 0 0 0-1.42 0L12 6.83 9.13 3.96a1 1 0 0 0-1.42 0L4.96 6.71a1 1 0 0 0 0 1.42L7.83 11 2 16.83V22h5.17L13 16.17l2.87 2.87a1 1 0 0 0 1.42 0l2.75-2.75a1 1 0 0 0 0-1.42L16.17 12l2.54-2.54a1 1 0 0 0 0-1.42z"/></svg>
         </button>
@@ -261,7 +259,7 @@
         <div class="user-profile">
           <div class="profile-avatar" id="profile-avatar-btn">U</div>
           <div class="profile-info" id="btn-settings-mobile">
-            <div class="profile-name" id="current-user-name">Вы <span class="crown-container" id="creator-crown" style="display:none;"><svg class="crown-icon" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg></span></div>
+            <div class="profile-name" id="current-user-name">Вы</div>
           </div>
         </div>
       </div>
@@ -467,10 +465,8 @@
 
           if (isCreator) {
             document.getElementById('admin-btn-top').style.display = 'flex';
-            document.getElementById('creator-crown').style.display = 'inline-flex';
           } else {
             document.getElementById('admin-btn-top').style.display = 'none';
-            document.getElementById('creator-crown').style.display = 'none';
           }
 
           if (isCreator || isAdmin) {
@@ -480,7 +476,6 @@
             document.getElementById('admin-hammer-btn').style.display = 'none';
           }
 
-          // Радио видит только создатель
           if (!isCreator) {
             document.getElementById('radio-section').style.display = 'none';
           } else {
@@ -550,8 +545,16 @@
           currentBgUrl = data.url;
           audioEl.src = currentBgUrl;
           radioBar.style.display = 'flex';
-          isRadioPlaying = false;
-          updateRadioUI(false);
+          
+          // ПЫТАЕМСЯ ВКЛЮЧИТЬ АВТОМАТИЧЕСКИ
+          audioEl.play().then(() => {
+            isRadioPlaying = true;
+            updateRadioUI(true);
+          }).catch(() => {
+            // Браузер заблокировал автовоспроизведение (нужен клик пользователя)
+            isRadioPlaying = false;
+            updateRadioUI(false);
+          });
         } else {
           currentBgUrl = null;
           audioEl.pause();
@@ -583,9 +586,12 @@
       const audioEl = document.getElementById('audio-player');
       if (!currentBgUrl) return;
       if (!isRadioPlaying) {
-        audioEl.play().catch(e => alert("Браузер заблокировал звук. Нажмите еще раз."));
-        isRadioPlaying = true;
-        updateRadioUI(true);
+        audioEl.play().then(() => {
+          isRadioPlaying = true;
+          updateRadioUI(true);
+        }).catch(() => {
+          alert("Браузер блокирует звук. Нажмите еще раз.");
+        });
       } else {
         audioEl.pause();
         isRadioPlaying = false;
@@ -598,9 +604,8 @@
       if (!url) return alert("Вставьте ссылку!");
       try {
         await db.collection('settings').doc('radio').set({ url: url });
-        alert("Радио запущено!");
+        alert("Радио запущено! У вас заиграет сразу, у других - после клика по экрану.");
         document.getElementById('bg-sound-url').value = '';
-        setTimeout(() => { if (!isRadioPlaying) toggleRadio(); }, 1000);
       } catch (err) { alert("Ошибка: " + err.message); }
     });
     document.getElementById('btn-stop-bg').addEventListener('click', async () => {
@@ -639,8 +644,8 @@
           
           let actionsHtml = `
             <div class="admin-actions">
-              <button class="btn-adm ${isMuted ? 'btn-unban' : 'btn-ban'} btn-mute-toggle" data-uid="${userData.uid}">${isMuted ? 'Разбан' : 'Бан'}</button>
-              <button class="btn-adm ${isVerified ? 'btn-unverify' : 'btn-verify'} btn-verify-toggle" data-uid="${userData.uid}">${isVerified ? 'Снять галочку' : 'Галочка'}</button>
+              <button class="btn-adm ${isMuted ? 'btn-unban' : 'btn-ban'} btn-mute-toggle" data-uid="${userData.uid}" data-muted="${isMuted}">${isMuted ? 'Разбан' : 'Бан'}</button>
+              <button class="btn-adm ${isVerified ? 'btn-unverify' : 'btn-verify'} btn-verify-toggle" data-uid="${userData.uid}" data-verified="${isVerified}">${isVerified ? 'Снять галочку' : 'Галочка'}</button>
           `;
           if (isCreator) {
             actionsHtml += `<button class="btn-adm ${isAdmin ? 'btn-unadmin' : 'btn-admin'} btn-admin-toggle" data-uid="${userData.uid}">${isAdmin ? 'Снять админ' : 'Сделать админом'}</button>`;
@@ -664,18 +669,20 @@
 
         document.querySelectorAll('.btn-mute-toggle').forEach(btn => {
           btn.addEventListener('click', async (e) => {
-            await db.collection('users').doc(e.target.dataset.uid).update({ isMuted: e.target.dataset.muted === 'true' ? false : true });
+            const b = e.currentTarget;
+            await db.collection('users').doc(b.dataset.uid).update({ isMuted: b.dataset.muted === 'true' ? false : true });
           });
         });
         document.querySelectorAll('.btn-verify-toggle').forEach(btn => {
           btn.addEventListener('click', async (e) => {
-            await db.collection('users').doc(e.target.dataset.uid).update({ verified: e.target.dataset.verified === 'true' ? false : true });
+            const b = e.currentTarget;
+            await db.collection('users').doc(b.dataset.uid).update({ verified: b.dataset.verified === 'true' ? false : true });
           });
         });
         if (isCreator) {
           document.querySelectorAll('.btn-admin-toggle').forEach(btn => {
             btn.addEventListener('click', async (e) => {
-              const uid = e.target.dataset.uid;
+              const uid = e.currentTarget.dataset.uid;
               const userDoc = await db.collection('users').doc(uid).get();
               const currentRole = userDoc.data().role || 'user';
               await db.collection('users').doc(uid).update({ role: currentRole === 'admin' ? 'user' : 'admin' });
