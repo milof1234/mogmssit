@@ -49,6 +49,7 @@
     .input-group input { width: 100%; padding: 16px; background: var(--bg-input); border: 1px solid transparent; border-radius: 12px; color: var(--text-main); font-size: 16px; outline: none; }
     .input-group input:focus { border-color: var(--accent); }
     .btn-primary { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+    .btn-text { width: 100%; padding: 10px; background: transparent; color: var(--text-muted); border: none; cursor: pointer; font-size: 13px; text-decoration: underline; margin-top: 10px; }
 
     #app-container { display: none; flex-direction: column; width: 100%; max-width: 1200px; height: 100%; }
     #top-nav { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); flex-shrink: 0; height: 56px; z-index: 20; }
@@ -205,6 +206,7 @@
           <input type="password" id="login-password" placeholder="Введите пароль">
         </div>
         <button id="btn-login" class="btn-primary">Войти</button>
+        <button id="btn-reset-pass" class="btn-text">Забыли пароль? Сбросить</button>
       </div>
       <div id="form-register" class="auth-form" style="display: none;">
         <div class="input-group">
@@ -448,7 +450,7 @@
           username: username, phone: phone, uid: auth.currentUser.uid, role: "user", verified: false, lastThemeChange: 0, lastUsernameChange: 0 
         });
       } catch (regError) { 
-        if (regError.code === 'auth/email-already-in-use') alert("Этот номер уже зарегистрирован!");
+        if (regError.code === 'auth/email-already-in-use') alert("Этот номер уже зарегистрирован! Если забыли пароль — нажмите 'Сбросить'.");
         else alert("Ошибка регистрации: " + regError.message); 
       }
     });
@@ -467,6 +469,18 @@
       }
     });
 
+    document.getElementById('btn-reset-pass').addEventListener('click', async () => {
+      const phone = document.getElementById('login-phone').value.replace(/\D/g, '');
+      if(!phone || phone.length < 11) return alert("Введите номер телефона, чтобы сбросить пароль");
+      const fakeEmail = `+${phone}@messenger.app`;
+      try {
+        await auth.sendPasswordResetEmail(fakeEmail);
+        alert("Инструкция по сбросу пароля отправлена на вашу почту (это системный адрес, просто проигнорируйте её). Вы можете зарегистрировать этот номер заново с новым паролем через 1 минуту.");
+      } catch (e) {
+        alert("Ошибка: " + e.message);
+      }
+    });
+
     document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
 
     auth.onAuthStateChanged(async (user) => {
@@ -475,11 +489,15 @@
         currentUserPhone = user.email.split('@')[0].replace('+', ''); 
         
         try {
-          const userDoc = await db.collection('users').doc(currentUserId).get();
+          let userDoc = await db.collection('users').doc(currentUserId).get();
+          
+          // АВТО-ВОССТАНОВЛЕНИЕ ПРОФИЛЯ
           if (!userDoc.exists) {
-            alert("Ваш профиль был удален администратором. Зарегистрируйтесь заново.");
-            auth.signOut();
-            return;
+            const defaultUsername = `user_${currentUserPhone.slice(-4)}`;
+            await db.collection('users').doc(currentUserId).set({
+              username: defaultUsername, phone: currentUserPhone, uid: currentUserId, role: "user", verified: false, lastThemeChange: 0, lastUsernameChange: 0
+            });
+            userDoc = await db.collection('users').doc(currentUserId).get();
           }
           
           currentUserUsername = userDoc.data().username || currentUserPhone;
@@ -510,9 +528,7 @@
           if (!isCreator) document.getElementById('radio-section').style.display = 'none';
           else document.getElementById('radio-section').style.display = 'block';
           
-          if (!currentUserAvatar) document.getElementById('profile-avatar-btn').innerText = currentUserUsername.charAt(0).toUpperCase();
           updateProfileUI();
-          
           document.getElementById('new-username').placeholder = `Текущий: @${currentUserUsername}`;
           
           document.getElementById('auth-screen').style.display = 'none';
@@ -542,7 +558,6 @@
       if (!currentUserAvatar) document.getElementById('profile-avatar-btn').innerText = currentUserUsername.charAt(0).toUpperCase();
     }
 
-    // СМЕНА ЮЗЕРНЕЙМА
     document.getElementById('btn-change-username').addEventListener('click', async () => {
       const newUsername = document.getElementById('new-username').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
       if(!newUsername || newUsername.length < 3) return alert("Юзернейм: минимум 3 символа (a-z, 0-9, _)");
@@ -561,10 +576,7 @@
       if (!snapshot.empty) return alert("Этот юзернейм уже занят!");
 
       try {
-        await db.collection('users').doc(currentUserId).update({ 
-          username: newUsername, 
-          lastUsernameChange: Date.now() 
-        });
+        await db.collection('users').doc(currentUserId).update({ username: newUsername, lastUsernameChange: Date.now() });
         currentUserUsername = newUsername;
         lastUsernameChange = Date.now();
         updateProfileUI();
@@ -576,7 +588,6 @@
       }
     });
 
-    // ЛОГИКА ТЕМЫ
     function applyTheme(themeName) {
       document.body.className = `theme-${themeName}`;
       document.querySelectorAll('.theme-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.theme === themeName); });
@@ -585,7 +596,6 @@
       btn.addEventListener('click', async () => {
         const theme = btn.dataset.theme;
         const isPrivileged = (currentUserPhone === CREATOR_PHONE) || (currentUserRole === "admin");
-        
         if (!isPrivileged) {
           const now = Date.now();
           const oneWeek = 7 * 24 * 60 * 60 * 1000;
@@ -594,7 +604,6 @@
             return alert(`Менять тему можно раз в неделю. Осталось ${daysLeft} дн.`);
           }
         }
-        
         applyTheme(theme);
         try { 
           await db.collection('users').doc(currentUserId).set({ theme: theme, lastThemeChange: Date.now() }, { merge: true }); 
@@ -603,9 +612,7 @@
       });
     });
 
-    // РАДИО ЛОГИКА
-    let currentBgUrl = null;
-    let isRadioPlaying = false;
+    let currentBgUrl = null, isRadioPlaying = false;
     function listenToBgSound() {
       db.collection('settings').doc('radio').onSnapshot((doc) => {
         const data = doc.data();
@@ -615,13 +622,7 @@
           currentBgUrl = data.url;
           audioEl.src = currentBgUrl;
           radioBar.style.display = 'flex';
-          audioEl.play().then(() => {
-            isRadioPlaying = true;
-            updateRadioUI(true);
-          }).catch(() => {
-            isRadioPlaying = false;
-            updateRadioUI(false);
-          });
+          audioEl.play().then(() => { isRadioPlaying = true; updateRadioUI(true); }).catch(() => { isRadioPlaying = false; updateRadioUI(false); });
         } else {
           currentBgUrl = null;
           audioEl.pause();
@@ -638,31 +639,20 @@
       const speakerOn = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
       const speakerOff = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>';
       if (isPlaying) {
-        icon.innerHTML = speakerOff;
-        text.innerText = 'Выключить звук';
-        icon.classList.remove('radio-pulsing-icon');
-        bar.classList.add('playing');
+        icon.innerHTML = speakerOff; text.innerText = 'Выключить звук';
+        icon.classList.remove('radio-pulsing-icon'); bar.classList.add('playing');
       } else {
-        icon.innerHTML = speakerOn;
-        text.innerText = 'Включить звук';
-        icon.classList.add('radio-pulsing-icon');
-        bar.classList.remove('playing');
+        icon.innerHTML = speakerOn; text.innerText = 'Включить звук';
+        icon.classList.add('radio-pulsing-icon'); bar.classList.remove('playing');
       }
     }
     function toggleRadio() {
       const audioEl = document.getElementById('audio-player');
       if (!currentBgUrl) return;
       if (!isRadioPlaying) {
-        audioEl.play().then(() => {
-          isRadioPlaying = true;
-          updateRadioUI(true);
-        }).catch(() => {
-          alert("Браузер блокирует звук. Нажмите еще раз.");
-        });
+        audioEl.play().then(() => { isRadioPlaying = true; updateRadioUI(true); }).catch(() => { alert("Браузер блокирует звук. Нажмите еще раз."); });
       } else {
-        audioEl.pause();
-        isRadioPlaying = false;
-        updateRadioUI(false);
+        audioEl.pause(); isRadioPlaying = false; updateRadioUI(false);
       }
     }
     document.getElementById('radio-bar').addEventListener('click', toggleRadio);
@@ -671,16 +661,13 @@
       if (!url) return alert("Вставьте ссылку!");
       try {
         await db.collection('settings').doc('radio').set({ url: url });
-        alert("Радио запущено!");
-        document.getElementById('bg-sound-url').value = '';
+        alert("Радио запущено!"); document.getElementById('bg-sound-url').value = '';
       } catch (err) { alert("Ошибка: " + err.message); }
     });
     document.getElementById('btn-stop-bg').addEventListener('click', async () => {
-      await db.collection('settings').doc('radio').delete();
-      alert("Радио остановлено!");
+      await db.collection('settings').doc('radio').delete(); alert("Радио остановлено!");
     });
 
-    // АДМИНКА
     function listenToMuteStatus() {
       db.collection('users').doc(currentUserId).onSnapshot((doc) => {
         if (doc.exists) {
@@ -767,7 +754,7 @@
         const msgSnap = await db.collection('chats/global_chat_1/messages').get();
         msgSnap.forEach(async (doc) => { await doc.ref.delete(); });
         await db.collection('settings').doc('radio').delete();
-        alert("База очищена!");
+        alert("База очищена! Теперь вы можете зарегистрироваться заново.");
         auth.signOut(); 
       } catch (e) { alert("Ошибка: " + e.message); }
     });
@@ -816,10 +803,7 @@
 
       try {
         const groupRef = await db.collection('groups').add({
-          name: groupName,
-          members: Array.from(memberUids),
-          owner: currentUserId,
-          createdAt: Date.now()
+          name: groupName, members: Array.from(memberUids), owner: currentUserId, createdAt: Date.now()
         });
         groupModal.style.display = 'none';
         document.getElementById('group-name-input').value = '';
