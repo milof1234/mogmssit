@@ -430,7 +430,6 @@
 
     const CREATOR_PHONE = "79254699801"; 
     let currentUserId = null, currentUserPhone = null, currentUserUsername = null, isUserMuted = false;
-    // ЖЕСТКО ФИКСИРУЕМ ПЕРЕМЕННЫЕ ПУТИ
     let activeChatId = "global_chat_1";
     let activeChatPath = "chats/global_chat_1/messages";
     let currentUserAvatar = null;
@@ -1003,7 +1002,6 @@
       item.addEventListener('click', (e) => { selectChat(e.currentTarget.dataset.id, e.currentTarget.dataset.name); });
     });
 
-    // ЖЕСТКО ФИКСИРУЕМ ПУТЬ ПРИ ВЫБОРЕ ЧАТА
     function selectChat(chatId, name) {
       activeChatId = chatId;
       activeChatPath = `chats/${chatId}/messages`;
@@ -1019,28 +1017,39 @@
     document.getElementById('btn-send').addEventListener('click', sendText);
     document.getElementById('message-text').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendText(); });
     
+    // ДИАГНОСТИКА ОТПРАВКИ
     async function sendText() {
-      if (isUserMuted) return;
-      const text = document.getElementById('message-text').value;
-      if (!text.trim()) return;
+      alert("1. Функция отправки вызвана. Путь: " + activeChatPath); // Диагностика
       
-      // ПРОВЕРКА ПУТИ ПЕРЕД ОТПРАВКОЙ
+      if (isUserMuted) {
+        alert("2. Вы замьючены!");
+        return;
+      }
+      
+      const text = document.getElementById('message-text').value;
+      if (!text.trim()) {
+        alert("2. Пустой текст сообщения!");
+        return;
+      }
+      
       if (!activeChatPath || activeChatPath.includes('undefined')) {
-        alert("Ошибка: Не выбран чат! Путь: " + activeChatPath);
+        alert("2. Ошибка: Не выбран чат! Путь: " + activeChatPath);
         return;
       }
 
       try {
+        alert("3. Попытка отправки в базу...");
         await db.collection(activeChatPath).add({
           senderId: currentUserId, senderUsername: currentUserUsername, senderPhone: currentUserPhone, senderAvatar: currentUserAvatar,
           senderRole: currentUserRole, senderVerified: currentUserVerified,
           type: "text", content: text,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
+        alert("4. Сообщение успешно отправлено!");
         document.getElementById('message-text').value = '';
       } catch (err) {
         console.error("Send Text Error:", err);
-        alert("Ошибка отправки сообщения!\nПричина: " + err.message + "\nПуть: " + activeChatPath);
+        alert("ОШИБКА ОТПРАВКИ:\n" + err.message);
       }
     }
 
