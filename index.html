@@ -101,7 +101,7 @@
     .profile-name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
     .crown-icon { fill: var(--gold); transition: all 0.3s; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5)); width: 18px; height: 18px; }
     .crown-container:hover .crown-icon { filter: drop-shadow(0 0 8px var(--gold)) drop-shadow(0 0 20px var(--gold)); transform: scale(1.2) rotate(-10deg); }
-    .verified-icon { fill: var(--accent); width: 14px; height: 14px; flex-shrink: 0; }
+    .verified-icon { fill: var(--accent); width: 14px; height: 14px; flex-shrink: 0; vertical-align: middle; }
 
     .chat-area { flex: 1; display: flex; flex-direction: column; width: 100%; background: var(--bg-main); height: 100%; }
     .chat-header { height: 60px; padding: 0 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg-sidebar); }
@@ -120,6 +120,12 @@
     .audio-player { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 20px; margin-top: 4px; }
     .play-btn { background: var(--accent); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     
+    .gift-card { max-width: 220px; padding: 15px; text-align: center; border-radius: 18px; background: linear-gradient(135deg, #4c1d95, #6d28d9); border: 1px solid #a78bfa; box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3); }
+    .gift-text-top { font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 10px; }
+    .gift-svg { display: flex; justify-content: center; margin: 10px 0; }
+    .gift-recipient { font-size: 14px; color: white; font-weight: bold; margin-top: 5px; }
+    .gift-text-bottom { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px; }
+    
     .muted-warning { text-align: center; color: var(--danger); font-size: 14px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 10px; margin: 10px; display: none; }
     .input-area { padding: 12px; display: flex; gap: 8px; align-items: center; border-top: 1px solid var(--border); background: var(--bg-sidebar); }
     .input-wrapper { flex: 1; background: var(--bg-input); border-radius: 24px; display: flex; align-items: center; padding: 5px 5px 5px 15px; transition: 0.3s; }
@@ -127,7 +133,6 @@
     .recording-timer { color: var(--danger); font-weight: 600; font-size: 16px; padding: 0 10px; display: none; }
     .input-area.recording .input-wrapper { border: 1px solid var(--danger); background: rgba(239, 68, 68, 0.1); }
     .input-area.recording .input-wrapper input[type="text"] { display: none; }
-    .input-area.recording .recording-timer { display: block; }
     .input-area.recording #btn-attach { display: none; }
 
     .btn-icon { width: 44px; height: 44px; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; flex-shrink: 0; }
@@ -172,6 +177,7 @@
     .btn-unverify { border-color: var(--text-muted); color: var(--text-muted); }
     .btn-admin { border-color: #a78bfa; color: #a78bfa; }
     .btn-unadmin { border-color: var(--text-muted); color: var(--text-muted); }
+    .btn-gift-give { border-color: var(--gold); color: var(--gold); }
     .input-text { width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); margin-bottom: 10px; outline: none; font-size: 14px; }
     .btn-launch-radio { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; margin-bottom: 10px; }
 
@@ -261,7 +267,7 @@
           </button>
         </div>
         <div class="chat-list" id="chat-list">
-          <div class="chat-item active" data-path="chats/global_chat_1/messages" data-name="Общий чат">
+          <div class="chat-item active" data-id="global_chat_1" data-name="Общий чат">
             <div class="chat-avatar" style="background:#8b5cf6;">#</div>
             <div class="chat-info"><div class="chat-name">Общий чат</div><div class="chat-last">Чат для всех</div></div>
           </div>
@@ -292,6 +298,9 @@
             <input type="text" id="message-text" placeholder="Написать сообщение...">
             <div class="recording-timer" id="recording-timer">0:00</div>
           </div>
+          <button class="btn-icon" id="btn-gift" title="Подарить мишку">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+          </button>
           <button class="btn-icon send-btn" id="btn-send" title="Отправить">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
           </button>
@@ -390,6 +399,22 @@
     </div>
   </div>
 
+  <div id="gift-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Отправить подарок</h3>
+        <button class="close-modal" id="close-gift-modal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Юзернейм получателя</div>
+        <input type="text" id="gift-recipient-input" class="input-text" placeholder="Например: ivan_007">
+      </div>
+      <button class="btn-upload-avatar" id="btn-send-gift" style="background: var(--accent); color: white; border: none;">Подарить Мишку</button>
+    </div>
+  </div>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyApifDrGuoHFtdU1ZZtPRUWvkFgjMFyCEY",
@@ -404,8 +429,14 @@
     const db = firebase.firestore();
 
     const CREATOR_PHONE = "79254699801"; 
-    let currentUserId = null, currentUserPhone = null, currentUserUsername = null, isUserMuted = false, activeChatPath = "chats/global_chat_1/messages", currentUserAvatar = null;
+    let currentUserId = null, currentUserPhone = null, currentUserUsername = null, isUserMuted = false;
+    // ЖЕСТКО ФИКСИРУЕМ ПЕРЕМЕННЫЕ ПУТИ
+    let activeChatId = "global_chat_1";
+    let activeChatPath = "chats/global_chat_1/messages";
+    let currentUserAvatar = null;
     let currentUserRole = "user", currentUserVerified = false, lastThemeChange = 0, lastUsernameChange = 0;
+    let currentUserGifts = 0;
+    let msgListener = null, chatsListener = null;
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -447,7 +478,7 @@
       try { 
         await auth.createUserWithEmailAndPassword(fakeEmail, password); 
         await db.collection('users').doc(auth.currentUser.uid).set({ 
-          username: username, phone: phone, uid: auth.currentUser.uid, role: "user", verified: false, lastThemeChange: 0, lastUsernameChange: 0 
+          username: username, phone: phone, uid: auth.currentUser.uid, role: "user", verified: false, lastThemeChange: 0, lastUsernameChange: 0, gifts: 0
         });
       } catch (regError) { 
         if (regError.code === 'auth/email-already-in-use') alert("Этот номер уже зарегистрирован! Если забыли пароль — нажмите 'Сбросить'.");
@@ -491,11 +522,10 @@
         try {
           let userDoc = await db.collection('users').doc(currentUserId).get();
           
-          // АВТО-ВОССТАНОВЛЕНИЕ ПРОФИЛЯ
           if (!userDoc.exists) {
             const defaultUsername = `user_${currentUserPhone.slice(-4)}`;
             await db.collection('users').doc(currentUserId).set({
-              username: defaultUsername, phone: currentUserPhone, uid: currentUserId, role: "user", verified: false, lastThemeChange: 0, lastUsernameChange: 0
+              username: defaultUsername, phone: currentUserPhone, uid: currentUserId, role: "user", verified: false, lastThemeChange: 0, lastUsernameChange: 0, gifts: 0
             });
             userDoc = await db.collection('users').doc(currentUserId).get();
           }
@@ -505,6 +535,7 @@
           currentUserVerified = userDoc.data().verified || false;
           lastThemeChange = userDoc.data().lastThemeChange || 0;
           lastUsernameChange = userDoc.data().lastUsernameChange || 0;
+          currentUserGifts = userDoc.data().gifts || 0;
           
           if (userDoc.data().avatar) {
             currentUserAvatar = userDoc.data().avatar;
@@ -512,31 +543,17 @@
           }
           if (userDoc.data().theme) applyTheme(userDoc.data().theme);
 
-          const isCreator = currentUserPhone === CREATOR_PHONE;
-          const isAdmin = currentUserRole === "admin";
-
-          if (isCreator) document.getElementById('admin-btn-top').style.display = 'flex';
-          else document.getElementById('admin-btn-top').style.display = 'none';
-
-          if (isCreator || isAdmin) {
-            document.getElementById('admin-hammer-btn').style.display = 'flex';
-            loadAdminUserList(isCreator);
-          } else {
-            document.getElementById('admin-hammer-btn').style.display = 'none';
-          }
-
-          if (!isCreator) document.getElementById('radio-section').style.display = 'none';
-          else document.getElementById('radio-section').style.display = 'block';
-          
+          updateAdminUI();
           updateProfileUI();
           document.getElementById('new-username').placeholder = `Текущий: @${currentUserUsername}`;
           
           document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('app-container').style.display = 'flex';
-          listenToMuteStatus();
-          listenToMessages();
+          
+          listenToUserChanges();
+          listenToChats();
           listenToBgSound();
-          listenToGroups();
+          selectChat('global_chat_1', 'Общий чат');
         } catch (dbError) {
           alert("Ошибка базы данных: " + dbError.message);
           auth.signOut();
@@ -549,13 +566,71 @@
       }
     });
 
+    function updateAdminUI() {
+      const isCreator = currentUserPhone === CREATOR_PHONE;
+      const isAdmin = currentUserRole === "admin";
+
+      if (isCreator) document.getElementById('admin-btn-top').style.display = 'flex';
+      else document.getElementById('admin-btn-top').style.display = 'none';
+
+      if (isCreator || isAdmin) {
+        document.getElementById('admin-hammer-btn').style.display = 'flex';
+        loadAdminUserList(isCreator);
+      } else {
+        document.getElementById('admin-hammer-btn').style.display = 'none';
+      }
+
+      if (!isCreator) document.getElementById('radio-section').style.display = 'none';
+      else document.getElementById('radio-section').style.display = 'block';
+    }
+
     function updateProfileUI() {
       let profileNameText = `@${currentUserUsername} `;
       const isCreator = currentUserPhone === CREATOR_PHONE;
-      if (isCreator) profileNameText += '<span class="crown-container" style="display:inline-flex;"><svg class="crown-icon" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg></span>';
-      else if (currentUserVerified) profileNameText += '<svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+      if (isCreator) profileNameText += '<span class="crown-container" style="display:inline-flex;"><svg class="crown-icon" width="18" height="18" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg></span>';
+      else if (currentUserVerified) profileNameText += '<svg class="verified-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
       document.getElementById('current-user-name').innerHTML = profileNameText;
       if (!currentUserAvatar) document.getElementById('profile-avatar-btn').innerText = currentUserUsername.charAt(0).toUpperCase();
+    }
+
+    function getVerifiedBadge(isVerified) {
+      return isVerified ? '<svg class="verified-icon" width="14" height="14" viewBox="0 0 24 24" style="display:inline-block; vertical-align:middle;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' : '';
+    }
+
+    function listenToUserChanges() {
+      db.collection('users').doc(currentUserId).onSnapshot((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          isUserMuted = data.isMuted || false;
+          
+          const newVerified = data.verified || false;
+          const newRole = data.role || "user";
+          const newUsername = data.username || currentUserPhone;
+          const newGifts = data.gifts || 0;
+          
+          let needsUIUpdate = false;
+          if (newVerified !== currentUserVerified) { currentUserVerified = newVerified; needsUIUpdate = true; }
+          if (newRole !== currentUserRole) { currentUserRole = newRole; needsUIUpdate = true; }
+          if (newUsername !== currentUserUsername) { currentUserUsername = newUsername; needsUIUpdate = true; }
+          if (newGifts !== currentUserGifts) { currentUserGifts = newGifts; }
+          
+          if (needsUIUpdate) {
+            updateProfileUI();
+            updateAdminUI();
+          }
+
+          const warning = document.getElementById('muted-warning');
+          const inputWrapper = document.querySelector('.input-wrapper');
+          const btnRecord = document.getElementById('btn-record');
+          const btnSend = document.getElementById('btn-send');
+          const btnGift = document.getElementById('btn-gift');
+          if (isUserMuted) {
+            warning.style.display = 'block'; inputWrapper.style.display = 'none'; btnRecord.style.display = 'none'; btnSend.style.display = 'none'; btnGift.style.display = 'none';
+          } else {
+            warning.style.display = 'none'; inputWrapper.style.display = 'flex'; btnRecord.style.display = 'flex'; btnSend.style.display = 'flex'; btnGift.style.display = 'flex';
+          }
+        }
+      });
     }
 
     document.getElementById('btn-change-username').addEventListener('click', async () => {
@@ -668,23 +743,6 @@
       await db.collection('settings').doc('radio').delete(); alert("Радио остановлено!");
     });
 
-    function listenToMuteStatus() {
-      db.collection('users').doc(currentUserId).onSnapshot((doc) => {
-        if (doc.exists) {
-          isUserMuted = doc.data().isMuted || false;
-          const warning = document.getElementById('muted-warning');
-          const inputWrapper = document.querySelector('.input-wrapper');
-          const btnRecord = document.getElementById('btn-record');
-          const btnSend = document.getElementById('btn-send');
-          if (isUserMuted) {
-            warning.style.display = 'block'; inputWrapper.style.display = 'none'; btnRecord.style.display = 'none'; btnSend.style.display = 'none';
-          } else {
-            warning.style.display = 'none'; inputWrapper.style.display = 'flex'; btnRecord.style.display = 'flex'; btnSend.style.display = 'flex';
-          }
-        }
-      });
-    }
-
     function loadAdminUserList(isCreator) {
       db.collection('users').onSnapshot((snapshot) => {
         const listContainer = document.getElementById('user-list-admin');
@@ -700,6 +758,7 @@
             <div class="admin-actions">
               <button class="btn-adm ${isMuted ? 'btn-unban' : 'btn-ban'} btn-mute-toggle" data-uid="${userData.uid}" data-muted="${isMuted}">${isMuted ? 'Разбан' : 'Бан'}</button>
               <button class="btn-adm ${isVerified ? 'btn-unverify' : 'btn-verify'} btn-verify-toggle" data-uid="${userData.uid}" data-verified="${isVerified}">${isVerified ? 'Снять галочку' : 'Галочка'}</button>
+              <button class="btn-adm btn-gift-give" data-uid="${userData.uid}">+ Мишка</button>
           `;
           if (isCreator) {
             actionsHtml += `<button class="btn-adm ${isAdmin ? 'btn-unadmin' : 'btn-admin'} btn-admin-toggle" data-uid="${userData.uid}">${isAdmin ? 'Снять админ' : 'Сделать админом'}</button>`;
@@ -712,8 +771,8 @@
             <div style="display: flex; align-items: center; gap: 10px; flex: 1; overflow: hidden;">
               <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">${userData.username ? userData.username.charAt(0).toUpperCase() : 'U'}</div>
               <div style="display: flex; flex-direction: column; overflow: hidden;">
-                <span style="font-size: 14px; color: var(--text-main); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@${userData.username || 'Unknown'} ${userData.verified ? '<svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' : ''}</span>
-                <span style="font-size: 11px; color: var(--text-muted);">${userData.phone}</span>
+                <span style="font-size: 14px; color: var(--text-main); font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@${userData.username || 'Unknown'} ${getVerifiedBadge(isVerified)}</span>
+                <span style="font-size: 11px; color: var(--text-muted);">${userData.phone} | Подарков: ${userData.gifts || 0}</span>
               </div>
             </div>
             ${actionsHtml}
@@ -731,6 +790,12 @@
           btn.addEventListener('click', async (e) => {
             const b = e.currentTarget;
             await db.collection('users').doc(b.dataset.uid).update({ verified: b.dataset.verified === 'true' ? false : true });
+          });
+        });
+        document.querySelectorAll('.btn-gift-give').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const uid = e.currentTarget.dataset.uid;
+            await db.collection('users').doc(uid).update({ gifts: firebase.firestore.FieldValue.increment(1) });
           });
         });
         if (isCreator) {
@@ -751,8 +816,12 @@
       try {
         const usersSnap = await db.collection('users').get();
         usersSnap.forEach(async (doc) => { await doc.ref.delete(); });
-        const msgSnap = await db.collection('chats/global_chat_1/messages').get();
-        msgSnap.forEach(async (doc) => { await doc.ref.delete(); });
+        const chatsSnap = await db.collection('chats').get();
+        chatsSnap.forEach(async (chatDoc) => {
+          const msgSnap = await chatDoc.ref.collection('messages').get();
+          msgSnap.forEach(async (m) => m.ref.delete());
+          await chatDoc.ref.delete();
+        });
         await db.collection('settings').doc('radio').delete();
         alert("База очищена! Теперь вы можете зарегистрироваться заново.");
         auth.signOut(); 
@@ -802,29 +871,40 @@
       }
 
       try {
-        const groupRef = await db.collection('groups').add({
-          name: groupName, members: Array.from(memberUids), owner: currentUserId, createdAt: Date.now()
+        const groupRef = await db.collection('chats').add({
+          type: 'group', name: groupName, members: Array.from(memberUids), owner: currentUserId, createdAt: Date.now()
         });
         groupModal.style.display = 'none';
         document.getElementById('group-name-input').value = '';
         document.getElementById('group-members-input').value = '';
-        selectChat(`groups/${groupRef.id}/messages`, groupName);
+        selectChat(groupRef.id, groupName);
       } catch (err) {
         alert("Ошибка создания группы: " + err.message);
       }
     });
 
-    let groupListener = null;
-    function listenToGroups() {
-      if (groupListener) groupListener();
-      groupListener = db.collection('groups').where('members', 'array-contains', currentUserId).onSnapshot((snapshot) => {
+    function listenToChats() {
+      if (chatsListener) chatsListener();
+      const q = db.collection('chats').where('members', 'array-contains', currentUserId);
+      chatsListener = q.onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
-          if (change.type === 'added') {
-            const groupData = change.doc.data();
-            addChatToList(`groups/${change.doc.id}/messages`, groupData.name, true, false);
+          const chatData = change.doc.data();
+          const chatId = change.doc.id;
+          
+          if (change.type === 'added' || change.type === 'modified') {
+            let displayName = '';
+            let isGroup = false;
+            if (chatData.type === 'group') {
+              displayName = chatData.name;
+              isGroup = true;
+            } else if (chatData.type === 'private') {
+              const otherIndex = chatData.members.indexOf(currentUserId) === 0 ? 1 : 0;
+              displayName = `@${chatData.usernames[otherIndex]}`;
+            }
+            if (displayName) addChatToList(chatId, displayName, isGroup, false);
           }
           if (change.type === 'removed') {
-            const item = document.querySelector(`.chat-item[data-path="groups/${change.doc.id}/messages"]`);
+            const item = document.querySelector(`.chat-item[data-id="${chatId}"]`);
             if (item) item.remove();
           }
         });
@@ -883,38 +963,53 @@
       let targetUid = '', targetUsername = '';
       snapshot.forEach(doc => { targetUid = doc.id; targetUsername = doc.data().username; });
       if (targetUid === currentUserId) return alert("Это вы сами.");
+      
       const chatId = [currentUserId, targetUid].sort().join('_');
-      addChatToList(`chats/${chatId}/messages`, `@${targetUsername}`, false, true);
+      const members = [currentUserId, targetUid];
+      const usernames = [currentUserUsername, targetUsername];
+      
+      await db.collection('chats').doc(chatId).set({
+        type: 'private',
+        members: members,
+        usernames: usernames,
+        createdAt: Date.now()
+      }, { merge: true });
+      
+      selectChat(chatId, `@${targetUsername}`);
       document.getElementById('search-user').value = '';
     }
     document.getElementById('search-user').addEventListener('keypress', (e) => { if (e.key === 'Enter') searchUser(); });
     document.getElementById('btn-search-user').addEventListener('click', searchUser);
 
-    function addChatToList(path, name, isGroup = false, autoSelect = true) {
+    function addChatToList(chatId, name, isGroup = false, autoSelect = true) {
       const list = document.getElementById('chat-list');
-      if (document.querySelector(`.chat-item[data-path="${path}"]`)) {
-        if (autoSelect) selectChat(path, name);
+      if (document.querySelector(`.chat-item[data-id="${chatId}"]`)) {
+        const existing = document.querySelector(`.chat-item[data-id="${chatId}"]`);
+        existing.querySelector('.chat-name').innerText = name;
+        if (autoSelect) selectChat(chatId, name);
         return;
       }
       const div = document.createElement('div');
-      div.className = 'chat-item'; div.dataset.path = path; div.dataset.name = name;
+      div.className = 'chat-item'; div.dataset.id = chatId; div.dataset.name = name;
       const bg = isGroup ? '#10b981' : '#3b82f6';
       const firstChar = name.charAt(0) === '@' ? name.charAt(1).toUpperCase() : name.charAt(0).toUpperCase();
       div.innerHTML = `<div class="chat-avatar" style="background:${bg};">${firstChar}</div><div class="chat-info"><div class="chat-name">${name}</div><div class="chat-last">${isGroup ? 'Группа' : 'Личный чат'}</div></div>`;
-      div.addEventListener('click', () => selectChat(path, name));
+      div.addEventListener('click', () => selectChat(chatId, name));
       list.prepend(div); 
-      if (autoSelect) selectChat(path, name);
+      if (autoSelect) selectChat(chatId, name);
     }
 
     document.querySelectorAll('.chat-item').forEach(item => {
-      item.addEventListener('click', (e) => { selectChat(e.currentTarget.dataset.path, e.currentTarget.dataset.name); });
+      item.addEventListener('click', (e) => { selectChat(e.currentTarget.dataset.id, e.currentTarget.dataset.name); });
     });
 
-    function selectChat(path, name) {
-      activeChatPath = path;
+    // ЖЕСТКО ФИКСИРУЕМ ПУТЬ ПРИ ВЫБОРЕ ЧАТА
+    function selectChat(chatId, name) {
+      activeChatId = chatId;
+      activeChatPath = `chats/${chatId}/messages`;
       document.getElementById('active-chat-name').innerText = name;
       document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-      const activeEl = document.querySelector(`.chat-item[data-path="${path}"]`);
+      const activeEl = document.querySelector(`.chat-item[data-id="${chatId}"]`);
       if (activeEl) activeEl.classList.add('active');
       document.getElementById('main-content').classList.add('mobile-chat-open');
       listenToMessages();
@@ -923,18 +1018,67 @@
 
     document.getElementById('btn-send').addEventListener('click', sendText);
     document.getElementById('message-text').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendText(); });
+    
     async function sendText() {
       if (isUserMuted) return;
       const text = document.getElementById('message-text').value;
       if (!text.trim()) return;
-      await db.collection(activeChatPath).add({
-        senderId: currentUserId, senderUsername: currentUserUsername, senderPhone: currentUserPhone, senderAvatar: currentUserAvatar,
-        senderRole: currentUserRole, senderVerified: currentUserVerified,
-        type: "text", content: text,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      document.getElementById('message-text').value = '';
+      
+      // ПРОВЕРКА ПУТИ ПЕРЕД ОТПРАВКОЙ
+      if (!activeChatPath || activeChatPath.includes('undefined')) {
+        alert("Ошибка: Не выбран чат! Путь: " + activeChatPath);
+        return;
+      }
+
+      try {
+        await db.collection(activeChatPath).add({
+          senderId: currentUserId, senderUsername: currentUserUsername, senderPhone: currentUserPhone, senderAvatar: currentUserAvatar,
+          senderRole: currentUserRole, senderVerified: currentUserVerified,
+          type: "text", content: text,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('message-text').value = '';
+      } catch (err) {
+        console.error("Send Text Error:", err);
+        alert("Ошибка отправки сообщения!\nПричина: " + err.message + "\nПуть: " + activeChatPath);
+      }
     }
+
+    const giftModal = document.getElementById('gift-modal');
+    document.getElementById('btn-gift').addEventListener('click', () => {
+      if (isUserMuted) return;
+      if (currentUserGifts <= 0) return alert("У вас нет подарков! Обратитесь к Создателю или Админу, чтобы они выдали вам мишек.");
+      giftModal.style.display = 'flex';
+    });
+    document.getElementById('close-gift-modal').addEventListener('click', () => giftModal.style.display = 'none');
+    giftModal.addEventListener('click', (e) => { if (e.target === giftModal) giftModal.style.display = 'none'; });
+
+    document.getElementById('btn-send-gift').addEventListener('click', async () => {
+      const recipient = document.getElementById('gift-recipient-input').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+      if (!recipient) return alert("Введите корректный юзернейм");
+
+      try {
+        await db.collection('users').doc(currentUserId).update({
+          gifts: firebase.firestore.FieldValue.increment(-1)
+        });
+
+        await db.collection(activeChatPath).add({
+          senderId: currentUserId,
+          senderUsername: currentUserUsername,
+          senderRole: currentUserRole,
+          senderVerified: currentUserVerified,
+          type: "gift",
+          giftType: "bear",
+          recipient: recipient,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById('gift-recipient-input').value = '';
+        giftModal.style.display = 'none';
+      } catch (err) {
+        alert("Ошибка отправки подарка: " + err.message);
+      }
+    });
 
     document.getElementById('btn-attach').addEventListener('click', () => document.getElementById('file-input').click());
     document.getElementById('file-input').addEventListener('change', (e) => {
@@ -953,12 +1097,16 @@
           canvas.height = img.height * scale;
           ctx.drawImage(img, 0, 0,canvas.width, canvas.height);
           const base64String = canvas.toDataURL('image/jpeg', 0.7);
-          await db.collection(activeChatPath).add({
-            senderId: currentUserId, senderUsername: currentUserUsername, senderPhone: currentUserPhone, senderAvatar: currentUserAvatar,
-            senderRole: currentUserRole, senderVerified: currentUserVerified,
-            type: "image", content: base64String,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
+          try {
+            await db.collection(activeChatPath).add({
+              senderId: currentUserId, senderUsername: currentUserUsername, senderPhone: currentUserPhone, senderAvatar: currentUserAvatar,
+              senderRole: currentUserRole, senderVerified: currentUserVerified,
+              type: "image", content: base64String,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          } catch (err) {
+            alert("Ошибка загрузки фото: " + err.message);
+          }
         };
         img.src = event.target.result;
       };
@@ -986,12 +1134,16 @@
             reader.readAsDataURL(audioBlob);
             reader.onloadend = async () => {
               const base64data = reader.result;
-              await db.collection(activeChatPath).add({
-                senderId: currentUserId, senderUsername: currentUserUsername, senderPhone: currentUserPhone, senderAvatar: currentUserAvatar,
-                senderRole: currentUserRole, senderVerified: currentUserVerified,
-                type: "audio", content: base64data,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-              });
+              try {
+                await db.collection(activeChatPath).add({
+                  senderId: currentUserId, senderUsername: currentUserUsername, senderPhone: currentUserPhone, senderAvatar: currentUserAvatar,
+                  senderRole: currentUserRole, senderVerified: currentUserVerified,
+                  type: "audio", content: base64data,
+                  timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+              } catch (err) {
+                alert("Ошибка отправки голосового: " + err.message);
+              }
             };
           };
           mediaRecorder.start();
@@ -1019,7 +1171,6 @@
       }
     });
 
-    let msgListener = null;
     function listenToMessages() {
       if (msgListener) msgListener(); 
       const q = db.collection(activeChatPath).orderBy("timestamp", "asc");
@@ -1038,17 +1189,18 @@
             let badge = '';
             if (msg.senderPhone === CREATOR_PHONE) {
               authorClass = 'msg-author creator';
-              badge = '<span class="crown-container"><svg class="crown-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg></span>';
+              badge = '<span class="crown-container"><svg class="crown-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg></span>';
             } else if (msg.senderRole === 'admin') {
               authorClass = 'msg-author admin';
             } else if (msg.senderVerified) {
-              badge = '<svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+              badge = '<svg class="verified-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
             }
             let displayName = msg.senderUsername ? `@${msg.senderUsername}` : msg.senderPhone;
             groupDiv.innerHTML += `<div class="${authorClass}">${displayName} ${badge}</div>`;
           }
           const msgDiv = document.createElement('div');
           msgDiv.className = `message ${msg.senderId === currentUserId ? 'sent' : 'received'}`;
+          
           if (msg.type === 'text') msgDiv.textContent = msg.content;
           else if (msg.type === 'image') msgDiv.innerHTML = `<img src="${msg.content}" alt="Фото">`;
           else if (msg.type === 'audio') {
@@ -1061,11 +1213,24 @@
                 <span style="font-size: 14px; color: var(--text-muted);">Голосовое сообщение</span>
               </div>
             `;
+          } else if (msg.type === 'gift') {
+            const bearSvg = `<svg width="48" height="48" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#8b5cf6"/><circle cx="6" cy="6" r="3" fill="#8b5cf6"/><circle cx="18" cy="6" r="3" fill="#8b5cf6"/><circle cx="6" cy="6" r="1.5" fill="#a78bfa"/><circle cx="18" cy="6" r="1.5" fill="#a78bfa"/><circle cx="9" cy="11" r="1.5" fill="white"/><circle cx="15" cy="11" r="1.5" fill="white"/><ellipse cx="12" cy="15" rx="2" ry="1.5" fill="#3b82f6"/></svg>`;
+            msgDiv.classList.add('gift-card');
+            msgDiv.innerHTML = `
+              <div class="gift-text-top">${msg.senderUsername} подарил(а) Мишку</div>
+              <div class="gift-svg">${bearSvg}</div>
+              <div class="gift-recipient">@${msg.recipient}</div>
+              <div class="gift-text-bottom">Получен подарок</div>
+            `;
           }
+          
           groupDiv.appendChild(msgDiv);
           container.appendChild(groupDiv);
         });
         container.scrollTop = container.scrollHeight;
+      }, (error) => {
+        console.error("Listen Messages Error:", error);
+        alert("Ошибка загрузки сообщений!\nПричина: " + error.message + "\nПуть: " + activeChatPath);
       });
     }
   </script>
