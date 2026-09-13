@@ -34,10 +34,12 @@
     }
     @keyframes gradient-wave { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--body-bg); color: var(--text-main); display: flex; justify-content: center; height: 100vh; height: 100dvh; overflow: hidden; }
+    /* ЖЕСТКАЯ ФИКСАЦИЯ ВЫСОТЫ, ЧТОБЫ НЕ БЫЛО "ПРИПЛЮСНУТО" */
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+    * { box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--body-bg); color: var(--text-main); display: flex; justify-content: center; }
 
-    #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 20px; position: relative; }
+    #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 20px; position: relative; }
     #auth-screen::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 300px; background: linear-gradient(180deg, var(--accent) 0%, transparent 100%); opacity: 0.1; }
     .auth-card { position: relative; background: var(--bg-sidebar); padding: 40px 30px; border-radius: 20px; width: 100%; max-width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1px solid var(--border); z-index: 1; }
     .auth-logo { width: 60px; height: 60px; background: var(--accent); border-radius: 18px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; font-weight: 700; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4); }
@@ -554,7 +556,7 @@
           listenToBgSound();
           selectChat('global_chat_1', 'Общий чат');
         } catch (dbError) {
-          alert("Ошибка базы данных: " + dbError.message);
+          console.error("DB Error:", dbError);
           auth.signOut();
         }
       } else {
@@ -1022,10 +1024,7 @@
       const text = document.getElementById('message-text').value;
       if (!text.trim()) return;
       
-      if (!activeChatPath || activeChatPath.includes('undefined')) {
-        alert("Ошибка: Не выбран чат! Путь: " + activeChatPath);
-        return;
-      }
+      if (!activeChatPath || activeChatPath.includes('undefined')) return;
 
       try {
         await db.collection(activeChatPath).add({
@@ -1037,7 +1036,6 @@
         document.getElementById('message-text').value = '';
       } catch (err) {
         console.error("Send Text Error:", err);
-        alert("ОШИБКА ОТПРАВКИ:\n" + err.message);
       }
     }
 
@@ -1073,7 +1071,7 @@
         document.getElementById('gift-recipient-input').value = '';
         giftModal.style.display = 'none';
       } catch (err) {
-        alert("Ошибка отправки подарка: " + err.message);
+        console.error("Send Gift Error:", err);
       }
     });
 
@@ -1102,7 +1100,7 @@
               timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
           } catch (err) {
-            alert("Ошибка загрузки фото: " + err.message);
+            console.error("Upload Photo Error:", err);
           }
         };
         img.src = event.target.result;
@@ -1139,7 +1137,7 @@
                   timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
               } catch (err) {
-                alert("Ошибка отправки голосового: " + err.message);
+                console.error("Upload Audio Error:", err);
               }
             };
           };
@@ -1157,7 +1155,7 @@
             timerEl.innerText = `${m}:${s < 10 ? '0' + s : s}`;
             if (seconds >= 30) document.getElementById('btn-record').click();
           }, 1000);
-        } catch (error) { alert("Нет доступа к микрофону."); }
+        } catch (error) { console.error("Mic Error:", error); }
       } else {
         clearInterval(timerInterval);
         mediaRecorder.stop();
@@ -1170,14 +1168,21 @@
 
     function listenToMessages() {
       if (msgListener) msgListener(); 
-      // Убрали orderBy, чтобы старые сообщения без timestamp не ломали чат
       const q = db.collection(activeChatPath);
       msgListener = q.onSnapshot((snapshot) => {
         const container = document.getElementById('messages-container');
         container.innerHTML = '';
+        
+        let messages = [];
+        snapshot.forEach(doc => messages.push(doc.data()));
+        messages.sort((a, b) => {
+            const timeA = a.timestamp?.toMillis() || 0;
+            const timeB = b.timestamp?.toMillis() || 0;
+            return timeA - timeB;
+        });
+
         let lastSenderId = null;
-        snapshot.forEach((doc) => {
-          const msg = doc.data();
+        messages.forEach((msg) => {
           const showAuthor = msg.senderId !== lastSenderId;
           lastSenderId = msg.senderId;
           const groupDiv = document.createElement('div');
@@ -1228,7 +1233,8 @@
         container.scrollTop = container.scrollHeight;
       }, (error) => {
         console.error("Listen Messages Error:", error);
-        alert("Ошибка загрузки сообщений!\nПричина: " + error.message + "\nПуть: " + activeChatPath);
+        const container = document.getElementById('messages-container');
+        container.innerHTML = '<div style="color: red; text-align: center; margin-top: 20px;">Ошибка загрузки сообщений. Проверьте правила базы данных.</div>';
       });
     }
   </script>
