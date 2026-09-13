@@ -1170,7 +1170,8 @@
 
     function listenToMessages() {
       if (msgListener) msgListener(); 
-      const q = db.collection(activeChatPath).orderBy("timestamp", "asc");
+      // Убрали orderBy, чтобы старые сообщения без timestamp не ломали чат
+      const q = db.collection(activeChatPath);
       msgListener = q.onSnapshot((snapshot) => {
         const container = document.getElementById('messages-container');
         container.innerHTML = '';
