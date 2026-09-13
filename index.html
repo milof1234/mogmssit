@@ -1017,35 +1017,23 @@
     document.getElementById('btn-send').addEventListener('click', sendText);
     document.getElementById('message-text').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendText(); });
     
-    // ДИАГНОСТИКА ОТПРАВКИ
     async function sendText() {
-      alert("1. Функция отправки вызвана. Путь: " + activeChatPath); // Диагностика
-      
-      if (isUserMuted) {
-        alert("2. Вы замьючены!");
-        return;
-      }
-      
+      if (isUserMuted) return;
       const text = document.getElementById('message-text').value;
-      if (!text.trim()) {
-        alert("2. Пустой текст сообщения!");
-        return;
-      }
+      if (!text.trim()) return;
       
       if (!activeChatPath || activeChatPath.includes('undefined')) {
-        alert("2. Ошибка: Не выбран чат! Путь: " + activeChatPath);
+        alert("Ошибка: Не выбран чат! Путь: " + activeChatPath);
         return;
       }
 
       try {
-        alert("3. Попытка отправки в базу...");
         await db.collection(activeChatPath).add({
           senderId: currentUserId, senderUsername: currentUserUsername, senderPhone: currentUserPhone, senderAvatar: currentUserAvatar,
           senderRole: currentUserRole, senderVerified: currentUserVerified,
           type: "text", content: text,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert("4. Сообщение успешно отправлено!");
         document.getElementById('message-text').value = '';
       } catch (err) {
         console.error("Send Text Error:", err);
@@ -1210,7 +1198,7 @@
           const msgDiv = document.createElement('div');
           msgDiv.className = `message ${msg.senderId === currentUserId ? 'sent' : 'received'}`;
           
-          if (msg.type === 'text') msgDiv.textContent = msg.content;
+          if (msg.type === 'text') msgDiv.innerText = msg.content;
           else if (msg.type === 'image') msgDiv.innerHTML = `<img src="${msg.content}" alt="Фото">`;
           else if (msg.type === 'audio') {
             msgDiv.innerHTML = `
