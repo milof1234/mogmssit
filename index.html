@@ -131,6 +131,10 @@
                 <button type="submit" id="authSubmitBtn" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 rounded-xl transition-colors mt-2 shadow-lg shadow-indigo-500/20 cursor-pointer">
                     Войти
                 </button>
+
+                <button type="button" onclick="resetAllData()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium py-2.5 rounded-xl transition-colors text-xs border border-red-500/20 flex items-center justify-center gap-2 mt-2 cursor-pointer">
+                    <i class="fa-solid fa-trash-can"></i> Очистить базу
+                </button>
             </form>
         </div>
     </div>
@@ -314,6 +318,9 @@
                     <button onclick="openProfileModal()" class="text-slate-400 hover:text-indigo-400 p-2 transition-colors cursor-pointer" title="Настройки профиля">
                         <i class="fa-solid fa-gear"></i>
                     </button>
+                    <button onclick="resetAllData()" class="text-slate-400 hover:text-red-400 p-2 transition-colors cursor-pointer" title="Очистить базу данных">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
                     <button onclick="logout()" class="text-slate-400 hover:text-red-400 p-2 transition-colors cursor-pointer" title="Выйти">
                         <i class="fa-solid fa-sign-out-alt"></i>
                     </button>
@@ -461,6 +468,8 @@
         let allGroupsMap = {};
         let presenceMap = {};
         let allMessagesList = [];
+        let rawMessagesMap = {};
+        let dbResetAt = 0;
         let activitiesMap = {};
         
         let mediaRecorder = null;
@@ -557,41 +566,7 @@
                 sessionStorage.setItem('cosmo_explicit_login', '1');
                 localStorage.setItem('cosmo_currentUser', JSON.stringify(user));
             }
-            registerActiveTabUser(user.id);
         }
-
-        function registerActiveTabUser(userId) {
-            if (!userId) return;
-            try {
-                const now = Date.now();
-                const raw = JSON.parse(localStorage.getItem('cosmo_active_tabs_map') || '{}');
-                const cleaned = {};
-                Object.keys(raw).forEach(tId => {
-                    if (raw[tId] && (now - raw[tId].ts) < 12000) {
-                        cleaned[tId] = raw[tId];
-                    }
-                });
-                cleaned[TAB_ID] = { userId: userId, ts: now };
-                localStorage.setItem('cosmo_active_tabs_map', JSON.stringify(cleaned));
-            } catch (e) {}
-        }
-
-        function isUserTakenByAnotherTab(userId) {
-            if (!userId) return false;
-            try {
-                const now = Date.now();
-                const raw = JSON.parse(localStorage.getItem('cosmo_active_tabs_map') || '{}');
-                return Object.keys(raw).some(tId => tId !== TAB_ID && raw[tId] && raw[tId].userId === userId && (now - raw[tId].ts) < 12000);
-            } catch (e) {
-                return false;
-            }
-        }
-
-        setInterval(() => {
-            if (currentUser && currentUser.id) {
-                registerActiveTabUser(currentUser.id);
-            }
-        }, 4000);
 
         function getGroupMembers(group) {
             if (!group || !group.memberIds) return [];
@@ -619,29 +594,31 @@
             return false;
         }
 
-        function switchTabAccount(userId) {
-            if (!userId || !allUsersMap[userId]) return;
-            currentUser = allUsersMap[userId];
-            saveCurrentTabUser(currentUser, true);
-            initPresence();
-            updateHeaderInfo();
-            checkUserMuteState();
-            if (activeChatUserId || activeGroupId) {
-                updateActiveChatHeader();
-                renderMessages(document.getElementById('chatSearchInput')?.value || '');
-            }
-            renderSidebarList();
+        function rebuildMessagesList() {
+            allMessagesList = Object.values(rawMessagesMap).filter(m => {
+                if (!m || !m.time) return false;
+                const t = new Date(m.time).getTime();
+                return !dbResetAt || t > dbResetAt;
+            });
+            allMessagesList.sort((a,b) => new Date(a.time).getTime() - new Date(b.time).getTime());
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             db.ref('users').on('value', (snapshot) => {
                 const raw = snapshot.val() || {};
+                if (raw.__reset__ && raw.__reset__.resetAt) {
+                    dbResetAt = Number(raw.__reset__.resetAt) || 0;
+                    rebuildMessagesList();
+                }
                 if (raw.__groups__ && typeof raw.__groups__ === 'object') {
                     allGroupsMap = raw.__groups__;
                     updateGroupsCount();
                     if (activeGroupId && allGroupsMap[activeGroupId]) {
                         updateActiveChatHeader();
                     }
+                } else {
+                    allGroupsMap = {};
+                    updateGroupsCount();
                 }
                 const filteredUsers = {};
                 Object.keys(raw).forEach(k => {
@@ -654,27 +631,20 @@
                 if (currentUser) {
                     if (allUsersMap[currentUser.id]) {
                         currentUser = allUsersMap[currentUser.id];
-                    } else if (currentUser.phone) {
-                        const matchedByPhone = Object.values(allUsersMap).find(
-                            u => cleanDigits(u.phone) && cleanDigits(u.phone) === cleanDigits(currentUser.phone)
-                        );
-                        if (matchedByPhone) {
-                            currentUser = matchedByPhone;
-                        }
+                        saveCurrentTabUser(currentUser, false);
+                        updateHeaderInfo();
+                        checkUserMuteState();
+                    } else if (Object.keys(allUsersMap).length === 0 || (dbResetAt && !allUsersMap[currentUser.id])) {
+                        // Database was cleared or account was removed
+                        sessionStorage.removeItem('cosmo_tab_user');
+                        sessionStorage.removeItem('cosmo_explicit_login');
+                        localStorage.removeItem('cosmo_currentUser');
+                        currentUser = null;
+                        activeChatUserId = null;
+                        activeGroupId = null;
+                        document.getElementById('mainApp').classList.add('hidden');
+                        document.getElementById('authModal').classList.remove('hidden');
                     }
-
-                    // Auto-resolve duplicate tab account if a second tab was opened without explicit login
-                    if (sessionStorage.getItem('cosmo_explicit_login') !== '1' && isUserTakenByAnotherTab(currentUser.id)) {
-                        const otherUsers = Object.values(allUsersMap).filter(u => u.id !== currentUser.id);
-                        if (otherUsers.length > 0) {
-                            currentUser = otherUsers[0];
-                            sessionStorage.setItem('cosmo_explicit_login', '1');
-                        }
-                    }
-
-                    saveCurrentTabUser(currentUser, false);
-                    updateHeaderInfo();
-                    checkUserMuteState();
                 }
                 if (activeChatUserId && allUsersMap[activeChatUserId]) {
                     updateActiveChatHeader();
@@ -701,9 +671,8 @@
             });
 
             db.ref('messages').on('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                allMessagesList = Object.values(data);
-                allMessagesList.sort((a,b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+                rawMessagesMap = snapshot.val() || {};
+                rebuildMessagesList();
                 if (activeChatUserId || activeGroupId) renderMessages();
                 renderSidebarList();
             });
@@ -870,31 +839,23 @@
         }
 
         async function resetAllData() {
-            if (currentUser && isAdmin(currentUser.phone)) {
-                if (confirm("Вы вошли как Администратор. Очистить ОБЛАЧНУЮ базу данных?")) {
-                    await db.ref().remove();
-                    localStorage.clear();
-                    location.reload();
-                }
-                return;
-            }
-            const phone = prompt("Введите номер телефона администратора:");
-            if (!phone || !isAdmin(phone)) {
-                alert("Ошибка: Не администратор!");
-                return;
-            }
-            const users = Object.values(allUsersMap);
-            const adminUser = users.find(u => isAdmin(u.phone));
-            if (adminUser && adminUser.password) {
-                const pass = prompt("Введите пароль администратора:");
-                if (pass !== adminUser.password) {
-                    alert("Ошибка: Неверный пароль!");
-                    return;
-                }
-            }
-            if (confirm("Вы действительно хотите полностью очистить всю базу данных?")) {
-                await db.ref().remove();
+            if (confirm("Вы действительно хотите полностью очистить всю базу данных (все аккаунты, группы и сообщения)?")) {
+                try {
+                    const snap = await db.ref('users').once('value');
+                    const raw = snap.val() || {};
+                    const promises = [];
+                    Object.keys(raw).forEach(k => {
+                        if (k !== '__reset__') {
+                            promises.push(db.ref('users/' + k).remove().catch(() => {}));
+                        }
+                    });
+                    promises.push(db.ref('users/__groups__').remove().catch(() => {}));
+                    promises.push(db.ref('users/__pinned__').remove().catch(() => {}));
+                    promises.push(db.ref('users/__reset__').set({ resetAt: Date.now() }).catch(() => {}));
+                    await Promise.all(promises);
+                } catch (e) {}
                 localStorage.clear();
+                sessionStorage.clear();
                 location.reload();
             }
         }
@@ -1679,17 +1640,7 @@
                 dot.classList.add('hidden');
 
                 const isCreator = group.creatorId === currentUser.id;
-                const otherMembers = memberIds.filter(id => id !== currentUser.id && allUsersMap[id]);
-                const switchOptions = memberIds
-                    .filter(id => allUsersMap[id])
-                    .map(id => `<option value="${id}" ${id === currentUser.id ? 'selected' : ''}>Вы: ${allUsersMap[id].name}</option>`)
-                    .join('');
-                const switcherHtml = memberIds.length > 1 ? `
-                    <select onchange="switchTabAccount(this.value)" title="Переключить активный аккаунт в этой вкладке" class="ml-2 bg-slate-800 border border-indigo-500/40 text-indigo-300 text-[11px] rounded-lg px-2 py-0.5 focus:outline-none cursor-pointer">
-                        ${switchOptions}
-                    </select>
-                ` : '';
-                chatNameEl.innerHTML = `${group.name} ${isCreator ? '<span class="text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20"><i class="fa-solid fa-crown mr-1"></i>Владелец</span>' : ''} ${switcherHtml}`;
+                chatNameEl.innerHTML = `${group.name} ${isCreator ? '<span class="text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20"><i class="fa-solid fa-crown mr-1"></i>Владелец</span>' : ''}`;
 
                 // Check group live recording or typing status
                 let grpAct = null;
