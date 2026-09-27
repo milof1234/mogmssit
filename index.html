@@ -518,6 +518,66 @@
             return `<span class="text-slate-400">был(а) ${date} в ${time}</span>`;
         }
 
+        const PROFANITY_PATTERNS = [
+            /х[уy][йiеeяиюл]/i,
+            /п[иi1][зz3][дd]/i,
+            /[еeё][бb6][аaоoуyиiеeыэюялтн]/i,
+            /[вb][ыy][еeё][бb6]/i,
+            /[зz3][аa][еeё][бb6]/i,
+            /[уy][еeё][бb6]/i,
+            /[дd][оo0][лl][бb6][оo0][еeё][бb6]/i,
+            /б[лl][я9]([дdтt]|$|\s|_|-)/i,
+            /б[лl][я9][дdтt]/i,
+            /с[уy][кk][аaиi]/i,
+            /с[уy]ч[кkаa]/i,
+            /м[уy][дd][аaоoиi][кkлlзво]/i,
+            /г[аaоo0]н[дd][оo0]н/i,
+            /п[иi1еe][дd][оo0аa][рp]/i,
+            /п[еe][дd][иi1][кk]/i,
+            /ш[лl]ю[хxш]/i,
+            /ш[аa][лl][аa][вb]/i,
+            /з[аa][лl][уy]п/i,
+            /м[аa]н[дd][аaыуе]/i,
+            /д[рp][оo0]ч/i,
+            /г[оo0][вb]н/i,
+            /ж[оo0]п[аaыуе]/i,
+            /д[еe]б[иi1][лl]/i,
+            /д[аa][уy]н/i,
+            /м[рp][аa]з[ьот]/i,
+            /f+u+c*k+/i,
+            /s+h+i+t+/i,
+            /b+i+t+c+h+/i,
+            /c+u+n+t+/i,
+            /d+i+c+k+/i,
+            /p+u+s+s+y+/i,
+            /a+s+s+h+o+l+e+/i,
+            /w+h+o+r+e+/i,
+            /s+l+u+t+/i,
+            /n+i+g+g+(e+r+|a+)/i,
+            /f+a+g+g*o*t*/i
+        ];
+
+        function containsProfanity(input) {
+            if (!input) return false;
+            const raw = String(input).toLowerCase().replace(/ё/g, 'е');
+            const collapsed = raw.replace(/[\s_\-.,!@#$%^&*()+=[\]{};:'"|\\/<>?~`]+/g, '');
+            const leetNormalized = collapsed
+                .replace(/0/g, 'о')
+                .replace(/3/g, 'з')
+                .replace(/4/g, 'ч')
+                .replace(/6/g, 'б')
+                .replace(/1/g, 'и')
+                .replace(/x/g, 'х')
+                .replace(/y/g, 'у')
+                .replace(/e/g, 'е')
+                .replace(/p/g, 'р')
+                .replace(/c/g, 'с')
+                .replace(/o/g, 'о')
+                .replace(/a/g, 'а')
+                .replace(/k/g, 'к');
+            return PROFANITY_PATTERNS.some(p => p.test(raw) || p.test(collapsed) || p.test(leetNormalized));
+        }
+
         function switchAuthMode(toLogin) {
             isLoginMode = toLogin;
             hideAuthError();
@@ -896,6 +956,11 @@
             } else {
                 if (!name) {
                     errorDiv.innerText = "Введите имя для регистрации";
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                if (containsProfanity(name) || containsProfanity(userTag)) {
+                    errorDiv.innerText = "Ник содержит недопустимые слова";
                     errorDiv.classList.remove('hidden');
                     return;
                 }
