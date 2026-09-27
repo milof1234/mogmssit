@@ -131,10 +131,6 @@
                 <button type="submit" id="authSubmitBtn" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 rounded-xl transition-colors mt-2 shadow-lg shadow-indigo-500/20 cursor-pointer">
                     Войти
                 </button>
-
-                <button type="button" onclick="resetAllData()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium py-2.5 rounded-xl transition-colors text-xs border border-red-500/20 flex items-center justify-center gap-2 mt-2 cursor-pointer">
-                    <i class="fa-solid fa-trash-can"></i> Очистить базу
-                </button>
             </form>
         </div>
     </div>
@@ -317,9 +313,6 @@
                     </button>
                     <button onclick="openProfileModal()" class="text-slate-400 hover:text-indigo-400 p-2 transition-colors cursor-pointer" title="Настройки профиля">
                         <i class="fa-solid fa-gear"></i>
-                    </button>
-                    <button onclick="resetAllData()" class="text-slate-400 hover:text-red-400 p-2 transition-colors cursor-pointer" title="Очистить базу данных">
-                        <i class="fa-solid fa-trash-can"></i>
                     </button>
                     <button onclick="logout()" class="text-slate-400 hover:text-red-400 p-2 transition-colors cursor-pointer" title="Выйти">
                         <i class="fa-solid fa-sign-out-alt"></i>
@@ -611,7 +604,15 @@
                     rebuildMessagesList();
                 }
                 if (raw.__groups__ && typeof raw.__groups__ === 'object') {
-                    allGroupsMap = raw.__groups__;
+                    const validGroups = {};
+                    Object.keys(raw.__groups__).forEach(gk => {
+                        const g = raw.__groups__[gk];
+                        const gTime = g && (g.createdAt || Number(String(g.id || gk).replace('grp_', '')));
+                        if (g && g.id && g.name && (!dbResetAt || !gTime || gTime > dbResetAt)) {
+                            validGroups[gk] = g;
+                        }
+                    });
+                    allGroupsMap = validGroups;
                     updateGroupsCount();
                     if (activeGroupId && allGroupsMap[activeGroupId]) {
                         updateActiveChatHeader();
@@ -622,8 +623,10 @@
                 }
                 const filteredUsers = {};
                 Object.keys(raw).forEach(k => {
-                    if (!k.startsWith('__') && raw[k] && typeof raw[k] === 'object' && raw[k].id) {
-                        filteredUsers[k] = raw[k];
+                    const u = raw[k];
+                    const uTime = u && Number(String(u.id || k).replace('usr_', ''));
+                    if (!k.startsWith('__') && u && typeof u === 'object' && u.id && u.name && u.phone && (!dbResetAt || !uTime || uTime > dbResetAt)) {
+                        filteredUsers[k] = u;
                     }
                 });
                 allUsersMap = filteredUsers;
@@ -651,15 +654,6 @@
                 }
                 if (activeChatUserId || activeGroupId) {
                     renderMessages(document.getElementById('chatSearchInput')?.value || '');
-                }
-                renderSidebarList();
-            });
-
-            db.ref('users/__groups__').on('value', (snapshot) => {
-                allGroupsMap = snapshot.val() || {};
-                updateGroupsCount();
-                if (activeGroupId && allGroupsMap[activeGroupId]) {
-                    updateActiveChatHeader();
                 }
                 renderSidebarList();
             });
