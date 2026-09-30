@@ -291,6 +291,40 @@
         </div>
     </div>
 
+    <!-- МОДАЛКА СОЗДАНИЯ ОПРОСА -->
+    <div id="pollModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 hidden p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+            <button type="button" onclick="closePollModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 cursor-pointer">
+                <i class="fa-solid fa-times text-lg"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 text-xl">
+                    <i class="fa-solid fa-square-poll-horizontal"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Создать опрос</h3>
+                    <p class="text-xs text-slate-400">Голосование для участников чата в реальном времени</p>
+                </div>
+            </div>
+            <form onsubmit="submitPollModal(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Вопрос опроса *</label>
+                    <input type="text" id="pollQuestionInput" required placeholder="Например: Во сколько сегодня созвон?" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Варианты ответа (по одному на строку, минимум 2)</label>
+                    <textarea id="pollOptionsInput" rows="4" required placeholder="Да&#10;Нет&#10;Обсудим позже" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none">Да
+Нет
+Обсудим позже</textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closePollModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-sm font-medium cursor-pointer">Отмена</button>
+                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/20 cursor-pointer">Отправить опрос</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ГЛАВНЫЙ ИНТЕРФЕЙС -->
     <div id="mainApp" class="w-full h-full max-w-[1400px] sm:rounded-2xl flex overflow-hidden bg-slate-900 border border-slate-700 shadow-2xl hidden">
         
@@ -408,7 +442,24 @@
                     </div>
                 </div>
 
+                <div id="editMsgBanner" class="max-w-4xl mx-auto mb-2 px-3 py-2 bg-indigo-500/15 border border-indigo-500/30 rounded-xl text-xs text-indigo-200 hidden items-center justify-between">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i class="fa-solid fa-pen text-indigo-400"></i>
+                        <div class="truncate">
+                            <span class="font-bold text-indigo-300 mr-1">Редактирование:</span>
+                            <span id="editMsgPreviewText" class="text-slate-300"></span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="cancelEditMsg()" class="text-slate-400 hover:text-white px-2 py-0.5 cursor-pointer">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
                 <div id="inputControlsWrapper" class="max-w-4xl mx-auto flex items-end gap-2 relative">
+                    <button type="button" onclick="openPollModal()" class="p-3 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-xl transition-colors shrink-0 cursor-pointer" title="Создать опрос (голосование)">
+                        <i class="fa-solid fa-square-poll-horizontal"></i>
+                    </button>
+
                     <div id="textInputWrapper" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl p-1 flex items-center focus-within:border-indigo-500">
                         <textarea id="msgInput" rows="1" placeholder="Введите сообщение..." oninput="handleMsgTyping()" onkeydown="handleEnter(event)" class="w-full bg-transparent resize-none outline-none text-white px-3 py-2 text-sm max-h-32 min-h-[40px]"></textarea>
                     </div>
@@ -1195,6 +1246,27 @@
             container.innerHTML = '';
             const query = normalizeStr(document.getElementById('globalSearch').value);
 
+            // 0. Saved Messages (Избранное)
+            if (sidebarTab !== 'groups' && !query) {
+                const isSavedActive = activeChatUserId === currentUser.id && !activeGroupId;
+                const savedDiv = document.createElement('div');
+                savedDiv.className = `flex items-center gap-3 p-3 mx-2 mt-1 rounded-xl cursor-pointer transition-colors ${isSavedActive ? 'bg-indigo-600' : 'hover:bg-slate-800 bg-slate-800/30 border border-slate-800'}`;
+                savedDiv.innerHTML = `
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-indigo-600 flex items-center justify-center font-bold text-lg text-white shrink-0 shadow-sm">
+                        <i class="fa-solid fa-bookmark text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-semibold text-white truncate flex items-center justify-between">
+                            <span>Избранное</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-normal">облако</span>
+                        </div>
+                        <div class="text-xs ${isSavedActive ? 'text-indigo-100' : 'text-slate-400'} truncate">Сохранённые сообщения и заметки</div>
+                    </div>
+                `;
+                savedDiv.onclick = () => openDirectChat(currentUser);
+                container.appendChild(savedDiv);
+            }
+
             // 1. Groups to show
             let userGroups = Object.values(allGroupsMap).filter(g => getGroupMembers(g).includes(currentUser.id));
             if (query) {
@@ -1412,6 +1484,12 @@
 
             if (!name) {
                 errDiv.innerText = "Введите название группы";
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (containsProfanity(name) || containsProfanity(desc)) {
+                errDiv.innerText = "Название содержит недопустимые слова";
                 errDiv.classList.remove('hidden');
                 return;
             }
@@ -1738,8 +1816,17 @@
                 return;
             }
 
-            if (activeChatUserId && allUsersMap[activeChatUserId]) {
-                const user = allUsersMap[activeChatUserId];
+            if (activeChatUserId && (allUsersMap[activeChatUserId] || (currentUser && activeChatUserId === currentUser.id))) {
+                const user = allUsersMap[activeChatUserId] || currentUser;
+                if (currentUser && user.id === currentUser.id) {
+                    chatAvatarEl.className = "w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center font-bold text-white overflow-hidden shrink-0 shadow-md";
+                    chatAvatarEl.innerHTML = '<i class="fa-solid fa-bookmark text-sm"></i>';
+                    dot.classList.add('hidden');
+                    chatNameEl.innerHTML = '<span>Избранное</span> <span class="text-[10px] text-amber-300 font-semibold bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/30">Облако</span>';
+                    chatInfoEl.innerHTML = 'Личное хранилище заметок, фото и голосовых сообщений';
+                    document.getElementById('adminChatActions').classList.add('hidden');
+                    return;
+                }
                 chatAvatarEl.className = "w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold text-white overflow-hidden shrink-0";
                 if (user.avatar) chatAvatarEl.innerHTML = `<img src="${user.avatar}" class="w-full h-full object-cover">`;
                 else chatAvatarEl.innerHTML = user.name ? user.name[0].toUpperCase() : '?';
@@ -1813,6 +1900,21 @@
             await db.ref('users/' + targetUser.id).set(targetUser);
         }
 
+        function getReadByList(msg) {
+            if (!msg || !msg.readBy) return [];
+            if (Array.isArray(msg.readBy)) return msg.readBy.filter(Boolean);
+            if (typeof msg.readBy === 'object') {
+                return Object.keys(msg.readBy).filter(k => Boolean(msg.readBy[k]));
+            }
+            return [];
+        }
+
+        function isMessageRead(msg) {
+            if (!msg) return false;
+            const readers = getReadByList(msg).filter(uid => uid !== msg.senderId);
+            return readers.length > 0;
+        }
+
         function renderMessages(filterQuery = '') {
             if (!activeChatUserId && !activeGroupId) return;
             const container = document.getElementById('messagesArea');
@@ -1830,6 +1932,20 @@
                 });
             }
 
+            // Mark unread messages from others in this chat as read by currentUser
+            if (currentUser && currentUser.id) {
+                chatMsgs.forEach(m => {
+                    if (!isMyMessage(m)) {
+                        const readers = getReadByList(m);
+                        if (!readers.includes(currentUser.id)) {
+                            const updatedReadBy = Array.from(new Set([...readers, currentUser.id]));
+                            m.readBy = updatedReadBy;
+                            db.ref('messages/' + m.id + '/readBy').set(updatedReadBy).catch(() => {});
+                        }
+                    }
+                });
+            }
+
             if (filterQuery) {
                 chatMsgs = chatMsgs.filter(m => m.type === 'text' && (m.text || '').toLowerCase().includes(filterQuery.toLowerCase()));
             }
@@ -1839,6 +1955,7 @@
             } else {
                 chatMsgs.forEach(msg => {
                     const isMe = isMyMessage(msg);
+                    const isRead = isMessageRead(msg);
                     const sender = allUsersMap[msg.senderId];
                     const senderName = isMe ? 'Вы' : (sender ? sender.name : (msg.senderName || 'Пользователь'));
                     const senderInitial = (sender && sender.name ? sender.name[0] : (senderName[0] || '?')).toUpperCase();
@@ -1851,7 +1968,35 @@
                     const time = new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                     let content = '';
-                    if (msg.type === 'voice') {
+                    if (msg.type === 'poll' && msg.poll) {
+                        const opts = Array.isArray(msg.poll.options) ? msg.poll.options : Object.values(msg.poll.options || {});
+                        let totalVotes = 0;
+                        opts.forEach(o => {
+                            const v = Array.isArray(o.voterIds) ? o.voterIds : Object.keys(o.voterIds || {});
+                            totalVotes += v.length;
+                        });
+                        const optsHtml = opts.map(o => {
+                            const v = Array.isArray(o.voterIds) ? o.voterIds : Object.keys(o.voterIds || {});
+                            const voted = v.includes(currentUser.id);
+                            const pct = totalVotes > 0 ? Math.round((v.length / totalVotes) * 100) : 0;
+                            return `
+                                <button type="button" onclick="votePoll('${msg.id}', '${o.id}')" class="w-full text-left rounded-xl p-2 mt-1.5 relative overflow-hidden border ${voted ? 'border-white/60 bg-white/15' : 'border-white/15 bg-black/20'} cursor-pointer block">
+                                    <div class="flex items-center justify-between text-xs font-semibold">
+                                        <span>${voted ? '✓ ' : ''}${o.text}</span>
+                                        <span>${pct}% (${v.length})</span>
+                                    </div>
+                                </button>
+                            `;
+                        }).join('');
+                        content = `
+                            <div class="min-w-[220px] py-1">
+                                <div class="text-[10px] uppercase tracking-wider opacity-80 font-bold mb-1"><i class="fa-solid fa-square-poll-horizontal mr-1"></i>Опрос</div>
+                                <div class="text-sm font-bold mb-1">${msg.poll.question}</div>
+                                ${optsHtml}
+                                <div class="text-[10px] opacity-75 mt-1.5">Всего голосов: ${totalVotes}</div>
+                            </div>
+                        `;
+                    } else if (msg.type === 'voice') {
                         content = `<div class="py-1 min-w-[200px]"><audio controls class="h-10 mt-1 max-w-full"><source src="${msg.audioUrl}" type="audio/webm"></audio></div>`;
                     } else {
                         const safeText = (msg.text || '').replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g, "<br>");
@@ -1868,14 +2013,47 @@
                         ? 'margin-left:auto !important; margin-right:0 !important; background:linear-gradient(135deg,#4f46e5 0%,#6366f1 100%) !important; color:#ffffff !important; border-bottom-right-radius:2px !important;'
                         : 'margin-right:auto !important; margin-left:0 !important; background-color:#1e293b !important; color:#f1f5f9 !important; border:1px solid #334155 !important; border-bottom-left-radius:2px !important;';
 
+                    const statusIconHtml = isMe
+                        ? (isRead
+                            ? '<i class="fa-solid fa-check-double text-[10px] text-sky-300" title="Прочитано"></i>'
+                            : '<i class="fa-solid fa-check text-[10px] text-indigo-200/75" title="Доставлено"></i>')
+                        : '';
+
+                    const editedBadgeHtml = msg.editedAt ? '<span class="italic opacity-75 mr-1">изм.</span>' : '';
+                    let reactionPillsHtml = '';
+                    if (msg.reactions && typeof msg.reactions === 'object') {
+                        const pills = Object.entries(msg.reactions).map(([em, rawUids]) => {
+                            const uids = Array.isArray(rawUids) ? rawUids.filter(Boolean) : Object.keys(rawUids || {});
+                            if (uids.length === 0) return '';
+                            const myReact = currentUser && uids.includes(currentUser.id);
+                            return `<button type="button" onclick="toggleMsgReaction('${msg.id}', '${em}')" class="px-1.5 py-0.5 rounded-full text-[11px] border ${myReact ? 'bg-white/25 border-white/60' : 'bg-black/20 border-white/15'} cursor-pointer">${em} ${uids.length}</button>`;
+                        }).filter(Boolean).join('');
+                        if (pills) {
+                            reactionPillsHtml = `<div class="flex flex-wrap gap-1 mt-1.5">${pills}</div>`;
+                        }
+                    }
+                    const actionsHtml = `
+                        ${reactionPillsHtml}
+                        <div class="flex items-center gap-1.5 mt-1 pt-1 border-t border-white/10 text-[10px] opacity-80">
+                            <button type="button" onclick="toggleMsgReaction('${msg.id}', '👍')" class="hover:scale-125 transition-transform cursor-pointer">👍</button>
+                            <button type="button" onclick="toggleMsgReaction('${msg.id}', '❤️')" class="hover:scale-125 transition-transform cursor-pointer">❤️</button>
+                            <button type="button" onclick="toggleMsgReaction('${msg.id}', '🔥')" class="hover:scale-125 transition-transform cursor-pointer">🔥</button>
+                            <button type="button" onclick="saveMsgToBookmarks('${msg.id}')" class="ml-auto hover:text-amber-300 cursor-pointer" title="Сохранить в Избранное"><i class="fa-regular fa-bookmark"></i></button>
+                            ${isMe && msg.type === 'text' ? `<button type="button" onclick="startEditMsg('${msg.id}')" class="hover:text-white cursor-pointer" title="Редактировать"><i class="fa-solid fa-pen"></i></button>` : ''}
+                            ${isMe ? `<button type="button" onclick="deleteMsg('${msg.id}')" class="hover:text-red-300 cursor-pointer" title="Удалить"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        </div>
+                    `;
+
                     div.innerHTML = `
                         ${avatarHtml}
                         <div class="max-w-[80%] sm:max-w-[68%] rounded-2xl px-4 py-2.5 relative shadow-md ${isMe ? 'msg-bubble-own ml-auto bg-indigo-600 text-white rounded-br-none' : 'msg-bubble-other mr-auto bg-slate-800 text-slate-200 rounded-bl-none border border-slate-700'}" style="${bubbleStyle}">
                             ${!isMe ? `<div class="text-xs font-bold text-indigo-300 mb-1">${senderName}</div>` : (activeGroupId ? `<div class="text-[10px] font-semibold text-indigo-200 mb-0.5 text-right">Вы</div>` : '')}
                             ${content}
-                            <div class="text-[10px] flex items-center justify-end gap-1 mt-1 opacity-75">
+                            ${actionsHtml}
+                            <div class="text-[10px] flex items-center justify-end gap-1 mt-1 opacity-90">
+                                ${editedBadgeHtml}
                                 <span>${time}</span>
-                                ${isMe ? '<i class="fa-solid fa-check-double text-[10px] text-indigo-200"></i>' : ''}
+                                ${statusIconHtml}
                             </div>
                         </div>
                     `;
@@ -1958,6 +2136,113 @@
             e.target.style.height = (e.target.scrollHeight) + 'px';
         }
 
+        let editingMsgId = null;
+
+        function startEditMsg(msgId) {
+            const msg = rawMessagesMap[msgId];
+            if (!msg || msg.type !== 'text') return;
+            editingMsgId = msgId;
+            const input = document.getElementById('msgInput');
+            input.value = msg.text || '';
+            input.focus();
+            const banner = document.getElementById('editMsgBanner');
+            const preview = document.getElementById('editMsgPreviewText');
+            if (preview) preview.innerText = msg.text || '';
+            if (banner) {
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            }
+        }
+
+        function cancelEditMsg() {
+            editingMsgId = null;
+            const input = document.getElementById('msgInput');
+            if (input) input.value = '';
+            const banner = document.getElementById('editMsgBanner');
+            if (banner) {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+            }
+        }
+
+        async function deleteMsg(msgId) {
+            await db.ref('messages/' + msgId).remove();
+        }
+
+        async function saveMsgToBookmarks(msgId) {
+            const msg = rawMessagesMap[msgId];
+            if (!msg || !currentUser) return;
+            const newId = 'msg_' + Date.now();
+            await db.ref('messages/' + newId).set({
+                ...msg,
+                id: newId,
+                senderId: currentUser.id,
+                receiverId: currentUser.id,
+                groupId: null,
+                time: new Date().toISOString()
+            });
+        }
+
+        async function toggleMsgReaction(msgId, emoji) {
+            const msg = rawMessagesMap[msgId];
+            if (!msg || !currentUser) return;
+            const existing = (msg.reactions && msg.reactions[emoji]) || [];
+            const list = Array.isArray(existing) ? existing : Object.keys(existing);
+            const updated = list.includes(currentUser.id)
+                ? list.filter(id => id !== currentUser.id)
+                : [...list, currentUser.id];
+            await db.ref(`messages/${msgId}/reactions/${emoji}`).set(updated);
+        }
+
+        function openPollModal() {
+            if (!activeChatUserId && !activeGroupId) return;
+            const modal = document.getElementById('pollModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closePollModal() {
+            const modal = document.getElementById('pollModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function submitPollModal(e) {
+            e.preventDefault();
+            const qInput = document.getElementById('pollQuestionInput');
+            const oInput = document.getElementById('pollOptionsInput');
+            const question = (qInput ? qInput.value : '').trim();
+            const rawOpts = (oInput ? oInput.value : '').trim();
+            if (!question || !rawOpts) return;
+            const opts = rawOpts.split(/\r?\n|,/).map(s => s.trim()).filter(Boolean);
+            if (opts.length < 2) return;
+            await saveMessage({
+                type: 'poll',
+                text: '📊 Опрос: ' + question,
+                poll: {
+                    question: question,
+                    options: opts.slice(0, 6).map((t, idx) => ({ id: 'opt_' + idx, text: t, voterIds: [] }))
+                }
+            });
+            if (qInput) qInput.value = '';
+            closePollModal();
+        }
+
+        async function votePoll(msgId, optionId) {
+            const msg = rawMessagesMap[msgId];
+            if (!msg || !msg.poll || !currentUser) return;
+            const opts = Array.isArray(msg.poll.options) ? msg.poll.options : Object.values(msg.poll.options || {});
+            const updatedOptions = opts.map(o => {
+                const voters = Array.isArray(o.voterIds) ? o.voterIds : Object.keys(o.voterIds || {});
+                if (o.id === optionId) {
+                    const next = voters.includes(currentUser.id)
+                        ? voters.filter(id => id !== currentUser.id)
+                        : [...voters, currentUser.id];
+                    return { ...o, voterIds: next };
+                }
+                return { ...o, voterIds: voters.filter(id => id !== currentUser.id) };
+            });
+            await db.ref(`messages/${msgId}/poll/options`).set(updatedOptions);
+        }
+
         function sendTextMsg() {
             if (currentUser.isMuted) return;
             const input = document.getElementById('msgInput');
@@ -1966,6 +2251,14 @@
 
             setMyActivity('idle');
             clearTimeout(typingTimeout);
+
+            if (editingMsgId) {
+                const targetId = editingMsgId;
+                cancelEditMsg();
+                db.ref('messages/' + targetId + '/text').set(text);
+                db.ref('messages/' + targetId + '/editedAt').set(new Date().toISOString());
+                return;
+            }
 
             saveMessage({ type: 'text', text: text });
             input.value = '';
@@ -1980,6 +2273,7 @@
                 senderName: currentUser.name || '',
                 senderPhone: cleanDigits(currentUser.phone || ''),
                 time: new Date().toISOString(),
+                readBy: [currentUser.id],
                 ...msgData
             };
 
