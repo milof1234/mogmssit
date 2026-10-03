@@ -1289,6 +1289,9 @@
                     }
                 });
                 directUsers = Object.values(allUsersMap).filter(u => partnerIds.has(u.id) && u.id !== currentUser.id);
+                if (directUsers.length === 0) {
+                    directUsers = Object.values(allUsersMap).filter(u => u.id !== currentUser.id);
+                }
             }
 
             // Render Groups
