@@ -1246,7 +1246,7 @@
             settingsGeneratedCode = Math.floor(100000 + Math.random() * 900000).toString();
 
             try {
-                const res = await fetch('/api/send-email', {
+                const res = await fetch(window.location.origin + '/api/send-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email, code: settingsGeneratedCode })
@@ -1257,7 +1257,7 @@
                 succEl.classList.remove('hidden');
                 document.getElementById('twoFactorVerifyGroup').classList.remove('hidden');
             } catch (err) {
-                errEl.innerText = 'Не удалось отправить: ' + err.message;
+                errEl.innerText = err.message || 'Ошибка отправки кода на email';
                 errEl.classList.remove('hidden');
             }
         }
